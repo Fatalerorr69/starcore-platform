@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Node
+node_modules/
+dist/
+build/
+
+# IDE
+.idea/
+.vscode/
+
+# macOS
+.DS_Store
+
+# Linux
+*~
+
+# Logs
+logs/
+*.log
+
+# Testing
+.coverage
+.pytest_cache/
+
+# Environment
+.env
+.env.local
+
+# Docker
+docker-data/
+
+# Generated
+tmp/
+cache/
+
+# MkDocs
+site/
