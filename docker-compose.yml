@@ -1,0 +1,28 @@
+version: "3.9"
+
+services:
+
+  postgres:
+    image: postgres:17
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: starcore
+      POSTGRES_PASSWORD: starcore
+      POSTGRES_DB: starcore
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:8
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+
+  nats:
+    image: nats:latest
+    restart: unless-stopped
+    ports:
+      - "4222:4222"
+
+volumes:
+  postgres-data:
