@@ -12,38 +12,85 @@ authors = [
 license = { text = "Apache-2.0" }
 
 dependencies = [
-    "fastapi",
-    "uvicorn",
-    "typer",
-    "pydantic",
-    "pydantic-settings",
-    "sqlalchemy",
-    "alembic",
-    "httpx",
-    "rich",
-    "loguru",
-    "pyyaml",
-    "psutil",
-    "redis",
-    "nats-py"
+    "fastapi>=0.116.0",
+    "uvicorn[standard]>=0.35.0",
+    "typer>=0.17.0",
+    "pydantic>=2.11.0",
+    "pydantic-settings>=2.10.0",
+    "sqlalchemy>=2.0.42",
+    "alembic>=1.16.0",
+    "httpx>=0.28.1",
+    "rich>=14.0.0",
+    "loguru>=0.7.3",
+    "pyyaml>=6.0.2",
+    "psutil>=7.0.0",
+    "redis>=6.2.0",
+    "nats-py>=2.11.0",
 ]
 
 [project.optional-dependencies]
 dev = [
-    "pytest",
-    "pytest-cov",
-    "ruff",
-    "mypy",
-    "mkdocs",
-    "mkdocs-material"
+    "pytest>=8.4.1",
+    "pytest-cov>=6.2.1",
+    "pytest-asyncio>=1.1.0",
+    "ruff>=0.12.0",
+    "mypy>=1.17.0",
+    "mkdocs>=1.6.1",
+    "mkdocs-material>=9.6.15",
+]
+
+[project.scripts]
+starcore = "apps.cli.main:app"
+
+[build-system]
+requires = ["hatchling>=1.27.0"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = [
+    "packages/core",
+    "packages/blueprints",
+    "packages/provider_sdk",
+    "packages/providers",
+]
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "apps",
+    "packages",
+    "tests",
+    "docs",
+    "README.md",
+    "LICENSE",
+    "pyproject.toml",
 ]
 
 [tool.ruff]
+target-version = "py312"
 line-length = 100
+
+[tool.ruff.lint]
+select = [
+    "E",
+    "F",
+    "I",
+    "UP",
+    "B",
+]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+pythonpath = [
+    ".",
+    "packages",
+]
+addopts = "-ra"
 
-[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
+[tool.mypy]
+python_version = "3.12"
+warn_unused_configs = true
+warn_return_any = true
+warn_unused_ignores = true
+check_untyped_defs = true
+disallow_untyped_defs = false
+ignore_missing_imports = true
