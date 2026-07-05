@@ -1,0 +1,33 @@
+name: demo
+
+version: "1.0"
+
+resources:
+
+  - name: ai-core
+
+    provider: proxmox
+
+    kind: vm
+
+    config:
+
+      cpu: 8
+
+      ram: 16384
+
+      disk: 120
+
+      image: ubuntu-24.04
+
+  - name: postgres
+
+    provider: docker
+
+    kind: container
+
+    config:
+
+      image: postgres:17
+
+      volume: postgres-data
