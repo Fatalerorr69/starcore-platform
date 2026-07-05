@@ -26,3 +26,9 @@ class ProxmoxProvider(BaseProvider):
     async def list_resources(self):
 
         return []
+
+    async def execute(self, task):
+
+    print(
+        f"[Proxmox] {task.action} {task.resource}"
+    )
