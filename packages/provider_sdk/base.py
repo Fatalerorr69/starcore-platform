@@ -32,3 +32,6 @@ class BaseProvider(ABC):
     @abstractmethod
     async def list_resources(self) -> list[dict]:
         """List managed resources."""
+    @abstractmethod
+    async def execute(self, task) -> None:
+        """Execute orchestration task."""
