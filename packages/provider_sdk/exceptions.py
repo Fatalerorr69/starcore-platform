@@ -4,16 +4,12 @@ Provider Exceptions
 
 
 class ProviderError(Exception):
-    pass
+    """Base exception for all provider-related errors."""
 
 
-class ConnectionError(ProviderError):
-    pass
-
-
-class AuthenticationError(ProviderError):
-    pass
+class ProviderConnectionError(ProviderError):
+    """Raised when a provider fails to connect."""
 
 
 class ResourceNotFound(ProviderError):
-    pass
+    """Raised when a requested resource does not exist."""
