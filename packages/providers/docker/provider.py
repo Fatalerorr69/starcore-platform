@@ -1,34 +1,23 @@
-"""
-Proxmox Provider
-"""
-
 from provider_sdk.base import BaseProvider
 
 
-class ProxmoxProvider(BaseProvider):
+class DockerProvider(BaseProvider):
+    name = "docker"
 
-    name = "proxmox"
-
-    async def connect(self):
-
+    async def connect(self) -> bool:
         return True
 
-    async def disconnect(self):
-
+    async def disconnect(self) -> None:
         return None
 
-    async def health(self):
-
+    async def health(self) -> dict:
         return {
-            "status": "ok"
+            "status": "ok",
+            "provider": self.name,
         }
 
-    async def list_resources(self):
-
+    async def list_resources(self) -> list:
         return []
-   
-    async def execute(self, task):
 
-    print(
-        f"[Docker] {task.action} {task.resource}"
-    )
+    async def execute(self, task) -> None:
+        print(f"[Docker] {task.action} {task.resource}")

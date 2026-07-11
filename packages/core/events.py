@@ -3,7 +3,7 @@ Simple Event Bus
 """
 
 from collections import defaultdict
-from typing import Callable
+from collections.abc import Callable
 
 
 class EventBus:
