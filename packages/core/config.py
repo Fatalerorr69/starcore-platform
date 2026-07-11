@@ -17,9 +17,7 @@ class Settings(BaseSettings):
 
     debug: bool = False
 
-    postgres_url: str = (
-        "postgresql://starcore:starcore@localhost:5432/starcore"
-    )
+    postgres_url: str = "postgresql://starcore:starcore@localhost:5432/starcore"
 
     redis_url: str = "redis://localhost:6379"
 

@@ -1,4 +1,4 @@
-﻿from provider_sdk.base import BaseProvider
+from provider_sdk.base import BaseProvider
 
 
 class ProxmoxProvider(BaseProvider):
@@ -20,6 +20,4 @@ class ProxmoxProvider(BaseProvider):
         return []
 
     async def execute(self, task) -> None:
-        print(
-            f"[Proxmox] {task.action} {task.resource}"
-        )
+        print(f"[Proxmox] {task.action} {task.resource}")
