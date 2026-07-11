@@ -69,3 +69,61 @@ async def test_proxmox_execute_raises_without_connection():
         raise AssertionError("expected RuntimeError")
     except RuntimeError:
         pass
+
+
+async def test_proxmox_create_vm_clones_template_and_sets_result():
+    from orchestrator.task import Task
+
+    fake_client = MagicMock()
+    fake_client.cluster.nextid.get.return_value = "105"
+    fake_client.nodes.return_value.qemu.return_value.clone.post.return_value = "UPID:fatalab:clone"
+    fake_client.nodes.return_value.tasks.return_value.status.get.return_value = {
+        "status": "stopped",
+        "exitstatus": "OK",
+    }
+
+    provider = ProxmoxProvider()
+    provider._client = fake_client
+
+    task = Task(
+        id="1",
+        provider="proxmox",
+        action="create",
+        resource="web-vm",
+        payload={
+            "node": "fatalab",
+            "template_vmid": 9000,
+            "cores": 2,
+            "memory": 2048,
+        },
+    )
+
+    await provider.execute(task)
+
+    assert task.result["vmid"] == 105
+    assert task.result["node"] == "fatalab"
+    fake_client.nodes.return_value.qemu.return_value.clone.post.assert_called_once()
+    fake_client.nodes.return_value.qemu.return_value.config.post.assert_called_once_with(
+        cores=2, memory=2048
+    )
+
+
+async def test_proxmox_create_vm_requires_node_and_template_vmid():
+    from orchestrator.task import Task
+
+    provider = ProxmoxProvider()
+    provider._client = MagicMock()
+
+    task = Task(
+        id="1",
+        provider="proxmox",
+        action="create",
+        resource="web-vm",
+        payload={},
+    )
+
+    try:
+        await provider.execute(task)
+        raise AssertionError("expected ValueError")
+    except ValueError:
+        pass
