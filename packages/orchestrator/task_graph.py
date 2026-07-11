@@ -8,7 +8,6 @@ from .task import Task
 
 
 class TaskGraph:
-
     def __init__(self) -> None:
         self.tasks: dict[str, Task] = {}
         self.edges = defaultdict(set)

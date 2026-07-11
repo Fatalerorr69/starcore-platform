@@ -6,9 +6,7 @@ from .models import Blueprint
 
 
 class ExecutionPlanner:
-
     def create_plan(self, blueprint: Blueprint):
-
         return [
             {
                 "provider": resource.provider,
