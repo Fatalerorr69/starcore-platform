@@ -46,8 +46,17 @@ class BlueprintExecutor:
             task.status = TaskStatus.RUNNING
             try:
                 provider = registry.get(step["provider"])
+                connected = await provider.connect()
+                if not connected:
+                    logger.warning(
+                        "Provider '{}' failed to connect, marking resource '{}' as failed",
+                        step["provider"],
+                        step["resource"],
+                    )
+                    task.status = TaskStatus.FAILED
+                    continue
+
                 used_providers.add(step["provider"])
-                await provider.connect()
                 await provider.execute(task)
                 task.status = TaskStatus.SUCCESS
             except Exception:
