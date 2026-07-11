@@ -48,8 +48,10 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = [
+    "apps",
     "packages/core",
     "packages/blueprints",
+    "packages/orchestrator",
     "packages/provider_sdk",
     "packages/providers",
 ]
