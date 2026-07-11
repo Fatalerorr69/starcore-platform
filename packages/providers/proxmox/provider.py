@@ -100,10 +100,85 @@ class ProxmoxProvider(BaseProvider):
             await asyncio.to_thread(self._client.nodes(node).qemu(vmid).status.post, action)
             logger.info("[Proxmox] {} -> vmid {} on node {}", action, vmid, node)
         elif action == "create":
-            raise NotImplementedError(
-                "Proxmox VM creation from blueprint (clone/template) is not "
-                "implemented yet; provide 'node' and 'vmid' of an existing VM "
-                "and use 'start' action instead."
-            )
+            await self._create_vm(task)
         else:
             raise ValueError(f"Unsupported Proxmox action: '{action}'")
+
+    async def _create_vm(self, task) -> None:
+        assert self._client is not None
+        payload = task.payload
+
+        node = payload.get("node")
+        template_vmid = payload.get("template_vmid")
+        if not node or not template_vmid:
+            raise ValueError(
+                f"Resource '{task.resource}' requires 'node' and 'template_vmid' "
+                "in config to clone a VM from a template"
+            )
+
+        vmid = payload.get("vmid")
+        if not vmid:
+            next_id = await asyncio.to_thread(self._client.cluster.nextid.get)
+            if next_id is None:
+                raise RuntimeError("Failed to allocate next VM ID from Proxmox")
+            vmid = int(next_id)
+        else:
+            vmid = int(vmid)
+
+        clone_kwargs: dict[str, Any] = {
+            "newid": vmid,
+            "name": task.resource,
+            "full": 1 if payload.get("full", True) else 0,
+        }
+        if storage := payload.get("storage"):
+            clone_kwargs["storage"] = storage
+        if target := payload.get("target_node"):
+            clone_kwargs["target"] = target
+
+        upid = await asyncio.to_thread(
+            self._client.nodes(node).qemu(template_vmid).clone.post, **clone_kwargs
+        )
+        if upid is None:
+            raise RuntimeError(
+                f"Proxmox did not return a task ID for cloning resource '{task.resource}'"
+            )
+
+        if payload.get("wait", True):
+            await self._wait_for_task(str(node), str(upid))
+
+        config_updates: dict[str, Any] = {}
+        if cores := payload.get("cores"):
+            config_updates["cores"] = cores
+        if memory := payload.get("memory"):
+            config_updates["memory"] = memory
+        if config_updates:
+            await asyncio.to_thread(
+                self._client.nodes(node).qemu(vmid).config.post, **config_updates
+            )
+
+        task.result["vmid"] = vmid
+        task.result["node"] = node
+        logger.info(
+            "[Proxmox] Cloned template {} -> vmid {} ('{}') on node {}",
+            template_vmid,
+            vmid,
+            task.resource,
+            node,
+        )
+
+    async def _wait_for_task(
+        self, node: str, upid: str, timeout: float = 300.0, interval: float = 2.0
+    ) -> None:
+        assert self._client is not None
+        elapsed = 0.0
+        while elapsed < timeout:
+            status = await asyncio.to_thread(self._client.nodes(node).tasks(upid).status.get)
+            if status is None:
+                raise RuntimeError(f"Proxmox returned no status for task {upid}")
+            if status.get("status") == "stopped":
+                if status.get("exitstatus") != "OK":
+                    raise RuntimeError(f"Proxmox task {upid} failed: {status.get('exitstatus')}")
+                return
+            await asyncio.sleep(interval)
+            elapsed += interval
+        raise TimeoutError(f"Proxmox task {upid} did not complete within {timeout}s")

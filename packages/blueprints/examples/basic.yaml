@@ -5,8 +5,11 @@ resources:
     provider: proxmox
     kind: vm
     config:
-      disk: 120
-      image: ubuntu-24.04
+      node: fatalab
+      template_vmid: 9000
+      cores: 2
+      memory: 2048
+      full: true
   - name: postgres
     provider: docker
     kind: container
