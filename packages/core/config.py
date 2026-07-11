@@ -23,6 +23,12 @@ class Settings(BaseSettings):
 
     nats_url: str = "nats://localhost:4222"
 
+    proxmox_host: str | None = None
+    proxmox_user: str | None = None
+    proxmox_token_name: str | None = None
+    proxmox_token_value: str | None = None
+    proxmox_verify_ssl: bool = True
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_prefix="STARCORE_",

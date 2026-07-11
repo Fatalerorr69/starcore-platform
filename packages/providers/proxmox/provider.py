@@ -5,9 +5,9 @@ Proxmox Provider
 from __future__ import annotations
 
 import asyncio
-import os
 from typing import Any
 
+from core.config import get_settings
 from loguru import logger
 from provider_sdk.base import BaseProvider
 from proxmoxer import ProxmoxAPI
@@ -20,27 +20,31 @@ class ProxmoxProvider(BaseProvider):
         self._client: ProxmoxAPI | None = None
 
     async def connect(self) -> bool:
-        host = os.environ.get("PROXMOX_HOST")
-        user = os.environ.get("PROXMOX_USER")
-        token_name = os.environ.get("PROXMOX_TOKEN_NAME")
-        token_value = os.environ.get("PROXMOX_TOKEN_VALUE")
-        verify_ssl = os.environ.get("PROXMOX_VERIFY_SSL", "true").lower() == "true"
+        settings = get_settings()
 
-        if not all([host, user, token_name, token_value]):
+        if not all(
+            [
+                settings.proxmox_host,
+                settings.proxmox_user,
+                settings.proxmox_token_name,
+                settings.proxmox_token_value,
+            ]
+        ):
             logger.error(
-                "Proxmox credentials missing. Set PROXMOX_HOST, PROXMOX_USER, "
-                "PROXMOX_TOKEN_NAME, PROXMOX_TOKEN_VALUE."
+                "Proxmox credentials missing. Set STARCORE_PROXMOX_HOST, "
+                "STARCORE_PROXMOX_USER, STARCORE_PROXMOX_TOKEN_NAME, "
+                "STARCORE_PROXMOX_TOKEN_VALUE (see .env.example)."
             )
             return False
 
         try:
             self._client = await asyncio.to_thread(
                 ProxmoxAPI,
-                host,
-                user=user,
-                token_name=token_name,
-                token_value=token_value,
-                verify_ssl=verify_ssl,
+                settings.proxmox_host,
+                user=settings.proxmox_user,
+                token_name=settings.proxmox_token_name,
+                token_value=settings.proxmox_token_value,
+                verify_ssl=settings.proxmox_verify_ssl,
             )
             await asyncio.to_thread(self._client.version.get)
             return True
