@@ -9,6 +9,7 @@ from blueprints.executor import BlueprintExecutor
 from blueprints.models import Blueprint
 from blueprints.planner import ExecutionPlanner
 from fastapi import FastAPI, HTTPException
+from orchestrator.scheduler import Scheduler
 from provider_sdk.registry import register_default_providers, registry
 from pydantic import BaseModel
 
@@ -76,8 +77,13 @@ class RunResponse(BaseModel):
 
 
 @app.post("/blueprints/run", response_model=RunResponse)
-async def run_blueprint(blueprint: Blueprint):
-    tasks = await BlueprintExecutor().execute(blueprint)
+async def run_blueprint(blueprint: Blueprint, parallel: bool = False):
+    if parallel:
+        graph = ExecutionPlanner().create_graph(blueprint)
+        tasks = await Scheduler().execute(graph)
+    else:
+        tasks = await BlueprintExecutor().execute(blueprint)
+
     return RunResponse(
         name=blueprint.name,
         version=blueprint.version,

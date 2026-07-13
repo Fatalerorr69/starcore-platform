@@ -5,6 +5,7 @@ import typer
 from blueprints.executor import BlueprintExecutor
 from blueprints.loader import BlueprintLoader
 from blueprints.planner import ExecutionPlanner
+from orchestrator.scheduler import Scheduler
 from rich.console import Console
 from rich.table import Table
 
@@ -43,10 +44,22 @@ def blueprint_plan(path: Path = typer.Argument(..., help="Path to a blueprint YA
 
 
 @blueprint_app.command("run")
-def blueprint_run(path: Path = typer.Argument(..., help="Path to a blueprint YAML file.")):
+def blueprint_run(
+    path: Path = typer.Argument(..., help="Path to a blueprint YAML file."),
+    parallel: bool = typer.Option(
+        False,
+        "--parallel",
+        help="Execute independent resources concurrently via the dependency-aware Scheduler.",
+    ),
+):
     """Execute a blueprint against its configured providers."""
     blueprint = BlueprintLoader.load(path)
-    tasks = asyncio.run(BlueprintExecutor().execute(blueprint))
+
+    if parallel:
+        graph = ExecutionPlanner().create_graph(blueprint)
+        tasks = asyncio.run(Scheduler().execute(graph))
+    else:
+        tasks = asyncio.run(BlueprintExecutor().execute(blueprint))
 
     table = Table(title=f"Result for '{blueprint.name}' (v{blueprint.version})")
     table.add_column("Resource")

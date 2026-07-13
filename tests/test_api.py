@@ -56,3 +56,15 @@ def test_run_blueprint_returns_task_results():
     assert response.status_code == 200
     body = response.json()
     assert body["tasks"][0]["status"] in ("failed", "skipped", "success")
+
+
+def test_run_blueprint_parallel_query_param():
+    payload = {
+        "name": "api-parallel-test",
+        "version": "1.0",
+        "resources": [{"name": "thing", "provider": "docker", "kind": "container", "config": {}}],
+    }
+    response = client.post("/blueprints/run?parallel=true", json=payload)
+    assert response.status_code == 200
+    body = response.json()
+    assert body["tasks"][0]["status"] in ("failed", "skipped", "success")

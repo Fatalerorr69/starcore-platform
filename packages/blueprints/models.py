@@ -10,6 +10,7 @@ class ResourceSpec(BaseModel):
     provider: str
     kind: str
     config: dict = Field(default_factory=dict)
+    depends_on: list[str] = Field(default_factory=list)
 
 
 class Blueprint(BaseModel):

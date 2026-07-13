@@ -1,0 +1,25 @@
+name: graph-demo
+version: "1.0"
+resources:
+  - name: db
+    provider: docker
+    kind: container
+    config:
+      image: postgres:17
+      volume: db-data
+  - name: cache
+    provider: docker
+    kind: container
+    config:
+      image: redis:7
+  - name: web-vm
+    provider: proxmox
+    kind: vm
+    config:
+      node: fatalab
+      template_vmid: 9000
+      cores: 2
+      memory: 2048
+    depends_on:
+      - db
+      - cache
