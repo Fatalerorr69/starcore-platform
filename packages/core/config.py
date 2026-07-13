@@ -23,6 +23,8 @@ class Settings(BaseSettings):
 
     nats_url: str = "nats://localhost:4222"
 
+    database_url: str = "sqlite:///./data/starcore.db"
+
     proxmox_host: str | None = None
     proxmox_user: str | None = None
     proxmox_token_name: str | None = None
