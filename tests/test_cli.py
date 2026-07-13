@@ -43,3 +43,35 @@ def test_blueprint_run_parallel_flag_reports_failures():
     result = runner.invoke(app, ["blueprint", "run", EXAMPLE_PATH, "--parallel"])
     assert result.exit_code == 1
     assert "failed" in result.stdout.lower()
+
+
+def test_blueprint_run_persists_and_appears_in_runs_list():
+    runner.invoke(app, ["blueprint", "run", EXAMPLE_PATH])
+    result = runner.invoke(app, ["runs", "list"])
+    assert result.exit_code == 0
+    assert "demo" in result.stdout
+
+
+def test_runs_show_displays_persisted_run():
+    from core.database import get_session
+    from core.repository import list_runs
+
+    runner.invoke(app, ["blueprint", "run", EXAMPLE_PATH])
+
+    session = get_session()
+    try:
+        records = list_runs(session)
+    finally:
+        session.close()
+
+    assert records
+    run_id = records[0].id
+
+    result = runner.invoke(app, ["runs", "show", run_id])
+    assert result.exit_code == 0
+    assert "demo" in result.stdout
+
+
+def test_runs_show_unknown_id_returns_error():
+    result = runner.invoke(app, ["runs", "show", "does-not-exist"])
+    assert result.exit_code == 1
