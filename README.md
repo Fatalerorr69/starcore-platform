@@ -1,161 +1,128 @@
-STARCORE Platform
+# STARCORE Platform
 
-«AI-Powered Infrastructure Operating Platform»
+**AI-Powered Infrastructure Operating Platform**
 
-"Version" (https://img.shields.io/badge/version-0.1.0--dev-blue)
-"License" (https://img.shields.io/badge/license-Apache--2.0-green)
-"Status" (https://img.shields.io/badge/status-active-orange)
-
----
-
-Overview
-
-STARCORE Platform is an open-source AI-powered infrastructure orchestration platform designed for homelabs, AI workstations, edge devices, and enterprise environments.
-
-STARCORE provides a unified control plane for managing:
-
-- Proxmox VE
-- Virtual Machines
-- LXC Containers
-- Docker
-- AI Services
-- Infrastructure Automation
-- Monitoring
-- Storage
-- Networking
-- Workflows
-- Blueprints
-
-The long-term objective is to provide an intelligent infrastructure platform capable of planning, deploying, monitoring and maintaining complete environments with minimal manual intervention.
+![Version](https://img.shields.io/badge/version-0.1.0--dev-blue)
+![License](https://img.shields.io/badge/license-Apache--2.0-green)
+![Status](https://img.shields.io/badge/status-active--development-orange)
 
 ---
 
-Vision
+## Overview
 
-Instead of manually installing dozens of services, users describe their goal.
+STARCORE Platform is an infrastructure orchestration platform for homelabs and self-hosted environments, currently focused on **Proxmox VE** and **Docker**.
 
-Example:
+It lets you describe infrastructure declaratively in YAML "blueprints" and have STARCORE plan and execute the required provider actions, sequentially or, when resources declare dependencies, in parallel.
 
-«Build an AI laboratory.»
-
-STARCORE automatically:
-
-- Creates required virtual machines
-- Deploys Docker stacks
-- Configures networking
-- Installs AI services
-- Enables monitoring
-- Configures backups
-- Registers services in Dashboard
-- Generates documentation
+This README reflects the **actual current state of the codebase**, not the long-term vision. The long-term vision is documented separately in `docs/ses/`.
 
 ---
 
-Core Principles
+## What Works Today
 
-- AI First
-- API First
-- Plugin First
-- Blueprint First
-- Offline First
-- Infrastructure as Code
-- Modular Architecture
-- Secure by Default
+| Component | Status | Description |
+|---|---|---|
+| Provider SDK | Done | BaseProvider interface, registry, exceptions |
+| Docker Provider | Done | Real implementation via docker-py: connect, health, list, create/start/stop/remove containers |
+| Proxmox Provider | Done | Real implementation via proxmoxer: connect, health, list, start/stop/shutdown VMs, clone VM from template |
+| Blueprint Engine | Done | Load YAML, plan, execute. Sequential (BlueprintExecutor) or parallel graph execution (Scheduler + TaskGraph) via depends_on |
+| CLI | Done | starcore blueprint plan/run [--parallel], starcore version, starcore health |
+| Core API | Done | FastAPI: providers, blueprint plan/run, run history |
+| Persistence | Done | SQLite (via SQLAlchemy) stores blueprint run history and task results |
+| Config | Done | .env-based settings via pydantic-settings |
+| Tests | 38 passing | ruff, pyright, pytest, pre-commit, CI on every PR |
 
----
+## What's Planned, Not Built Yet
 
-Main Components
-
-Component| Description
-Installer Studio| Interactive graphical installer
-Core Runtime| Main orchestration engine
-Dashboard| Web management interface
-CLI| Command line interface
-AI Brain| AI orchestration layer
-Provider Engine| Proxmox, Docker, LXC integrations
-Blueprint Engine| Declarative deployment engine
-Marketplace| Extension catalog
-Knowledge Base| Documentation and AI knowledge
-
----
-
-Repository Structure
-
-apps/
-packages/
-docs/
-specs/
-tests/
-tools/
-scripts/
-.github/
+| Component | Status | Notes |
+|---|---|---|
+| API Authentication | Planned | Endpoints are currently unauthenticated |
+| Alembic Migrations | Planned | DB schema currently created via create_all, not versioned |
+| LXC Support | Planned | Only VMs (Proxmox) and containers (Docker) today |
+| Plugin System | Skeleton only | PluginManager exists but isn't wired into anything |
+| Installer Studio | Vision | Not started |
+| Dashboard (Web UI) | Vision | Not started |
+| AI Brain | Vision | Not started |
+| Marketplace | Vision | Not started |
 
 ---
 
-Project Status
+## Quick Start
 
-Current Version:
+```bash
+uv sync --extra dev
+cp .env.example .env
+uv run starcore blueprint plan packages/blueprints/examples/basic.yaml
+uv run starcore blueprint run packages/blueprints/examples/basic.yaml
+```
 
-0.1.0-dev
+Run the API:
 
-Current Phase:
+```bash
+uv run uvicorn core.main:app --reload
+```
 
-Foundation
+## Example Blueprint
 
----
+```yaml
+name: demo
+resources:
+  - name: db
+    provider: docker
+    kind: container
+    config:
+      image: postgres:17
+  - name: web-vm
+    provider: proxmox
+    kind: vm
+    config:
+      node: fatalab
+      template_vmid: 9000
+    depends_on:
+      - db
+```
 
-Development Roadmap
-
-- Foundation
-- Core Runtime
-- Installer Studio
-- Dashboard
-- Provider SDK
-- AI Brain
-- Blueprint Engine
-- Marketplace
-- Version 1.0
-
----
-
-Documentation
-
-Documentation is located inside:
-
-docs/
-
-Architecture specifications:
-
-specs/
-
-Architecture Decision Records:
-
-docs/adr/
+Run it in parallel-aware mode: `starcore blueprint run <path> --parallel`
 
 ---
 
-License
+## Repository Structure
+
+```
+apps/cli/              CLI entry point (Typer)
+packages/core/          FastAPI app, config, database, persistence models
+packages/blueprints/    Blueprint models, loader, planner, executor
+packages/orchestrator/  Task, TaskGraph, Scheduler
+packages/provider_sdk/  BaseProvider, registry, exceptions
+packages/providers/     Docker and Proxmox implementations
+tests/                  pytest test suite
+docs/ses/               Long-term engineering specification and vision docs
+```
+
+---
+
+## Development
+
+```bash
+uv sync --extra dev
+uv run ruff check .
+uv run pyright
+uv run pytest -q
+uv run pre-commit run --all-files
+```
+
+CI runs the same checks on every pull request.
+
+---
+
+## Documentation
+
+Long-term vision and engineering specifications live in `docs/ses/`. They describe where the project is headed, not its current state. See the tables above for that.
+
+## License
 
 Apache License 2.0
 
----
+## Project Owner
 
-Contributing
-
-See:
-
-CONTRIBUTING.md
-
----
-
-Project Owner
-
-GitHub
-
-Fatalerorr69
-
----
-
-STARCORE Platform
-
-AI-Powered Infrastructure Operating Platform
+GitHub: Fatalerorr69
