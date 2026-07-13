@@ -37,3 +37,9 @@ def test_blueprint_run_command_reports_failures():
     result = runner.invoke(app, ["blueprint", "run", EXAMPLE_PATH])
     assert result.exit_code == 1
     assert "failed" in result.stdout.lower()
+
+
+def test_blueprint_run_parallel_flag_reports_failures():
+    result = runner.invoke(app, ["blueprint", "run", EXAMPLE_PATH, "--parallel"])
+    assert result.exit_code == 1
+    assert "failed" in result.stdout.lower()
