@@ -68,3 +68,29 @@ def test_run_blueprint_parallel_query_param():
     assert response.status_code == 200
     body = response.json()
     assert body["tasks"][0]["status"] in ("failed", "skipped", "success")
+
+
+def test_run_blueprint_persists_and_is_retrievable():
+    payload = {
+        "name": "persist-test",
+        "version": "1.0",
+        "resources": [{"name": "thing", "provider": "docker", "kind": "container", "config": {}}],
+    }
+    run_response = client.post("/blueprints/run", json=payload)
+    assert run_response.status_code == 200
+    run_id = run_response.json()["run_id"]
+
+    detail = client.get(f"/runs/{run_id}")
+    assert detail.status_code == 200
+    assert detail.json()["blueprint_name"] == "persist-test"
+
+
+def test_get_run_detail_unknown_returns_404():
+    response = client.get("/runs/does-not-exist")
+    assert response.status_code == 404
+
+
+def test_list_runs_returns_array():
+    response = client.get("/runs")
+    assert response.status_code == 200
+    assert isinstance(response.json(), list)

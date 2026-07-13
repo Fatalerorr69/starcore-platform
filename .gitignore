@@ -41,3 +41,7 @@ cache/
 
 # MkDocs
 site/
+
+# Local SQLite database
+data/
+*.db
