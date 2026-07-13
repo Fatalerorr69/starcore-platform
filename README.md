@@ -37,7 +37,7 @@ This README reflects the **actual current state of the codebase**, not the long-
 | Component | Status | Notes |
 |---|---|---|
 | API Authentication | Planned | Endpoints are currently unauthenticated |
-| Alembic Migrations | Planned | DB schema currently created via create_all, not versioned |
+| Alembic Migrations | Done | migrations/ tracks schema via `alembic upgrade head`; create_all() still runs on app start for dev convenience |
 | LXC Support | Planned | Only VMs (Proxmox) and containers (Docker) today |
 | Plugin System | Skeleton only | PluginManager exists but isn't wired into anything |
 | Installer Studio | Vision | Not started |
