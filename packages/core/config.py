@@ -25,6 +25,8 @@ class Settings(BaseSettings):
 
     database_url: str = "sqlite:///./data/starcore.db"
 
+    api_key: str | None = None
+
     proxmox_host: str | None = None
     proxmox_user: str | None = None
     proxmox_token_name: str | None = None

@@ -10,11 +10,12 @@ import asyncio
 from blueprints.executor import BlueprintExecutor
 from blueprints.models import Blueprint
 from blueprints.planner import ExecutionPlanner
-from fastapi import FastAPI, HTTPException
+from fastapi import Depends, FastAPI, Header, HTTPException
 from orchestrator.scheduler import Scheduler
 from provider_sdk.registry import register_default_providers, registry
 from pydantic import BaseModel
 
+from core.config import get_settings
 from core.database import get_session
 from core.repository import get_run, list_runs, save_run
 
@@ -22,6 +23,20 @@ app = FastAPI(
     title="STARCORE Platform",
     version="0.1.0-dev",
 )
+
+
+def verify_api_key(x_api_key: str | None = Header(default=None, alias="X-API-Key")) -> None:
+    settings = get_settings()
+    if not settings.api_key:
+        raise HTTPException(
+            status_code=503,
+            detail="API key not configured on server. Set STARCORE_API_KEY in .env.",
+        )
+    if x_api_key != settings.api_key:
+        raise HTTPException(
+            status_code=401,
+            detail="Missing or invalid API key. Provide it via the X-API-Key header.",
+        )
 
 
 @app.get("/")
@@ -34,13 +49,13 @@ def health():
     return {"status": "healthy"}
 
 
-@app.get("/providers")
+@app.get("/providers", dependencies=[Depends(verify_api_key)])
 async def list_providers():
     register_default_providers()
     return {"providers": [{"name": provider.name} for provider in registry.all()]}
 
 
-@app.get("/providers/{name}/health")
+@app.get("/providers/{name}/health", dependencies=[Depends(verify_api_key)])
 async def provider_health(name: str):
     register_default_providers()
     if name not in registry.names():
@@ -61,7 +76,7 @@ class PlanResponse(BaseModel):
     steps: list[dict]
 
 
-@app.post("/blueprints/plan", response_model=PlanResponse)
+@app.post("/blueprints/plan", response_model=PlanResponse, dependencies=[Depends(verify_api_key)])
 def plan_blueprint(blueprint: Blueprint):
     plan = ExecutionPlanner().create_plan(blueprint)
     return PlanResponse(name=blueprint.name, version=blueprint.version, steps=plan)
@@ -90,7 +105,7 @@ class RunRecordResponse(BaseModel):
     tasks: list[TaskResult]
 
 
-@app.post("/blueprints/run", response_model=RunResponse)
+@app.post("/blueprints/run", response_model=RunResponse, dependencies=[Depends(verify_api_key)])
 async def run_blueprint(blueprint: Blueprint, parallel: bool = False):
     if parallel:
         graph = ExecutionPlanner().create_graph(blueprint)
@@ -125,7 +140,7 @@ async def run_blueprint(blueprint: Blueprint, parallel: bool = False):
     )
 
 
-@app.get("/runs", response_model=list[RunRecordResponse])
+@app.get("/runs", response_model=list[RunRecordResponse], dependencies=[Depends(verify_api_key)])
 async def get_runs():
     def _list() -> list[RunRecordResponse]:
         session = get_session()
@@ -156,7 +171,11 @@ async def get_runs():
     return await asyncio.to_thread(_list)
 
 
-@app.get("/runs/{run_id}", response_model=RunRecordResponse)
+@app.get(
+    "/runs/{run_id}",
+    response_model=RunRecordResponse,
+    dependencies=[Depends(verify_api_key)],
+)
 async def get_run_detail(run_id: str):
     def _get() -> RunRecordResponse | None:
         session = get_session()

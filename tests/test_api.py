@@ -6,6 +6,7 @@ from core.main import app
 from fastapi.testclient import TestClient
 
 client = TestClient(app)
+client.headers.update({"X-API-Key": "test-api-key"})
 
 
 def test_health():
