@@ -18,7 +18,7 @@ from provider_sdk.registry import register_default_providers, registry
 from sqlalchemy import create_engine
 
 from core.config import get_settings
-from core.database import get_session
+from core.database import ensure_sqlite_directory, get_session
 from core.repository import list_known_provider_vmids
 
 
@@ -43,6 +43,7 @@ def _check_api_key() -> CheckResult:
 def _check_database() -> CheckResult:
     settings = get_settings()
     try:
+        ensure_sqlite_directory(settings.database_url)
         engine = create_engine(settings.database_url)
         with engine.connect():
             pass
@@ -59,6 +60,7 @@ def _check_migrations() -> CheckResult:
         script = ScriptDirectory.from_config(cfg)
         head = script.get_current_head()
 
+        ensure_sqlite_directory(settings.database_url)
         engine = create_engine(settings.database_url)
         with engine.connect() as conn:
             context = MigrationContext.configure(conn)
