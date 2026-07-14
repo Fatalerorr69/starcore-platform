@@ -23,6 +23,7 @@ This README reflects the **actual current state of the codebase**, not the long-
 | Component | Status | Description |
 |---|---|---|
 | Provider SDK | Done | BaseProvider interface, registry, exceptions |
+| API Authentication | Done | X-API-Key header required on all endpoints except / and /health; returns 503 if server has no key configured |
 | Docker Provider | Done | Real implementation via docker-py: connect, health, list, create/start/stop/remove containers |
 | Proxmox Provider | Done | Real implementation via proxmoxer: connect, health, list, start/stop/shutdown VMs and LXC containers, clone VM or LXC from template |
 | Blueprint Engine | Done | Load YAML, plan, execute. Sequential (BlueprintExecutor) or parallel graph execution (Scheduler + TaskGraph) via depends_on |
@@ -30,13 +31,12 @@ This README reflects the **actual current state of the codebase**, not the long-
 | Core API | Done | FastAPI: providers, blueprint plan/run, run history |
 | Persistence | Done | SQLite (via SQLAlchemy) stores blueprint run history and task results |
 | Config | Done | .env-based settings via pydantic-settings |
-| Tests | 38 passing | ruff, pyright, pytest, pre-commit, CI on every PR |
+| Tests | 52 passing | ruff, pyright, pytest, pre-commit, CI on every PR |
 
 ## What's Planned, Not Built Yet
 
 | Component | Status | Notes |
 |---|---|---|
-| API Authentication | Planned | Endpoints are currently unauthenticated |
 | Alembic Migrations | Done | migrations/ tracks schema via `alembic upgrade head`; create_all() still runs on app start for dev convenience |
 | Plugin System | Skeleton only | PluginManager exists but isn't wired into anything |
 | Installer Studio | Vision | Not started |
