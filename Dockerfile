@@ -14,6 +14,7 @@ COPY apps ./apps
 COPY packages ./packages
 COPY migrations ./migrations
 COPY alembic.ini ./
+COPY plugins ./plugins
 
 RUN uv sync --frozen
 

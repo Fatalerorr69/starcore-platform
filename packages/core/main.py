@@ -17,6 +17,7 @@ from pydantic import BaseModel
 
 from core.config import get_settings
 from core.database import get_session
+from core.plugin_manager import plugin_manager
 from core.repository import get_run, list_runs, save_run
 
 app = FastAPI(
@@ -68,6 +69,13 @@ async def provider_health(name: str):
     finally:
         if connected:
             await provider.disconnect()
+
+
+@app.get("/plugins", dependencies=[Depends(verify_api_key)])
+async def list_plugins():
+    discovered = plugin_manager.discover()
+    loaded = await asyncio.to_thread(plugin_manager.load_all)
+    return {"discovered": discovered, "loaded": loaded}
 
 
 class PlanResponse(BaseModel):

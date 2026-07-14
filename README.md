@@ -38,7 +38,7 @@ This README reflects the **actual current state of the codebase**, not the long-
 | Component | Status | Notes |
 |---|---|---|
 | Alembic Migrations | Done | migrations/ tracks schema via `alembic upgrade head`; create_all() still runs on app start for dev convenience |
-| Plugin System | Skeleton only | PluginManager exists but isn't wired into anything |
+| Plugin System | Done | Plugins in plugins/<name>/ expose register(registry) to add custom providers; discoverable via 'starcore plugins' and GET /plugins |
 | Installer Studio | Vision | Not started |
 | Dashboard (Web UI) | Vision | Not started |
 | AI Brain | Vision | Not started |

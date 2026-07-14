@@ -75,3 +75,9 @@ def test_runs_show_displays_persisted_run():
 def test_runs_show_unknown_id_returns_error():
     result = runner.invoke(app, ["runs", "show", "does-not-exist"])
     assert result.exit_code == 1
+
+
+def test_plugins_command_lists_example_plugin():
+    result = runner.invoke(app, ["plugins"])
+    assert result.exit_code == 0
+    assert "example_provider" in result.stdout
