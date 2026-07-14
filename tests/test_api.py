@@ -95,3 +95,10 @@ def test_list_runs_returns_array():
     response = client.get("/runs")
     assert response.status_code == 200
     assert isinstance(response.json(), list)
+
+
+def test_list_plugins_endpoint_includes_example_plugin():
+    response = client.get("/plugins")
+    assert response.status_code == 200
+    body = response.json()
+    assert "example_provider" in body["discovered"]

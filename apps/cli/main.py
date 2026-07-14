@@ -189,5 +189,31 @@ def runs_show(run_id: str = typer.Argument(..., help="Run ID to inspect.")):
     console.print(table)
 
 
+@app.command("plugins")
+def plugins_list():
+    """List discovered and loaded plugins from the plugins/ directory."""
+    from core.plugin_manager import plugin_manager
+
+    discovered = plugin_manager.discover()
+    if not discovered:
+        console.print("No plugins found in 'plugins/' directory.")
+        return
+
+    loaded = plugin_manager.load_all()
+
+    table = Table(title="Plugins")
+    table.add_column("Name")
+    table.add_column("Status")
+    for name in discovered:
+        status = (
+            "[green]loaded[/green]"
+            if name in loaded
+            else "[yellow]discovered (not loaded)[/yellow]"
+        )
+        table.add_row(name, status)
+
+    console.print(table)
+
+
 if __name__ == "__main__":
     app()
