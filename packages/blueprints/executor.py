@@ -31,6 +31,7 @@ class BlueprintExecutor:
                 action="create",
                 resource=step["resource"],
                 payload=step["config"],
+                kind=step["kind"],
             )
             tasks.append(task)
 

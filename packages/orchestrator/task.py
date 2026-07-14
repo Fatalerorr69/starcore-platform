@@ -25,8 +25,8 @@ class Task:
     resource: str
 
     payload: dict[str, Any] = field(default_factory=dict)
-
     depends_on: list[str] = field(default_factory=list)
 
     status: TaskStatus = TaskStatus.PENDING
     result: dict[str, Any] = field(default_factory=dict)
+    kind: str = ""

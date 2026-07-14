@@ -79,9 +79,27 @@ class ProxmoxProvider(BaseProvider):
                         "vmid": vm["vmid"],
                         "name": vm.get("name"),
                         "status": vm.get("status"),
+                        "kind": "vm",
+                    }
+                )
+            containers = await asyncio.to_thread(self._client.nodes(node["node"]).lxc.get) or []
+            for ct in containers:
+                resources.append(
+                    {
+                        "node": node["node"],
+                        "vmid": ct["vmid"],
+                        "name": ct.get("name"),
+                        "status": ct.get("status"),
+                        "kind": "lxc",
                     }
                 )
         return resources
+
+    def _resource_endpoint(self, node: str, vmid: int | str, kind: str) -> Any:
+        assert self._client is not None
+        if kind == "lxc":
+            return self._client.nodes(node).lxc(vmid)
+        return self._client.nodes(node).qemu(vmid)
 
     async def execute(self, task) -> None:
         if self._client is None:
@@ -90,6 +108,7 @@ class ProxmoxProvider(BaseProvider):
         action = task.action
         node = task.payload.get("node")
         vmid = task.payload.get("vmid")
+        resource_kind = "lxc" if task.kind == "lxc" else "vm"
 
         if action in ("start", "stop", "shutdown"):
             if not node or not vmid:
@@ -97,14 +116,15 @@ class ProxmoxProvider(BaseProvider):
                     f"Resource '{task.resource}' requires 'node' and 'vmid' "
                     f"in config for action '{action}'"
                 )
-            await asyncio.to_thread(self._client.nodes(node).qemu(vmid).status.post, action)
-            logger.info("[Proxmox] {} -> vmid {} on node {}", action, vmid, node)
+            endpoint = self._resource_endpoint(node, vmid, resource_kind)
+            await asyncio.to_thread(endpoint.status.post, action)
+            logger.info("[Proxmox] {} -> {} {} on node {}", action, resource_kind, vmid, node)
         elif action == "create":
-            await self._create_vm(task)
+            await self._create_resource(task, resource_kind)
         else:
             raise ValueError(f"Unsupported Proxmox action: '{action}'")
 
-    async def _create_vm(self, task) -> None:
+    async def _create_resource(self, task, resource_kind: str) -> None:
         assert self._client is not None
         payload = task.payload
 
@@ -113,31 +133,33 @@ class ProxmoxProvider(BaseProvider):
         if not node or not template_vmid:
             raise ValueError(
                 f"Resource '{task.resource}' requires 'node' and 'template_vmid' "
-                "in config to clone a VM from a template"
+                f"in config to clone a {resource_kind}"
             )
 
         vmid = payload.get("vmid")
         if not vmid:
             next_id = await asyncio.to_thread(self._client.cluster.nextid.get)
             if next_id is None:
-                raise RuntimeError("Failed to allocate next VM ID from Proxmox")
+                raise RuntimeError("Failed to allocate next ID from Proxmox")
             vmid = int(next_id)
         else:
             vmid = int(vmid)
 
         clone_kwargs: dict[str, Any] = {
             "newid": vmid,
-            "name": task.resource,
             "full": 1 if payload.get("full", True) else 0,
         }
+        if resource_kind == "lxc":
+            clone_kwargs["hostname"] = task.resource
+        else:
+            clone_kwargs["name"] = task.resource
         if storage := payload.get("storage"):
             clone_kwargs["storage"] = storage
         if target := payload.get("target_node"):
             clone_kwargs["target"] = target
 
-        upid = await asyncio.to_thread(
-            self._client.nodes(node).qemu(template_vmid).clone.post, **clone_kwargs
-        )
+        source_endpoint = self._resource_endpoint(node, template_vmid, resource_kind)
+        upid = await asyncio.to_thread(source_endpoint.clone.post, **clone_kwargs)
         if upid is None:
             raise RuntimeError(
                 f"Proxmox did not return a task ID for cloning resource '{task.resource}'"
@@ -152,14 +174,15 @@ class ProxmoxProvider(BaseProvider):
         if memory := payload.get("memory"):
             config_updates["memory"] = memory
         if config_updates:
-            await asyncio.to_thread(
-                self._client.nodes(node).qemu(vmid).config.post, **config_updates
-            )
+            target_endpoint = self._resource_endpoint(node, vmid, resource_kind)
+            await asyncio.to_thread(target_endpoint.config.post, **config_updates)
 
         task.result["vmid"] = vmid
         task.result["node"] = node
+        task.result["kind"] = resource_kind
         logger.info(
-            "[Proxmox] Cloned template {} -> vmid {} ('{}') on node {}",
+            "[Proxmox] Cloned {} template {} -> vmid {} ('{}') on node {}",
+            resource_kind,
             template_vmid,
             vmid,
             task.resource,

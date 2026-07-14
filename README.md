@@ -24,7 +24,7 @@ This README reflects the **actual current state of the codebase**, not the long-
 |---|---|---|
 | Provider SDK | Done | BaseProvider interface, registry, exceptions |
 | Docker Provider | Done | Real implementation via docker-py: connect, health, list, create/start/stop/remove containers |
-| Proxmox Provider | Done | Real implementation via proxmoxer: connect, health, list, start/stop/shutdown VMs, clone VM from template |
+| Proxmox Provider | Done | Real implementation via proxmoxer: connect, health, list, start/stop/shutdown VMs and LXC containers, clone VM or LXC from template |
 | Blueprint Engine | Done | Load YAML, plan, execute. Sequential (BlueprintExecutor) or parallel graph execution (Scheduler + TaskGraph) via depends_on |
 | CLI | Done | starcore blueprint plan/run [--parallel], starcore version, starcore health |
 | Core API | Done | FastAPI: providers, blueprint plan/run, run history |
@@ -38,7 +38,6 @@ This README reflects the **actual current state of the codebase**, not the long-
 |---|---|---|
 | API Authentication | Planned | Endpoints are currently unauthenticated |
 | Alembic Migrations | Done | migrations/ tracks schema via `alembic upgrade head`; create_all() still runs on app start for dev convenience |
-| LXC Support | Planned | Only VMs (Proxmox) and containers (Docker) today |
 | Plugin System | Skeleton only | PluginManager exists but isn't wired into anything |
 | Installer Studio | Vision | Not started |
 | Dashboard (Web UI) | Vision | Not started |

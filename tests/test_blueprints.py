@@ -104,3 +104,9 @@ async def test_executor_skips_unknown_provider():
 
     assert len(tasks) == 1
     assert tasks[0].status == TaskStatus.SKIPPED
+
+
+def test_lxc_example_loads_with_lxc_kind():
+    lxc_path = Path(__file__).parent.parent / "packages" / "blueprints" / "examples" / "lxc.yaml"
+    blueprint = BlueprintLoader.load(lxc_path)
+    assert blueprint.resources[0].kind == "lxc"
