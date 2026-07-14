@@ -95,6 +95,31 @@ class ProxmoxProvider(BaseProvider):
                 )
         return resources
 
+    async def node_status(self) -> list[dict]:
+        """Return raw Proxmox node status (cpu, memory, rootfs) per node."""
+        if self._client is None:
+            return []
+        nodes = await asyncio.to_thread(self._client.nodes.get) or []
+        result: list[dict] = []
+        for node in nodes:
+            node_name = node["node"]
+            status = await asyncio.to_thread(self._client.nodes(node_name).status.get) or {}
+            result.append({"node": node_name, **status})
+        return result
+
+    async def storage_status(self) -> list[dict]:
+        """Return raw Proxmox storage status per node."""
+        if self._client is None:
+            return []
+        nodes = await asyncio.to_thread(self._client.nodes.get) or []
+        result: list[dict] = []
+        for node in nodes:
+            node_name = node["node"]
+            storages = await asyncio.to_thread(self._client.nodes(node_name).storage.get) or []
+            for storage in storages:
+                result.append({"node": node_name, **storage})
+        return result
+
     def _resource_endpoint(self, node: str, vmid: int | str, kind: str) -> Any:
         assert self._client is not None
         if kind == "lxc":

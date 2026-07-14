@@ -40,3 +40,17 @@ def list_runs(session: Session) -> list[BlueprintRunRecord]:
 
 def get_run(session: Session, run_id: str) -> BlueprintRunRecord | None:
     return session.get(BlueprintRunRecord, run_id)
+
+
+def list_known_provider_vmids(session: Session, provider: str) -> set[int]:
+    records = session.query(TaskRunRecord).filter(TaskRunRecord.provider == provider).all()
+    vmids: set[int] = set()
+    for record in records:
+        vmid = (record.result or {}).get("vmid")
+        if vmid is None:
+            continue
+        try:
+            vmids.add(int(vmid))
+        except (TypeError, ValueError):
+            continue
+    return vmids

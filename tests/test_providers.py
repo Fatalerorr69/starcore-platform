@@ -191,3 +191,37 @@ async def test_proxmox_start_lxc_uses_lxc_endpoint_not_qemu():
 
     fake_client.nodes.return_value.lxc.return_value.status.post.assert_called_once_with("start")
     fake_client.nodes.return_value.qemu.return_value.status.post.assert_not_called()
+
+
+async def test_proxmox_node_status_returns_node_metrics():
+    fake_client = MagicMock()
+    fake_client.nodes.get.return_value = [{"node": "fatalab"}]
+    fake_client.nodes.return_value.status.get.return_value = {
+        "cpu": 0.42,
+        "memory": {"used": 4_000_000_000, "total": 16_000_000_000},
+        "rootfs": {"used": 20_000_000_000, "total": 100_000_000_000},
+    }
+
+    provider = ProxmoxProvider()
+    provider._client = fake_client
+
+    result = await provider.node_status()
+
+    assert result[0]["node"] == "fatalab"
+    assert result[0]["cpu"] == 0.42
+
+
+async def test_proxmox_storage_status_returns_storage_list():
+    fake_client = MagicMock()
+    fake_client.nodes.get.return_value = [{"node": "fatalab"}]
+    fake_client.nodes.return_value.storage.get.return_value = [
+        {"storage": "local-zfs", "type": "zfspool", "used": 1000, "total": 5000}
+    ]
+
+    provider = ProxmoxProvider()
+    provider._client = fake_client
+
+    result = await provider.storage_status()
+
+    assert result[0]["storage"] == "local-zfs"
+    assert result[0]["node"] == "fatalab"

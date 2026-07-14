@@ -6,6 +6,7 @@ from blueprints.executor import BlueprintExecutor
 from blueprints.loader import BlueprintLoader
 from blueprints.planner import ExecutionPlanner
 from core.database import get_session
+from core.diagnostics import run_diagnostics
 from core.repository import get_run, list_runs, save_run
 from orchestrator.scheduler import Scheduler
 from rich.console import Console
@@ -213,6 +214,77 @@ def plugins_list():
         table.add_row(name, status)
 
     console.print(table)
+
+
+@app.command("diagnose")
+def diagnose():
+    """Run a deep health/status check of the STARCORE deployment and configured providers."""
+    report = asyncio.run(run_diagnostics())
+
+    status_colors = {"ok": "green", "warning": "yellow", "error": "red"}
+
+    overall = report["overall_status"]
+    color = status_colors.get(overall, "white")
+    console.print(f"Overall status: [{color}]{overall}[/{color}]")
+
+    table = Table(title="Checks")
+    table.add_column("Check")
+    table.add_column("Status")
+    table.add_column("Detail")
+    for check in report["checks"]:
+        c = status_colors.get(check["status"], "white")
+        table.add_row(check["name"], f"[{c}]{check['status']}[/{c}]", check["detail"])
+    console.print(table)
+
+    proxmox = report.get("proxmox") or {}
+    if proxmox.get("nodes"):
+        node_table = Table(title="Proxmox Nodes")
+        node_table.add_column("Node")
+        node_table.add_column("CPU %")
+        node_table.add_column("Memory")
+        node_table.add_column("Disk")
+        for node in proxmox["nodes"]:
+            node_table.add_row(
+                str(node["node"]),
+                f"{node['cpu_percent']}%",
+                f"{node['memory_used_gb']} / {node['memory_total_gb']} GB",
+                f"{node['disk_used_gb']} / {node['disk_total_gb']} GB",
+            )
+        console.print(node_table)
+
+    if proxmox.get("storage"):
+        storage_table = Table(title="Proxmox Storage")
+        storage_table.add_column("Node")
+        storage_table.add_column("Storage")
+        storage_table.add_column("Type")
+        storage_table.add_column("Used / Total")
+        for s in proxmox["storage"]:
+            storage_table.add_row(
+                str(s["node"]),
+                str(s["storage"]),
+                str(s["type"]),
+                f"{s['used_gb']} / {s['total_gb']} GB",
+            )
+        console.print(storage_table)
+
+    if proxmox.get("orphaned_resources"):
+        console.print(
+            f"[yellow]{len(proxmox['orphaned_resources'])} orphaned Proxmox "
+            "resource(s) found (exist on host but not tracked in STARCORE run "
+            "history):[/yellow]"
+        )
+        for res in proxmox["orphaned_resources"]:
+            console.print(
+                f"  - {res.get('kind')} vmid={res.get('vmid')} "
+                f"name={res.get('name')} on {res.get('node')}"
+            )
+
+    docker = report.get("docker") or {}
+    if docker.get("containers"):
+        console.print(f"Docker containers by status: {docker['containers']}")
+
+    if overall != "ok":
+        raise typer.Exit(code=1)
 
 
 if __name__ == "__main__":
