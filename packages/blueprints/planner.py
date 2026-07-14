@@ -39,6 +39,7 @@ class ExecutionPlanner:
                 resource=resource.name,
                 payload=resource.config,
                 depends_on=list(resource.depends_on),
+                kind=resource.kind,
             )
             graph.add_task(task)
         return graph
