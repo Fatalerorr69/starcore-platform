@@ -100,6 +100,17 @@ docs/ses/               Long-term engineering specification and vision docs
 
 ---
 
+## Docker Deployment
+
+```bash
+cp .env.example .env
+docker compose up -d --build api
+```
+
+The `api` service builds this repo, runs Alembic migrations, and starts the FastAPI server on port 8000. SQLite data persists in the `starcore-data` volume. Postgres, Redis, and NATS services are also defined in `docker-compose.yml` for future use but are not yet wired into the application.
+
+---
+
 ## Development
 
 ```bash

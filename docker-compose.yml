@@ -1,6 +1,16 @@
 version: "3.9"
-
 services:
+  api:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      STARCORE_DATABASE_URL: sqlite:////data/starcore.db
+    volumes:
+      - starcore-data:/data
 
   postgres:
     image: postgres:17
@@ -11,6 +21,8 @@ services:
       POSTGRES_DB: starcore
     ports:
       - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
 
   redis:
     image: redis:8
@@ -26,3 +38,4 @@ services:
 
 volumes:
   postgres-data:
+  starcore-data:
