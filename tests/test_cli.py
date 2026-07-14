@@ -81,3 +81,9 @@ def test_plugins_command_lists_example_plugin():
     result = runner.invoke(app, ["plugins"])
     assert result.exit_code == 0
     assert "example_provider" in result.stdout
+
+
+def test_diagnose_command_runs_and_prints_report():
+    result = runner.invoke(app, ["diagnose"])
+    assert result.exit_code in (0, 1)
+    assert "overall status" in result.stdout.lower()

@@ -17,6 +17,7 @@ from pydantic import BaseModel
 
 from core.config import get_settings
 from core.database import get_session
+from core.diagnostics import run_diagnostics
 from core.plugin_manager import plugin_manager
 from core.repository import get_run, list_runs, save_run
 
@@ -69,6 +70,11 @@ async def provider_health(name: str):
     finally:
         if connected:
             await provider.disconnect()
+
+
+@app.get("/diagnostics", dependencies=[Depends(verify_api_key)])
+async def get_diagnostics():
+    return await run_diagnostics()
 
 
 @app.get("/plugins", dependencies=[Depends(verify_api_key)])

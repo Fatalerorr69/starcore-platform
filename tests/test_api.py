@@ -102,3 +102,11 @@ def test_list_plugins_endpoint_includes_example_plugin():
     assert response.status_code == 200
     body = response.json()
     assert "example_provider" in body["discovered"]
+
+
+def test_diagnostics_endpoint_returns_report():
+    response = client.get("/diagnostics")
+    assert response.status_code == 200
+    body = response.json()
+    assert "overall_status" in body
+    assert "checks" in body

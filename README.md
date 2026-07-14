@@ -31,7 +31,7 @@ This README reflects the **actual current state of the codebase**, not the long-
 | Core API | Done | FastAPI: providers, blueprint plan/run, run history |
 | Persistence | Done | SQLite (via SQLAlchemy) stores blueprint run history and task results |
 | Config | Done | .env-based settings via pydantic-settings |
-| Tests | 52 passing | ruff, pyright, pytest, pre-commit, CI on every PR |
+| Tests | 67 passing | ruff, pyright, pytest, pre-commit, CI on every PR |
 
 ## What's Planned, Not Built Yet
 
@@ -39,6 +39,7 @@ This README reflects the **actual current state of the codebase**, not the long-
 |---|---|---|
 | Alembic Migrations | Done | migrations/ tracks schema via `alembic upgrade head`; create_all() still runs on app start for dev convenience |
 | Plugin System | Done | Plugins in plugins/<name>/ expose register(registry) to add custom providers; discoverable via 'starcore plugins' and GET /plugins |
+| Diagnostics | Done | `starcore diagnose` CLI and `GET /diagnostics` API report config, database, migrations, and Docker/Proxmox provider health including node CPU/RAM/disk, storage, and orphaned resource detection |
 | Installer Studio | Vision | Not started |
 | Dashboard (Web UI) | Vision | Not started |
 | AI Brain | Vision | Not started |
