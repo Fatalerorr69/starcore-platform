@@ -105,3 +105,18 @@ async def test_run_diagnostics_includes_config_checks():
 async def test_run_diagnostics_overall_status_reflects_docker_unavailable():
     report = await run_diagnostics()
     assert report["overall_status"] in ("warning", "error")
+
+
+async def test_check_database_creates_missing_sqlite_directory(tmp_path, monkeypatch):
+    from core.config import get_settings
+
+    nested_path = tmp_path / "fresh_clone" / "data" / "starcore.db"
+    monkeypatch.setenv("STARCORE_DATABASE_URL", f"sqlite:///{nested_path}")
+    get_settings.cache_clear()
+    try:
+        report = await run_diagnostics()
+        db_check = next(c for c in report["checks"] if c["name"] == "config.database")
+        assert db_check["status"] == "ok"
+        assert nested_path.parent.exists()
+    finally:
+        get_settings.cache_clear()
