@@ -8,7 +8,9 @@ from __future__ import annotations
 import asyncio
 from pathlib import Path
 
+from ai.generator import BlueprintGenerationError, generate_blueprint_yaml
 from blueprints.executor import BlueprintExecutor
+from blueprints.loader import BlueprintLoader
 from blueprints.models import Blueprint
 from blueprints.planner import ExecutionPlanner
 from fastapi import Depends, FastAPI, Header, HTTPException
@@ -88,6 +90,34 @@ async def provider_health(name: str):
 @app.get("/diagnostics", dependencies=[Depends(verify_api_key)])
 async def get_diagnostics():
     return await run_diagnostics()
+
+
+class GenerateBlueprintRequest(BaseModel):
+    description: str
+
+
+class GenerateBlueprintResponse(BaseModel):
+    yaml: str
+    blueprint: Blueprint | None = None
+    validation_error: str | None = None
+
+
+@app.post(
+    "/ai/generate-blueprint",
+    response_model=GenerateBlueprintResponse,
+    dependencies=[Depends(verify_api_key)],
+)
+async def generate_blueprint_endpoint(request: GenerateBlueprintRequest):
+    try:
+        yaml_text = await generate_blueprint_yaml(request.description)
+    except BlueprintGenerationError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+    try:
+        blueprint = BlueprintLoader.load_from_string(yaml_text)
+        return GenerateBlueprintResponse(yaml=yaml_text, blueprint=blueprint)
+    except Exception as exc:
+        return GenerateBlueprintResponse(yaml=yaml_text, validation_error=str(exc))
 
 
 @app.get("/plugins", dependencies=[Depends(verify_api_key)])

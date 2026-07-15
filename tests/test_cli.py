@@ -87,3 +87,9 @@ def test_diagnose_command_runs_and_prints_report():
     result = runner.invoke(app, ["diagnose"])
     assert result.exit_code in (0, 1)
     assert "overall status" in result.stdout.lower()
+
+
+def test_ai_generate_command_fails_gracefully_without_api_key():
+    result = runner.invoke(app, ["ai", "generate", "a simple web app"])
+    assert result.exit_code == 1
+    assert "anthropic" in result.stdout.lower() or "not configured" in result.stdout.lower()

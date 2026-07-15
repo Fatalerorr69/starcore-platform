@@ -33,6 +33,9 @@ class Settings(BaseSettings):
     proxmox_token_value: str | None = None
     proxmox_verify_ssl: bool = True
 
+    anthropic_api_key: str | None = None
+    anthropic_model: str = "claude-sonnet-5"
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_prefix="STARCORE_",
