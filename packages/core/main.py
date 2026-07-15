@@ -13,6 +13,7 @@ from blueprints.executor import BlueprintExecutor
 from blueprints.loader import BlueprintLoader
 from blueprints.models import Blueprint
 from blueprints.planner import ExecutionPlanner
+from blueprints.template_resolver import TemplateResolutionError, resolve_templates
 from fastapi import Depends, FastAPI, Header, HTTPException
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
@@ -184,7 +185,11 @@ class PlanResponse(BaseModel):
 
 
 @app.post("/blueprints/plan", response_model=PlanResponse, dependencies=[Depends(verify_api_key)])
-def plan_blueprint(blueprint: Blueprint):
+async def plan_blueprint(blueprint: Blueprint):
+    try:
+        blueprint = await resolve_templates(blueprint)
+    except TemplateResolutionError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
     plan = ExecutionPlanner().create_plan(blueprint)
     return PlanResponse(name=blueprint.name, version=blueprint.version, steps=plan)
 
@@ -214,6 +219,10 @@ class RunRecordResponse(BaseModel):
 
 @app.post("/blueprints/run", response_model=RunResponse, dependencies=[Depends(verify_api_key)])
 async def run_blueprint(blueprint: Blueprint, parallel: bool = False):
+    try:
+        blueprint = await resolve_templates(blueprint)
+    except TemplateResolutionError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
     if parallel:
         graph = ExecutionPlanner().create_graph(blueprint)
         tasks = await Scheduler().execute(graph)
