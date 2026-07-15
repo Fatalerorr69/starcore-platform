@@ -196,6 +196,14 @@ class ProxmoxProvider(BaseProvider):
             await self._create_resource(task, resource_kind)
         elif action == "destroy":
             await self._destroy_resource(task, resource_kind)
+        elif action == "snapshot-create":
+            await self._snapshot_create(task, resource_kind)
+        elif action == "snapshot-list":
+            await self._snapshot_list(task, resource_kind)
+        elif action == "snapshot-delete":
+            await self._snapshot_delete(task, resource_kind)
+        elif action == "snapshot-rollback":
+            await self._snapshot_rollback(task, resource_kind)
         else:
             raise ValueError(f"Unsupported Proxmox action: '{action}'")
 
@@ -292,6 +300,99 @@ class ProxmoxProvider(BaseProvider):
         task.result["node"] = node
         task.result["kind"] = resource_kind
         logger.info("[Proxmox] Destroyed {} vmid {} on node {}", resource_kind, vmid, node)
+
+    def _require_snapshot_fields(self, task, need_name: bool) -> tuple[str, int]:
+        payload = task.payload
+        node = payload.get("node")
+        vmid = payload.get("vmid")
+        if not node or not vmid:
+            raise ValueError(
+                f"Resource '{task.resource}' requires 'node' and 'vmid' "
+                f"in config for action '{task.action}'"
+            )
+        if need_name and not payload.get("snapshot_name"):
+            raise ValueError(
+                f"Resource '{task.resource}' requires 'snapshot_name' in config "
+                f"for action '{task.action}'"
+            )
+        return node, vmid
+
+    async def _snapshot_create(self, task, resource_kind: str) -> None:
+        assert self._client is not None
+        node, vmid = self._require_snapshot_fields(task, need_name=True)
+        payload = task.payload
+        snapshot_name = payload["snapshot_name"]
+
+        endpoint = self._resource_endpoint(node, vmid, resource_kind)
+        post_kwargs: dict[str, Any] = {"snapname": snapshot_name}
+        if description := payload.get("description"):
+            post_kwargs["description"] = description
+
+        upid = await asyncio.to_thread(endpoint.snapshot.post, **post_kwargs)
+        if upid and payload.get("wait", True):
+            await self._wait_for_task(str(node), str(upid))
+
+        task.result["snapshot_name"] = snapshot_name
+        task.result["vmid"] = vmid
+        task.result["node"] = node
+        logger.info(
+            "[Proxmox] Created snapshot '{}' on {} vmid {}",
+            snapshot_name,
+            resource_kind,
+            vmid,
+        )
+
+    async def _snapshot_list(self, task, resource_kind: str) -> None:
+        assert self._client is not None
+        node, vmid = self._require_snapshot_fields(task, need_name=False)
+
+        endpoint = self._resource_endpoint(node, vmid, resource_kind)
+        raw = await asyncio.to_thread(endpoint.snapshot.get) or []
+        snapshots = [s for s in raw if s.get("name") != "current"]
+
+        task.result["snapshots"] = snapshots
+        task.result["vmid"] = vmid
+        task.result["node"] = node
+
+    async def _snapshot_delete(self, task, resource_kind: str) -> None:
+        assert self._client is not None
+        node, vmid = self._require_snapshot_fields(task, need_name=True)
+        snapshot_name = task.payload["snapshot_name"]
+
+        endpoint = self._resource_endpoint(node, vmid, resource_kind)
+        upid = await asyncio.to_thread(endpoint.snapshot(snapshot_name).delete)
+        if upid and task.payload.get("wait", True):
+            await self._wait_for_task(str(node), str(upid))
+
+        task.result["snapshot_name"] = snapshot_name
+        task.result["vmid"] = vmid
+        task.result["node"] = node
+        logger.info(
+            "[Proxmox] Deleted snapshot '{}' on {} vmid {}",
+            snapshot_name,
+            resource_kind,
+            vmid,
+        )
+
+    async def _snapshot_rollback(self, task, resource_kind: str) -> None:
+        assert self._client is not None
+        node, vmid = self._require_snapshot_fields(task, need_name=True)
+        snapshot_name = task.payload["snapshot_name"]
+
+        endpoint = self._resource_endpoint(node, vmid, resource_kind)
+        upid = await asyncio.to_thread(endpoint.snapshot(snapshot_name).rollback.post)
+        if upid and task.payload.get("wait", True):
+            await self._wait_for_task(str(node), str(upid))
+
+        task.result["snapshot_name"] = snapshot_name
+        task.result["vmid"] = vmid
+        task.result["node"] = node
+        logger.info(
+            "[Proxmox] Rolled back {} vmid {} to snapshot '{}'",
+            resource_kind,
+            vmid,
+            snapshot_name,
+        )
 
     async def _wait_for_task(
         self, node: str, upid: str, timeout: float = 300.0, interval: float = 2.0

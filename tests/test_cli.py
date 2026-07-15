@@ -105,3 +105,24 @@ def test_resource_action_command_reports_skipped_for_unknown_provider():
     result = runner.invoke(app, ["resource", "action", "ghost", "stop", "thing"])
     assert result.exit_code == 0
     assert "skipped" in result.stdout.lower()
+
+
+def test_snapshot_create_reports_failure_without_proxmox_connection():
+    result = runner.invoke(app, ["snapshot", "create", "fatalab", "105", "before-test"])
+    assert result.exit_code == 1
+
+
+def test_snapshot_list_reports_failure_without_proxmox_connection():
+    result = runner.invoke(app, ["snapshot", "list", "fatalab", "105"])
+    assert result.exit_code == 1
+
+
+def test_snapshot_delete_prompts_for_confirmation():
+    result = runner.invoke(app, ["snapshot", "delete", "fatalab", "105", "old-snap"], input="n\n")
+    assert result.exit_code == 0
+    assert "delete" in result.stdout.lower()
+
+
+def test_snapshot_delete_skips_confirmation_with_yes_flag():
+    result = runner.invoke(app, ["snapshot", "delete", "fatalab", "105", "old-snap", "--yes"])
+    assert result.exit_code == 1

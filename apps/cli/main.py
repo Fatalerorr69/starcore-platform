@@ -26,6 +26,8 @@ proxmox_app = typer.Typer(help="Proxmox environment tools.")
 app.add_typer(proxmox_app, name="proxmox")
 resource_app = typer.Typer(help="Manage individual resources outside of blueprints.")
 app.add_typer(resource_app, name="resource")
+snapshot_app = typer.Typer(help="Manage Proxmox VM/LXC snapshots.")
+app.add_typer(snapshot_app, name="snapshot")
 
 console = Console()
 
@@ -439,6 +441,106 @@ def resource_action(
 
     if task.status.value == "failed":
         raise typer.Exit(code=1)
+
+
+def _run_snapshot_action(
+    action: str, node: str, vmid: int, kind: str, snapshot_name: str = "", description: str = ""
+):
+    payload: dict = {"node": node, "vmid": vmid}
+    if snapshot_name:
+        payload["snapshot_name"] = snapshot_name
+    if description:
+        payload["description"] = description
+    return asyncio.run(
+        execute_resource_action("proxmox", action, f"{node}:{vmid}", kind=kind, payload=payload)
+    )
+
+
+@snapshot_app.command("create")
+def snapshot_create(
+    node: str = typer.Argument(..., help="Proxmox node name."),
+    vmid: int = typer.Argument(..., help="VM/LXC ID."),
+    name: str = typer.Argument(..., help="Snapshot name."),
+    kind: str = typer.Option("vm", help="Resource kind: vm or lxc."),
+    description: str = typer.Option("", help="Optional snapshot description."),
+):
+    """Create a snapshot of a Proxmox VM or LXC container."""
+    task = _run_snapshot_action(
+        "snapshot-create", node, vmid, kind, snapshot_name=name, description=description
+    )
+    if task.status.value != "success":
+        console.print(f"[red]Failed: {task.result.get('error', task.status.value)}[/red]")
+        raise typer.Exit(code=1)
+    console.print(f"[green]Snapshot '{name}' created for {kind} {vmid} on {node}[/green]")
+
+
+@snapshot_app.command("list")
+def snapshot_list(
+    node: str = typer.Argument(..., help="Proxmox node name."),
+    vmid: int = typer.Argument(..., help="VM/LXC ID."),
+    kind: str = typer.Option("vm", help="Resource kind: vm or lxc."),
+):
+    """List snapshots of a Proxmox VM or LXC container."""
+    task = _run_snapshot_action("snapshot-list", node, vmid, kind)
+    if task.status.value != "success":
+        console.print(f"[red]Failed: {task.result.get('error', task.status.value)}[/red]")
+        raise typer.Exit(code=1)
+
+    snapshots = task.result.get("snapshots", [])
+    if not snapshots:
+        console.print("No snapshots found.")
+        return
+
+    table = Table(title=f"Snapshots for {kind} {vmid} on {node}")
+    table.add_column("Name")
+    table.add_column("Description")
+    for s in snapshots:
+        table.add_row(str(s.get("name")), str(s.get("description") or "-"))
+    console.print(table)
+
+
+@snapshot_app.command("delete")
+def snapshot_delete(
+    node: str = typer.Argument(..., help="Proxmox node name."),
+    vmid: int = typer.Argument(..., help="VM/LXC ID."),
+    name: str = typer.Argument(..., help="Snapshot name."),
+    kind: str = typer.Option("vm", help="Resource kind: vm or lxc."),
+    yes: bool = typer.Option(False, "--yes", "-y", help="Skip confirmation."),
+):
+    """Delete a snapshot of a Proxmox VM or LXC container."""
+    if not yes:
+        confirm = typer.confirm(f"Delete snapshot '{name}' on {kind} {vmid} ({node})?")
+        if not confirm:
+            raise typer.Exit(code=0)
+
+    task = _run_snapshot_action("snapshot-delete", node, vmid, kind, snapshot_name=name)
+    if task.status.value != "success":
+        console.print(f"[red]Failed: {task.result.get('error', task.status.value)}[/red]")
+        raise typer.Exit(code=1)
+    console.print(f"[green]Snapshot '{name}' deleted[/green]")
+
+
+@snapshot_app.command("rollback")
+def snapshot_rollback(
+    node: str = typer.Argument(..., help="Proxmox node name."),
+    vmid: int = typer.Argument(..., help="VM/LXC ID."),
+    name: str = typer.Argument(..., help="Snapshot name."),
+    kind: str = typer.Option("vm", help="Resource kind: vm or lxc."),
+    yes: bool = typer.Option(False, "--yes", "-y", help="Skip confirmation."),
+):
+    """Roll back a Proxmox VM or LXC container to a snapshot. Discards current state."""
+    if not yes:
+        confirm = typer.confirm(
+            f"Roll back {kind} {vmid} ({node}) to snapshot '{name}'? This discards current state."
+        )
+        if not confirm:
+            raise typer.Exit(code=0)
+
+    task = _run_snapshot_action("snapshot-rollback", node, vmid, kind, snapshot_name=name)
+    if task.status.value != "success":
+        console.print(f"[red]Failed: {task.result.get('error', task.status.value)}[/red]")
+        raise typer.Exit(code=1)
+    console.print(f"[green]Rolled back to snapshot '{name}'[/green]")
 
 
 if __name__ == "__main__":
