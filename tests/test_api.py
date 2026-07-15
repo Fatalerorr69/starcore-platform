@@ -127,3 +127,12 @@ def test_proxmox_discover_endpoint_returns_connected_false_without_credentials()
     response = client.get("/proxmox/discover")
     assert response.status_code == 200
     assert response.json()["connected"] is False
+
+
+def test_resource_action_endpoint_skips_unknown_provider():
+    response = client.post(
+        "/resources/action",
+        json={"provider": "ghost", "action": "stop", "resource": "thing"},
+    )
+    assert response.status_code == 200
+    assert response.json()["status"] == "skipped"

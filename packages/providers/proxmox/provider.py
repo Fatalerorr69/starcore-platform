@@ -96,7 +96,6 @@ class ProxmoxProvider(BaseProvider):
         return resources
 
     async def list_templates(self) -> list[dict]:
-        """Return VM/LXC resources marked as templates (available to clone)."""
         if self._client is None:
             return []
         nodes = await asyncio.to_thread(self._client.nodes.get) or []
@@ -128,7 +127,6 @@ class ProxmoxProvider(BaseProvider):
         return templates
 
     async def list_networks(self) -> list[dict]:
-        """Return network bridges configured on each node."""
         if self._client is None:
             return []
         nodes = await asyncio.to_thread(self._client.nodes.get) or []
@@ -148,7 +146,6 @@ class ProxmoxProvider(BaseProvider):
         return networks
 
     async def node_status(self) -> list[dict]:
-        """Return raw Proxmox node status (cpu, memory, rootfs) per node."""
         if self._client is None:
             return []
         nodes = await asyncio.to_thread(self._client.nodes.get) or []
@@ -160,7 +157,6 @@ class ProxmoxProvider(BaseProvider):
         return result
 
     async def storage_status(self) -> list[dict]:
-        """Return raw Proxmox storage status per node."""
         if self._client is None:
             return []
         nodes = await asyncio.to_thread(self._client.nodes.get) or []
@@ -198,6 +194,8 @@ class ProxmoxProvider(BaseProvider):
             logger.info("[Proxmox] {} -> {} {} on node {}", action, resource_kind, vmid, node)
         elif action == "create":
             await self._create_resource(task, resource_kind)
+        elif action == "destroy":
+            await self._destroy_resource(task, resource_kind)
         else:
             raise ValueError(f"Unsupported Proxmox action: '{action}'")
 
@@ -265,6 +263,35 @@ class ProxmoxProvider(BaseProvider):
             task.resource,
             node,
         )
+
+    async def _destroy_resource(self, task, resource_kind: str) -> None:
+        assert self._client is not None
+        payload = task.payload
+
+        node = payload.get("node")
+        vmid = payload.get("vmid")
+        if not node or not vmid:
+            raise ValueError(
+                f"Resource '{task.resource}' requires 'node' and 'vmid' "
+                "in config for action 'destroy'"
+            )
+
+        delete_kwargs: dict[str, Any] = {}
+        if payload.get("purge"):
+            delete_kwargs["purge"] = 1
+        if payload.get("force"):
+            delete_kwargs["force"] = 1
+
+        endpoint = self._resource_endpoint(node, vmid, resource_kind)
+        upid = await asyncio.to_thread(endpoint.delete, **delete_kwargs)
+
+        if upid and payload.get("wait", True):
+            await self._wait_for_task(str(node), str(upid))
+
+        task.result["vmid"] = vmid
+        task.result["node"] = node
+        task.result["kind"] = resource_kind
+        logger.info("[Proxmox] Destroyed {} vmid {} on node {}", resource_kind, vmid, node)
 
     async def _wait_for_task(
         self, node: str, upid: str, timeout: float = 300.0, interval: float = 2.0

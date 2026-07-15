@@ -99,3 +99,9 @@ def test_proxmox_discover_command_reports_connection_failure_without_credentials
     result = runner.invoke(app, ["proxmox", "discover"])
     assert result.exit_code == 1
     assert "could not connect" in result.stdout.lower()
+
+
+def test_resource_action_command_reports_skipped_for_unknown_provider():
+    result = runner.invoke(app, ["resource", "action", "ghost", "stop", "thing"])
+    assert result.exit_code == 0
+    assert "skipped" in result.stdout.lower()

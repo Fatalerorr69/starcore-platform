@@ -10,6 +10,7 @@ from core.database import get_session
 from core.diagnostics import run_diagnostics
 from core.discovery import discover_proxmox_environment
 from core.repository import get_run, list_runs, save_run
+from core.resource_actions import execute_resource_action
 from orchestrator.scheduler import Scheduler
 from rich.console import Console
 from rich.table import Table
@@ -23,6 +24,8 @@ ai_app = typer.Typer(help="AI-assisted blueprint generation.")
 app.add_typer(ai_app, name="ai")
 proxmox_app = typer.Typer(help="Proxmox environment tools.")
 app.add_typer(proxmox_app, name="proxmox")
+resource_app = typer.Typer(help="Manage individual resources outside of blueprints.")
+app.add_typer(resource_app, name="resource")
 
 console = Console()
 
@@ -404,6 +407,38 @@ def proxmox_discover():
         console.print(net_table)
 
     console.print(f"Existing resources: {len(report['existing_resources'])}")
+
+
+@resource_app.command("action")
+def resource_action(
+    provider: str = typer.Argument(..., help="Provider name, e.g. docker or proxmox."),
+    action: str = typer.Argument(
+        ..., help="Action: start, stop, shutdown, destroy (proxmox), remove (docker)."
+    ),
+    resource: str = typer.Argument(..., help="Resource/container name."),
+    node: str = typer.Option(None, help="Proxmox node name."),
+    vmid: int = typer.Option(None, help="Proxmox VM/LXC ID."),
+    kind: str = typer.Option("", help="Resource kind: vm or lxc (Proxmox only)."),
+):
+    """Run a single lifecycle action against one resource, outside of any blueprint."""
+    payload: dict = {}
+    if node:
+        payload["node"] = node
+    if vmid is not None:
+        payload["vmid"] = vmid
+
+    task = asyncio.run(
+        execute_resource_action(provider, action, resource, kind=kind, payload=payload)
+    )
+
+    status_colors = {"success": "green", "failed": "red", "skipped": "yellow"}
+    color = status_colors.get(task.status.value, "white")
+    console.print(f"{resource}: [{color}]{task.status.value}[/{color}]")
+    if task.result.get("error"):
+        console.print(f"[red]{task.result['error']}[/red]")
+
+    if task.status.value == "failed":
+        raise typer.Exit(code=1)
 
 
 if __name__ == "__main__":
