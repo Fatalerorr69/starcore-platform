@@ -116,3 +116,8 @@ def test_dashboard_ui_serves_html():
     response = client.get("/ui")
     assert response.status_code == 200
     assert "STARCORE Dashboard" in response.text
+
+
+def test_generate_blueprint_endpoint_returns_503_without_api_key():
+    response = client.post("/ai/generate-blueprint", json={"description": "a simple web app"})
+    assert response.status_code == 503

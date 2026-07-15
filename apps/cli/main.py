@@ -2,6 +2,7 @@ import asyncio
 from pathlib import Path
 
 import typer
+from ai.generator import BlueprintGenerationError, generate_blueprint_yaml
 from blueprints.executor import BlueprintExecutor
 from blueprints.loader import BlueprintLoader
 from blueprints.planner import ExecutionPlanner
@@ -17,6 +18,8 @@ blueprint_app = typer.Typer(help="Manage and execute infrastructure blueprints."
 app.add_typer(blueprint_app, name="blueprint")
 runs_app = typer.Typer(help="Inspect persisted blueprint run history.")
 app.add_typer(runs_app, name="runs")
+ai_app = typer.Typer(help="AI-assisted blueprint generation.")
+app.add_typer(ai_app, name="ai")
 
 console = Console()
 
@@ -285,6 +288,50 @@ def diagnose():
 
     if overall != "ok":
         raise typer.Exit(code=1)
+
+
+@ai_app.command("generate")
+def ai_generate(
+    description: str = typer.Argument(
+        ..., help="Natural language description of the infrastructure to build."
+    ),
+    output: Path | None = typer.Option(
+        None, "--output", "-o", help="Write the generated blueprint YAML to this file."
+    ),
+):
+    """Generate a blueprint YAML file from a natural language description."""
+    try:
+        yaml_text = asyncio.run(generate_blueprint_yaml(description))
+    except BlueprintGenerationError as exc:
+        console.print(f"[red]{exc}[/red]")
+        raise typer.Exit(code=1) from exc
+
+    try:
+        blueprint = BlueprintLoader.load_from_string(yaml_text)
+    except Exception as exc:
+        console.print(f"[yellow]Generated YAML failed validation: {exc}[/yellow]")
+        console.print(yaml_text)
+        raise typer.Exit(code=1) from exc
+
+    if output:
+        output.write_text(yaml_text)
+        console.print(f"Blueprint written to [bold]{output}[/bold]")
+    else:
+        console.print(yaml_text)
+
+    table = Table(title=f"Generated plan for '{blueprint.name}'")
+    table.add_column("Resource")
+    table.add_column("Provider")
+    table.add_column("Kind")
+    table.add_column("Depends On")
+    for resource in blueprint.resources:
+        table.add_row(
+            resource.name,
+            resource.provider,
+            resource.kind,
+            ", ".join(resource.depends_on) or "-",
+        )
+    console.print(table)
 
 
 if __name__ == "__main__":
