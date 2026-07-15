@@ -92,3 +92,25 @@ async def test_scheduler_skips_unregistered_provider():
     tasks = await Scheduler().execute(graph)
 
     assert tasks[0].status == TaskStatus.SKIPPED
+
+
+async def test_scheduler_emits_run_completed_event():
+    from core.events import event_bus
+
+    received = []
+
+    async def handler(payload):
+        received.append(payload)
+
+    event_bus.subscribe("run.completed", handler)
+
+    fake = FakeProvider()
+    registry.register(fake)
+
+    graph = TaskGraph()
+    a = Task(id="a", provider="fake", action="create", resource="a")
+    graph.add_task(a)
+
+    await Scheduler().execute(graph)
+
+    assert len(received) == 1

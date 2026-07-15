@@ -2,8 +2,9 @@
 Example STARCORE plugin.
 
 Registers a no-op provider to validate the plugin loading mechanism.
-Use this as a template for real plugins: implement BaseProvider and
-expose a register(registry) function.
+Use this as a template: register(context) receives context.registry
+(to add custom providers) and context.events (to subscribe to
+blueprint execution events - see plugins/run_logger for an example).
 """
 
 from __future__ import annotations
@@ -32,6 +33,6 @@ class NoopProvider(BaseProvider):
         return None
 
 
-def register(registry) -> None:
-    if "noop" not in registry.names():
-        registry.register(NoopProvider())
+def register(context) -> None:
+    if "noop" not in context.registry.names():
+        context.registry.register(NoopProvider())

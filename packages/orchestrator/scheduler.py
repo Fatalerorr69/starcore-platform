@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import asyncio
 
+from core.events import event_bus
 from loguru import logger
 from provider_sdk.registry import register_default_providers, registry
 
@@ -49,9 +50,25 @@ class Scheduler:
         for name in used_providers:
             await registry.get(name).disconnect()
 
+        await event_bus.emit(
+            "run.completed",
+            {
+                "tasks": [
+                    {
+                        "resource": t.resource,
+                        "provider": t.provider,
+                        "status": t.status.value,
+                    }
+                    for t in all_tasks
+                ],
+            },
+        )
+
         return all_tasks
 
     async def _run_task(self, task: Task, used_providers: set[str]) -> None:
+        await event_bus.emit("task.started", {"resource": task.resource, "provider": task.provider})
+
         if task.provider not in registry.names():
             logger.warning(
                 "Provider '{}' not registered, skipping resource '{}'",
@@ -59,6 +76,7 @@ class Scheduler:
                 task.resource,
             )
             task.status = TaskStatus.SKIPPED
+            await self._emit_task_completed(task)
             return
 
         task.status = TaskStatus.RUNNING
@@ -72,6 +90,7 @@ class Scheduler:
                     task.resource,
                 )
                 task.status = TaskStatus.FAILED
+                await self._emit_task_completed(task)
                 return
             used_providers.add(task.provider)
             await provider.execute(task)
@@ -79,3 +98,14 @@ class Scheduler:
         except Exception:
             logger.exception("Failed to execute task for resource '{}'", task.resource)
             task.status = TaskStatus.FAILED
+        await self._emit_task_completed(task)
+
+    async def _emit_task_completed(self, task: Task) -> None:
+        await event_bus.emit(
+            "task.completed",
+            {
+                "resource": task.resource,
+                "provider": task.provider,
+                "status": task.status.value,
+            },
+        )

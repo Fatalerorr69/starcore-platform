@@ -51,3 +51,41 @@ def test_load_all_skips_plugin_without_register_function(tmp_path):
     loaded = manager.load_all()
 
     assert loaded == []
+
+
+async def test_run_logger_plugin_receives_run_completed_event():
+    from core.events import event_bus
+
+    from plugins import run_logger
+
+    run_logger.completed_runs.clear()
+
+    manager = PluginManager(plugins_dir="plugins")
+    manager.load_all()
+
+    await event_bus.emit(
+        "run.completed",
+        {"blueprint_name": "demo", "version": "1.0", "tasks": []},
+    )
+
+    assert len(run_logger.completed_runs) == 1
+    assert run_logger.completed_runs[0]["blueprint_name"] == "demo"
+
+
+async def test_load_all_twice_does_not_duplicate_event_subscriptions():
+    from core.events import event_bus
+
+    from plugins import run_logger
+
+    run_logger.completed_runs.clear()
+
+    manager = PluginManager(plugins_dir="plugins")
+    manager.load_all()
+    manager.load_all()
+
+    await event_bus.emit(
+        "run.completed",
+        {"blueprint_name": "demo2", "version": "1.0", "tasks": []},
+    )
+
+    assert len(run_logger.completed_runs) == 1

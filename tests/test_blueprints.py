@@ -110,3 +110,27 @@ def test_lxc_example_loads_with_lxc_kind():
     lxc_path = Path(__file__).parent.parent / "packages" / "blueprints" / "examples" / "lxc.yaml"
     blueprint = BlueprintLoader.load(lxc_path)
     assert blueprint.resources[0].kind == "lxc"
+
+
+async def test_executor_emits_run_completed_event():
+    from core.events import event_bus
+
+    received = []
+
+    async def handler(payload):
+        received.append(payload)
+
+    event_bus.subscribe("run.completed", handler)
+
+    fake = FakeProvider()
+    registry.register(fake)
+
+    blueprint = Blueprint(
+        name="event-test",
+        resources=[ResourceSpec(name="thing", provider="fake", kind="svc", config={})],
+    )
+
+    await BlueprintExecutor().execute(blueprint)
+
+    assert len(received) == 1
+    assert received[0]["blueprint_name"] == "event-test"

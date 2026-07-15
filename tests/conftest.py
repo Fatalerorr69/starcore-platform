@@ -22,3 +22,12 @@ def _api_key(monkeypatch):
     get_settings.cache_clear()
     yield
     get_settings.cache_clear()
+
+
+@pytest.fixture(autouse=True)
+def _clean_event_bus():
+    from core.events import event_bus
+
+    event_bus._subscribers.clear()
+    yield
+    event_bus._subscribers.clear()

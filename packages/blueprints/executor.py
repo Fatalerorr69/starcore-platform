@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import uuid
 
+from core.events import event_bus
 from loguru import logger
 from orchestrator.task import Task, TaskStatus
 from provider_sdk.registry import register_default_providers, registry
@@ -35,6 +36,10 @@ class BlueprintExecutor:
             )
             tasks.append(task)
 
+            await event_bus.emit(
+                "task.started", {"resource": task.resource, "provider": task.provider}
+            )
+
             if step["provider"] not in registry.names():
                 logger.warning(
                     "Provider '{}' not registered, skipping resource '{}'",
@@ -42,6 +47,7 @@ class BlueprintExecutor:
                     step["resource"],
                 )
                 task.status = TaskStatus.SKIPPED
+                await self._emit_task_completed(task)
                 continue
 
             task.status = TaskStatus.RUNNING
@@ -55,6 +61,7 @@ class BlueprintExecutor:
                         step["resource"],
                     )
                     task.status = TaskStatus.FAILED
+                    await self._emit_task_completed(task)
                     continue
 
                 used_providers.add(step["provider"])
@@ -64,7 +71,35 @@ class BlueprintExecutor:
                 logger.exception("Failed to execute task for resource '{}'", step["resource"])
                 task.status = TaskStatus.FAILED
 
+            await self._emit_task_completed(task)
+
         for name in used_providers:
             await registry.get(name).disconnect()
 
+        await event_bus.emit(
+            "run.completed",
+            {
+                "blueprint_name": blueprint.name,
+                "version": blueprint.version,
+                "tasks": [
+                    {
+                        "resource": t.resource,
+                        "provider": t.provider,
+                        "status": t.status.value,
+                    }
+                    for t in tasks
+                ],
+            },
+        )
+
         return tasks
+
+    async def _emit_task_completed(self, task: Task) -> None:
+        await event_bus.emit(
+            "task.completed",
+            {
+                "resource": task.resource,
+                "provider": task.provider,
+                "status": task.status.value,
+            },
+        )
