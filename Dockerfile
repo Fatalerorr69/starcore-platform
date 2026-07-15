@@ -10,6 +10,7 @@ ENV PATH="/root/.local/bin:${PATH}"
 WORKDIR /app
 
 COPY pyproject.toml uv.lock ./
+COPY README.md ./
 COPY apps ./apps
 COPY packages ./packages
 COPY migrations ./migrations

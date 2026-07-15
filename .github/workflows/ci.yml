@@ -31,3 +31,31 @@ jobs:
 
       - name: Pytest
         run: uv run pytest -q
+
+  docker-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Build image
+        run: docker build -t starcore-platform:ci-test .
+
+      - name: Smoke test container starts and responds to /health
+        run: |
+          docker run -d --name starcore-ci -p 8000:8000 \
+            -e STARCORE_DATABASE_URL=sqlite:////data/starcore.db \
+            starcore-platform:ci-test
+          for i in $(seq 1 15); do
+            if curl -sf http://localhost:8000/health; then
+              echo "Health check passed"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "Health check failed after retries"
+          docker logs starcore-ci
+          exit 1
+
+      - name: Container logs (always, for debugging)
+        if: always()
+        run: docker logs starcore-ci || true
