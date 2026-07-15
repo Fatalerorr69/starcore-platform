@@ -6,6 +6,7 @@ from __future__ import annotations
 
 from unittest.mock import MagicMock, patch
 
+import pytest
 from core.config import Settings
 from providers.proxmox.provider import ProxmoxProvider
 
@@ -225,3 +226,139 @@ async def test_proxmox_storage_status_returns_storage_list():
 
     assert result[0]["storage"] == "local-zfs"
     assert result[0]["node"] == "fatalab"
+
+
+async def test_proxmox_snapshot_create_calls_snapshot_endpoint():
+    from unittest.mock import MagicMock
+
+    from orchestrator.task import Task
+
+    fake_client = MagicMock()
+    fake_client.nodes.return_value.qemu.return_value.snapshot.post.return_value = "UPID:test"
+    fake_client.nodes.return_value.tasks.return_value.status.get.return_value = {
+        "status": "stopped",
+        "exitstatus": "OK",
+    }
+
+    provider = ProxmoxProvider()
+    provider._client = fake_client
+
+    task = Task(
+        id="1",
+        provider="proxmox",
+        action="snapshot-create",
+        resource="web-vm",
+        payload={"node": "fatalab", "vmid": 105, "snapshot_name": "before-upgrade"},
+    )
+
+    await provider.execute(task)
+
+    fake_client.nodes.return_value.qemu.return_value.snapshot.post.assert_called_once_with(
+        snapname="before-upgrade"
+    )
+    assert task.result["snapshot_name"] == "before-upgrade"
+
+
+async def test_proxmox_snapshot_create_requires_snapshot_name():
+    from orchestrator.task import Task
+
+    provider = ProxmoxProvider()
+    provider._client = object()
+
+    task = Task(
+        id="1",
+        provider="proxmox",
+        action="snapshot-create",
+        resource="web-vm",
+        payload={"node": "fatalab", "vmid": 105},
+    )
+
+    with pytest.raises(ValueError):
+        await provider.execute(task)
+
+
+async def test_proxmox_snapshot_list_filters_out_current():
+    from unittest.mock import MagicMock
+
+    from orchestrator.task import Task
+
+    fake_client = MagicMock()
+    fake_client.nodes.return_value.qemu.return_value.snapshot.get.return_value = [
+        {"name": "before-upgrade", "snaptime": 1000},
+        {"name": "current"},
+    ]
+
+    provider = ProxmoxProvider()
+    provider._client = fake_client
+
+    task = Task(
+        id="1",
+        provider="proxmox",
+        action="snapshot-list",
+        resource="web-vm",
+        payload={"node": "fatalab", "vmid": 105},
+    )
+
+    await provider.execute(task)
+
+    assert len(task.result["snapshots"]) == 1
+    assert task.result["snapshots"][0]["name"] == "before-upgrade"
+
+
+async def test_proxmox_snapshot_delete_calls_correct_endpoint():
+    from unittest.mock import MagicMock
+
+    from orchestrator.task import Task
+
+    fake_client = MagicMock()
+    fake_client.nodes.return_value.qemu.return_value.snapshot.return_value.delete
+    fake_client.nodes.return_value.qemu.return_value.snapshot.return_value.delete.return_value = (
+        None
+    )
+
+    provider = ProxmoxProvider()
+    provider._client = fake_client
+
+    task = Task(
+        id="1",
+        provider="proxmox",
+        action="snapshot-delete",
+        resource="web-vm",
+        payload={"node": "fatalab", "vmid": 105, "snapshot_name": "old-snap"},
+    )
+
+    await provider.execute(task)
+
+    fake_client.nodes.return_value.qemu.return_value.snapshot.assert_called_with("old-snap")
+    assert task.result["snapshot_name"] == "old-snap"
+
+
+async def test_proxmox_snapshot_rollback_calls_rollback_endpoint():
+    from unittest.mock import MagicMock
+
+    from orchestrator.task import Task
+
+    fake_client = MagicMock()
+    fake_rollback = MagicMock()
+    fake_rollback.post.return_value = "UPID:test"
+    fake_client.nodes.return_value.qemu.return_value.snapshot.return_value.rollback = fake_rollback
+    fake_client.nodes.return_value.tasks.return_value.status.get.return_value = {
+        "status": "stopped",
+        "exitstatus": "OK",
+    }
+
+    provider = ProxmoxProvider()
+    provider._client = fake_client
+
+    task = Task(
+        id="1",
+        provider="proxmox",
+        action="snapshot-rollback",
+        resource="web-vm",
+        payload={"node": "fatalab", "vmid": 105, "snapshot_name": "old-snap"},
+    )
+
+    await provider.execute(task)
+
+    fake_rollback.post.assert_called_once()
+    assert task.result["snapshot_name"] == "old-snap"

@@ -107,6 +107,8 @@ class ResourceActionRequest(BaseModel):
     kind: str = ""
     node: str | None = None
     vmid: int | None = None
+    snapshot_name: str | None = None
+    description: str | None = None
 
 
 class ResourceActionResponse(BaseModel):
@@ -127,6 +129,10 @@ async def resource_action_endpoint(request: ResourceActionRequest):
         payload["node"] = request.node
     if request.vmid is not None:
         payload["vmid"] = request.vmid
+    if request.snapshot_name:
+        payload["snapshot_name"] = request.snapshot_name
+    if request.description:
+        payload["description"] = request.description
 
     task = await execute_resource_action(
         request.provider,
