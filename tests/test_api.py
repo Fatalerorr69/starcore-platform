@@ -110,3 +110,9 @@ def test_diagnostics_endpoint_returns_report():
     body = response.json()
     assert "overall_status" in body
     assert "checks" in body
+
+
+def test_dashboard_ui_serves_html():
+    response = client.get("/ui")
+    assert response.status_code == 200
+    assert "STARCORE Dashboard" in response.text

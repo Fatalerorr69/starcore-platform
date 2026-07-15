@@ -6,11 +6,14 @@ Core API
 from __future__ import annotations
 
 import asyncio
+from pathlib import Path
 
 from blueprints.executor import BlueprintExecutor
 from blueprints.models import Blueprint
 from blueprints.planner import ExecutionPlanner
 from fastapi import Depends, FastAPI, Header, HTTPException
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from orchestrator.scheduler import Scheduler
 from provider_sdk.registry import register_default_providers, registry
 from pydantic import BaseModel
@@ -39,6 +42,16 @@ def verify_api_key(x_api_key: str | None = Header(default=None, alias="X-API-Key
             status_code=401,
             detail="Missing or invalid API key. Provide it via the X-API-Key header.",
         )
+
+
+_STATIC_DIR = Path(__file__).parent / "static"
+
+app.mount("/ui/assets", StaticFiles(directory=str(_STATIC_DIR)), name="ui-assets")
+
+
+@app.get("/ui")
+def dashboard():
+    return FileResponse(str(_STATIC_DIR / "index.html"))
 
 
 @app.get("/")

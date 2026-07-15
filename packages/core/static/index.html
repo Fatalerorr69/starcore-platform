@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>STARCORE Dashboard</title>
+<style>
+  :root { color-scheme: dark; }
+  body { font-family: system-ui, sans-serif; background: #0f1115; color: #e6e6e6; margin: 0; padding: 24px; }
+  h1 { font-size: 20px; margin-bottom: 4px; }
+  .subtitle { color: #888; font-size: 13px; margin-bottom: 20px; }
+  .key-bar { display: flex; gap: 8px; margin-bottom: 24px; }
+  input { background: #1a1d24; border: 1px solid #333; color: #e6e6e6; padding: 8px 10px; border-radius: 6px; flex: 1; font-size: 13px; }
+  button { background: #2563eb; color: white; border: none; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; }
+  button:hover { background: #1d4ed8; }
+  section { margin-bottom: 28px; }
+  h2 { font-size: 14px; text-transform: uppercase; letter-spacing: 0.05em; color: #999; margin-bottom: 10px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #24262e; }
+  th { color: #888; font-weight: 500; }
+  .status-ok, .status-success { color: #4ade80; }
+  .status-warning, .status-skipped { color: #facc15; }
+  .status-error, .status-failed { color: #f87171; }
+  .status-pending, .status-running, .status-disconnected { color: #94a3b8; }
+  .empty { color: #666; font-size: 13px; padding: 10px 0; }
+  .card { background: #1a1d24; border: 1px solid #24262e; border-radius: 8px; padding: 14px; }
+</style>
+</head>
+<body>
+  <h1>STARCORE Dashboard</h1>
+  <div class="subtitle">Read-only view over the STARCORE API</div>
+
+  <div class="key-bar">
+    <input id="apiKey" type="password" placeholder="X-API-Key" />
+    <button onclick="saveKeyAndRefresh()">Connect</button>
+    <button onclick="refreshAll()">Refresh</button>
+  </div>
+
+  <section class="card">
+    <h2>Providers</h2>
+    <table id="providersTable"><tbody></tbody></table>
+    <div id="providersEmpty" class="empty" style="display:none">No data yet.</div>
+  </section>
+
+  <section class="card">
+    <h2>Diagnostics</h2>
+    <div id="diagOverall" style="margin-bottom:10px;font-weight:600;"></div>
+    <table id="diagTable"><tbody></tbody></table>
+  </section>
+
+  <section class="card">
+    <h2>Run History</h2>
+    <table id="runsTable">
+      <thead><tr><th>Run ID</th><th>Blueprint</th><th>Mode</th><th>Created</th><th>Tasks</th></tr></thead>
+      <tbody></tbody>
+    </table>
+    <div id="runsEmpty" class="empty" style="display:none">No runs yet.</div>
+  </section>
+
+<script>
+function getKey() { return localStorage.getItem('starcore_api_key') || ''; }
+
+function saveKeyAndRefresh() {
+  const key = document.getElementById('apiKey').value;
+  if (key) localStorage.setItem('starcore_api_key', key);
+  refreshAll();
+}
+
+async function apiGet(path) {
+  const res = await fetch(path, { headers: { 'X-API-Key': getKey() } });
+  if (!res.ok) throw new Error(`${path} -> ${res.status}`);
+  return res.json();
+}
+
+async function loadProviders() {
+  const tbody = document.querySelector('#providersTable tbody');
+  tbody.innerHTML = '';
+  try {
+    const data = await apiGet('/providers');
+    if (!data.providers.length) {
+      document.getElementById('providersEmpty').style.display = 'block';
+      return;
+    }
+    document.getElementById('providersEmpty').style.display = 'none';
+    for (const p of data.providers) {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${p.name}</td>`;
+      tbody.appendChild(tr);
+    }
+  } catch (e) {
+    document.getElementById('providersEmpty').textContent = 'Error: ' + e.message;
+    document.getElementById('providersEmpty').style.display = 'block';
+  }
+}
+
+async function loadDiagnostics() {
+  const overall = document.getElementById('diagOverall');
+  const tbody = document.querySelector('#diagTable tbody');
+  tbody.innerHTML = '';
+  try {
+    const data = await apiGet('/diagnostics');
+    overall.innerHTML = `Overall: <span class="status-${data.overall_status}">${data.overall_status}</span>`;
+    for (const c of data.checks) {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${c.name}</td><td class="status-${c.status}">${c.status}</td><td>${c.detail}</td>`;
+      tbody.appendChild(tr);
+    }
+  } catch (e) {
+    overall.textContent = 'Error: ' + e.message;
+  }
+}
+
+async function loadRuns() {
+  const tbody = document.querySelector('#runsTable tbody');
+  tbody.innerHTML = '';
+  try {
+    const data = await apiGet('/runs');
+    if (!data.length) {
+      document.getElementById('runsEmpty').style.display = 'block';
+      return;
+    }
+    document.getElementById('runsEmpty').style.display = 'none';
+    for (const r of data) {
+      const statuses = r.tasks.map(t => t.status).join(', ');
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${r.id.slice(0, 8)}</td><td>${r.blueprint_name} (v${r.version})</td><td>${r.parallel ? 'parallel' : 'sequential'}</td><td>-</td><td>${statuses}</td>`;
+      tbody.appendChild(tr);
+    }
+  } catch (e) {
+    document.getElementById('runsEmpty').textContent = 'Error: ' + e.message;
+    document.getElementById('runsEmpty').style.display = 'block';
+  }
+}
+
+function refreshAll() {
+  loadProviders();
+  loadDiagnostics();
+  loadRuns();
+}
+
+document.getElementById('apiKey').value = getKey();
+refreshAll();
+</script>
+</body>
+</html>
