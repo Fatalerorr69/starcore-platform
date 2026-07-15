@@ -95,6 +95,58 @@ class ProxmoxProvider(BaseProvider):
                 )
         return resources
 
+    async def list_templates(self) -> list[dict]:
+        """Return VM/LXC resources marked as templates (available to clone)."""
+        if self._client is None:
+            return []
+        nodes = await asyncio.to_thread(self._client.nodes.get) or []
+        templates: list[dict] = []
+        for node in nodes:
+            node_name = node["node"]
+            vms = await asyncio.to_thread(self._client.nodes(node_name).qemu.get) or []
+            for vm in vms:
+                if vm.get("template") == 1:
+                    templates.append(
+                        {
+                            "node": node_name,
+                            "vmid": vm["vmid"],
+                            "name": vm.get("name"),
+                            "kind": "vm",
+                        }
+                    )
+            containers = await asyncio.to_thread(self._client.nodes(node_name).lxc.get) or []
+            for ct in containers:
+                if ct.get("template") == 1:
+                    templates.append(
+                        {
+                            "node": node_name,
+                            "vmid": ct["vmid"],
+                            "name": ct.get("name"),
+                            "kind": "lxc",
+                        }
+                    )
+        return templates
+
+    async def list_networks(self) -> list[dict]:
+        """Return network bridges configured on each node."""
+        if self._client is None:
+            return []
+        nodes = await asyncio.to_thread(self._client.nodes.get) or []
+        networks: list[dict] = []
+        for node in nodes:
+            node_name = node["node"]
+            ifaces = await asyncio.to_thread(self._client.nodes(node_name).network.get) or []
+            for iface in ifaces:
+                if iface.get("type") == "bridge":
+                    networks.append(
+                        {
+                            "node": node_name,
+                            "bridge": iface.get("iface"),
+                            "active": bool(iface.get("active", 0)),
+                        }
+                    )
+        return networks
+
     async def node_status(self) -> list[dict]:
         """Return raw Proxmox node status (cpu, memory, rootfs) per node."""
         if self._client is None:
