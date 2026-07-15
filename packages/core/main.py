@@ -26,6 +26,7 @@ from core.diagnostics import run_diagnostics
 from core.discovery import discover_proxmox_environment
 from core.plugin_manager import plugin_manager
 from core.repository import get_run, list_runs, save_run
+from core.resource_actions import execute_resource_action
 
 app = FastAPI(
     title="STARCORE Platform",
@@ -96,6 +97,49 @@ async def get_diagnostics():
 @app.get("/proxmox/discover", dependencies=[Depends(verify_api_key)])
 async def discover_proxmox():
     return await discover_proxmox_environment()
+
+
+class ResourceActionRequest(BaseModel):
+    provider: str
+    action: str
+    resource: str
+    kind: str = ""
+    node: str | None = None
+    vmid: int | None = None
+
+
+class ResourceActionResponse(BaseModel):
+    resource: str
+    provider: str
+    status: str
+    result: dict
+
+
+@app.post(
+    "/resources/action",
+    response_model=ResourceActionResponse,
+    dependencies=[Depends(verify_api_key)],
+)
+async def resource_action_endpoint(request: ResourceActionRequest):
+    payload: dict = {}
+    if request.node:
+        payload["node"] = request.node
+    if request.vmid is not None:
+        payload["vmid"] = request.vmid
+
+    task = await execute_resource_action(
+        request.provider,
+        request.action,
+        request.resource,
+        kind=request.kind,
+        payload=payload,
+    )
+    return ResourceActionResponse(
+        resource=task.resource,
+        provider=task.provider,
+        status=task.status.value,
+        result=task.result,
+    )
 
 
 @app.get("/plugins", dependencies=[Depends(verify_api_key)])

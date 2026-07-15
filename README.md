@@ -31,7 +31,7 @@ This README reflects the **actual current state of the codebase**, not the long-
 | Core API | Done | FastAPI: providers, blueprint plan/run, run history |
 | Persistence | Done | SQLite (via SQLAlchemy) stores blueprint run history and task results |
 | Config | Done | .env-based settings via pydantic-settings |
-| Tests | 91 passing | ruff, pyright, pytest, pre-commit, CI on every PR |
+| Tests | 99 passing | ruff, pyright, pytest, pre-commit, CI on every PR |
 
 ## What's Planned, Not Built Yet
 
@@ -41,6 +41,7 @@ This README reflects the **actual current state of the codebase**, not the long-
 | Plugin System | Done | Plugins in plugins/<name>/ expose register(context) to add custom providers (context.registry) and subscribe to blueprint execution events (context.events); discoverable via 'starcore plugins' and GET /plugins |
 | Diagnostics | Done | `starcore diagnose` CLI and `GET /diagnostics` API report config, database, migrations, and Docker/Proxmox provider health including node CPU/RAM/disk, storage, and orphaned resource detection |
 | Web Dashboard | Done (read-only) | Static HTML/JS at GET /ui, calls the existing API (providers, runs, diagnostics) via fetch() with an X-API-Key stored in localStorage. No build step |
+| Resource Lifecycle Actions | Done | 'starcore resource action <provider> <action> <resource>' and POST /resources/action run a single action (start/stop/shutdown/destroy for Proxmox, start/stop/remove for Docker) against one resource, independent of any blueprint |
 | Proxmox Environment Discovery | Done | 'starcore proxmox discover' and GET /proxmox/discover catalog node capacity, storage, available VM/LXC templates, and network bridges, used to tailor deployments before they run |
 | AI Blueprint Generation | Done (requires API key) | 'starcore ai generate "<description>"' and POST /ai/generate-blueprint use Anthropic's API to translate natural language into a validated blueprint YAML. Requires STARCORE_ANTHROPIC_API_KEY |
 | Installer Studio | Vision | Not started |
