@@ -6,10 +6,20 @@ from __future__ import annotations
 
 import importlib
 import sys
+from dataclasses import dataclass
 from pathlib import Path
 
 from loguru import logger
+from provider_sdk.registry import ProviderRegistry
 from provider_sdk.registry import registry as provider_registry
+
+from core.events import EventBus, event_bus
+
+
+@dataclass
+class PluginContext:
+    registry: ProviderRegistry
+    events: EventBus
 
 
 class PluginManager:
@@ -32,8 +42,14 @@ class PluginManager:
         if base_dir not in sys.path:
             sys.path.insert(0, base_dir)
 
+        context = PluginContext(registry=provider_registry, events=event_bus)
+
         loaded: list[str] = []
         for name in self.discover():
+            if name in self.plugins:
+                loaded.append(name)
+                continue
+
             module_name = f"{self.plugins_dir.name}.{name}"
             try:
                 module = importlib.import_module(module_name)
@@ -47,7 +63,7 @@ class PluginManager:
                 continue
 
             try:
-                register_fn(provider_registry)
+                register_fn(context)
             except Exception:
                 logger.exception("Plugin '{}' failed during register()", name)
                 continue
