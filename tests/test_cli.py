@@ -93,3 +93,9 @@ def test_ai_generate_command_fails_gracefully_without_api_key():
     result = runner.invoke(app, ["ai", "generate", "a simple web app"])
     assert result.exit_code == 1
     assert "anthropic" in result.stdout.lower() or "not configured" in result.stdout.lower()
+
+
+def test_proxmox_discover_command_reports_connection_failure_without_credentials():
+    result = runner.invoke(app, ["proxmox", "discover"])
+    assert result.exit_code == 1
+    assert "could not connect" in result.stdout.lower()

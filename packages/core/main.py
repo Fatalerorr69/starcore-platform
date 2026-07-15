@@ -23,6 +23,7 @@ from pydantic import BaseModel
 from core.config import get_settings
 from core.database import get_session
 from core.diagnostics import run_diagnostics
+from core.discovery import discover_proxmox_environment
 from core.plugin_manager import plugin_manager
 from core.repository import get_run, list_runs, save_run
 
@@ -92,6 +93,18 @@ async def get_diagnostics():
     return await run_diagnostics()
 
 
+@app.get("/proxmox/discover", dependencies=[Depends(verify_api_key)])
+async def discover_proxmox():
+    return await discover_proxmox_environment()
+
+
+@app.get("/plugins", dependencies=[Depends(verify_api_key)])
+async def list_plugins():
+    discovered = plugin_manager.discover()
+    loaded = await asyncio.to_thread(plugin_manager.load_all)
+    return {"discovered": discovered, "loaded": loaded}
+
+
 class GenerateBlueprintRequest(BaseModel):
     description: str
 
@@ -118,13 +131,6 @@ async def generate_blueprint_endpoint(request: GenerateBlueprintRequest):
         return GenerateBlueprintResponse(yaml=yaml_text, blueprint=blueprint)
     except Exception as exc:
         return GenerateBlueprintResponse(yaml=yaml_text, validation_error=str(exc))
-
-
-@app.get("/plugins", dependencies=[Depends(verify_api_key)])
-async def list_plugins():
-    discovered = plugin_manager.discover()
-    loaded = await asyncio.to_thread(plugin_manager.load_all)
-    return {"discovered": discovered, "loaded": loaded}
 
 
 class PlanResponse(BaseModel):

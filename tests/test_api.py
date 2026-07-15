@@ -121,3 +121,9 @@ def test_dashboard_ui_serves_html():
 def test_generate_blueprint_endpoint_returns_503_without_api_key():
     response = client.post("/ai/generate-blueprint", json={"description": "a simple web app"})
     assert response.status_code == 503
+
+
+def test_proxmox_discover_endpoint_returns_connected_false_without_credentials():
+    response = client.get("/proxmox/discover")
+    assert response.status_code == 200
+    assert response.json()["connected"] is False

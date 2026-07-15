@@ -8,6 +8,7 @@ from blueprints.loader import BlueprintLoader
 from blueprints.planner import ExecutionPlanner
 from core.database import get_session
 from core.diagnostics import run_diagnostics
+from core.discovery import discover_proxmox_environment
 from core.repository import get_run, list_runs, save_run
 from orchestrator.scheduler import Scheduler
 from rich.console import Console
@@ -20,6 +21,8 @@ runs_app = typer.Typer(help="Inspect persisted blueprint run history.")
 app.add_typer(runs_app, name="runs")
 ai_app = typer.Typer(help="AI-assisted blueprint generation.")
 app.add_typer(ai_app, name="ai")
+proxmox_app = typer.Typer(help="Proxmox environment tools.")
+app.add_typer(proxmox_app, name="proxmox")
 
 console = Console()
 
@@ -332,6 +335,75 @@ def ai_generate(
             ", ".join(resource.depends_on) or "-",
         )
     console.print(table)
+
+
+@proxmox_app.command("discover")
+def proxmox_discover():
+    """Audit the configured Proxmox host: nodes, storage, templates,
+    networks, existing resources."""
+    report = asyncio.run(discover_proxmox_environment())
+
+    if not report.get("connected"):
+        console.print(f"[red]Could not connect to Proxmox: {report.get('error')}[/red]")
+        raise typer.Exit(code=1)
+
+    if report["nodes"]:
+        node_table = Table(title="Nodes")
+        node_table.add_column("Node")
+        node_table.add_column("CPU %")
+        node_table.add_column("Memory")
+        node_table.add_column("Disk")
+        for node in report["nodes"]:
+            node_table.add_row(
+                str(node["node"]),
+                f"{node['cpu_percent']}%",
+                f"{node['memory_used_gb']} / {node['memory_total_gb']} GB",
+                f"{node['disk_used_gb']} / {node['disk_total_gb']} GB",
+            )
+        console.print(node_table)
+
+    if report["storage"]:
+        storage_table = Table(title="Storage")
+        storage_table.add_column("Node")
+        storage_table.add_column("Storage")
+        storage_table.add_column("Type")
+        storage_table.add_column("Used / Total")
+        for s in report["storage"]:
+            storage_table.add_row(
+                str(s["node"]),
+                str(s["storage"]),
+                str(s["type"]),
+                f"{s['used_gb']} / {s['total_gb']} GB",
+            )
+        console.print(storage_table)
+
+    if report["templates"]:
+        template_table = Table(title="Available Templates")
+        template_table.add_column("Node")
+        template_table.add_column("VMID")
+        template_table.add_column("Name")
+        template_table.add_column("Kind")
+        for t in report["templates"]:
+            template_table.add_row(
+                str(t["node"]),
+                str(t["vmid"]),
+                str(t.get("name") or "-"),
+                str(t["kind"]),
+            )
+        console.print(template_table)
+    else:
+        console.print("[yellow]No VM/LXC templates found on this host.[/yellow]")
+
+    if report["networks"]:
+        net_table = Table(title="Network Bridges")
+        net_table.add_column("Node")
+        net_table.add_column("Bridge")
+        net_table.add_column("Active")
+        for n in report["networks"]:
+            net_table.add_row(str(n["node"]), str(n["bridge"]), "yes" if n["active"] else "no")
+        console.print(net_table)
+
+    console.print(f"Existing resources: {len(report['existing_resources'])}")
 
 
 if __name__ == "__main__":
