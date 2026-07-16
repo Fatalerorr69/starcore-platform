@@ -11,14 +11,16 @@ import asyncio
 from dataclasses import dataclass
 from typing import Any
 
-from alembic.config import Config
-from alembic.runtime.migration import MigrationContext
-from alembic.script import ScriptDirectory
 from provider_sdk.registry import register_default_providers, registry
 from sqlalchemy import create_engine
 
 from core.config import get_settings
-from core.database import ensure_sqlite_directory, get_session
+from core.database import (
+    ensure_sqlite_directory,
+    get_database_revision,
+    get_migration_head,
+    get_session,
+)
 from core.repository import list_known_provider_vmids
 
 
@@ -62,16 +64,10 @@ def check_database_connectivity() -> CheckResult:
 def _check_migrations() -> CheckResult:
     settings = get_settings()
     try:
-        cfg = Config("alembic.ini")
-        cfg.set_main_option("sqlalchemy.url", settings.database_url)
-        script = ScriptDirectory.from_config(cfg)
-        head = script.get_current_head()
-
         ensure_sqlite_directory(settings.database_url)
+        head = get_migration_head()
         engine = create_engine(settings.database_url)
-        with engine.connect() as conn:
-            context = MigrationContext.configure(conn)
-            current = context.get_current_revision()
+        current = get_database_revision(engine)
 
         if current == head:
             return CheckResult("config.migrations", "ok", f"Database schema is at head ({head})")

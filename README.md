@@ -130,6 +130,14 @@ uv run pre-commit run --all-files
 
 CI runs the same checks on every pull request.
 
+**Database schema:** a brand-new database is created and tracked
+automatically on first run (nothing to do). If you already have a
+database from a previous version and a new migration has been added since
+(`migrations/versions/`), run `uv run alembic upgrade head` before
+starting the app — STARCORE Platform will refuse to start against a
+database whose schema is out of date rather than run with a silently
+incomplete schema.
+
 ---
 
 ## Documentation
