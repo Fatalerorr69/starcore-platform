@@ -36,6 +36,13 @@ class Settings(BaseSettings):
     anthropic_api_key: str | None = None
     anthropic_model: str = "claude-sonnet-5"
 
+    # Requests per minute allowed per client IP, applied globally to all
+    # endpoints except /health (see core/main.py). 0 disables rate limiting
+    # entirely -- useful for local development or trusted-network-only
+    # deployments where an operator has already decided the exposure is
+    # acceptable.
+    rate_limit_per_minute: int = 60
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_prefix="STARCORE_",

@@ -31,3 +31,21 @@ def _clean_event_bus():
     event_bus._subscribers.clear()
     yield
     event_bus._subscribers.clear()
+
+
+@pytest.fixture(autouse=True)
+def _reset_rate_limiter():
+    """Reset the process-wide rate limiter's in-memory counters between tests.
+
+    `core.main.app` (and therefore `core.main.limiter`) is a single module-
+    level singleton shared by every test file that does `from core.main
+    import app`. Without this reset, request counts from an earlier test
+    file would carry over into a later one via the limiter's shared
+    in-memory storage, making pass/fail depend on total test-suite request
+    volume and ordering rather than on each test's own behavior.
+    """
+    from core.main import limiter
+
+    limiter.reset()
+    yield
+    limiter.reset()

@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import asyncio
 import hmac
+from collections.abc import Callable
 from pathlib import Path
 
 from ai.generator import BlueprintGenerationError, generate_blueprint_yaml
@@ -15,12 +16,16 @@ from blueprints.loader import BlueprintLoader
 from blueprints.models import Blueprint
 from blueprints.planner import ExecutionPlanner
 from blueprints.template_resolver import TemplateResolutionError, resolve_templates
-from fastapi import Depends, FastAPI, Header, HTTPException
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi import Depends, FastAPI, Header, HTTPException, Request
+from fastapi.responses import FileResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 from orchestrator.scheduler import Scheduler
 from provider_sdk.registry import register_default_providers, registry
 from pydantic import BaseModel
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from slowapi.middleware import SlowAPIMiddleware
+from slowapi.util import get_remote_address
 
 from core.config import get_settings
 from core.database import get_session
@@ -34,6 +39,68 @@ app = FastAPI(
     title="STARCORE Platform",
     version="0.1.0-dev",
 )
+
+
+# Rate limiting (RISK-03 / TD-12): a single, process-wide, in-memory limiter
+# applied to every route via SlowAPIMiddleware's default_limits, except
+# /health (see its @limiter.exempt below -- container orchestrators must be
+# able to probe it without being throttled by their own polling interval).
+#
+# The limit is read once at process startup, not per-request: like `app`
+# itself, the limiter is part of process wiring rather than a value that is
+# expected to change while the process is running. Set
+# STARCORE_RATE_LIMIT_PER_MINUTE=0 to disable entirely (e.g. for local
+# development or a deployment an operator has already decided to expose
+# only on a trusted network).
+def _build_rate_limit_config(
+    rate_limit_per_minute: int,
+) -> tuple[list[str | Callable[..., str]], bool]:
+    """Translate the configured per-minute limit into slowapi's inputs.
+
+    Extracted as a standalone, settings-free function so the "0 disables
+    rate limiting" branch is unit-testable without constructing a FastAPI
+    app or a real Limiter (see tests/test_rate_limiting.py).
+
+    Return type is widened to `str | Callable[..., str]` (rather than just
+    `str`) to match slowapi's `Limiter.__init__` parameter type exactly --
+    `list` is invariant, so a plain `list[str]` is not assignable where
+    `list[str | Callable[..., str]]` is expected, even though every element
+    here is always a `str`.
+    """
+    enabled = rate_limit_per_minute > 0
+    default_limits: list[str | Callable[..., str]] = (
+        [f"{rate_limit_per_minute}/minute"] if enabled else []
+    )
+    return default_limits, enabled
+
+
+def _handle_rate_limit_exceeded(request: Request, exc: Exception) -> Response:
+    """Typed adapter for FastAPI's `add_exception_handler`.
+
+    FastAPI's `ExceptionHandler` type expects a handler taking `Exception`,
+    but slowapi's `_rate_limit_exceeded_handler` is typed to take the more
+    specific `RateLimitExceeded` -- correct at runtime (this handler is only
+    ever invoked for `RateLimitExceeded`, per the registration below), but
+    not directly assignable under static typing without this adapter.
+    """
+    assert isinstance(exc, RateLimitExceeded)
+    return _rate_limit_exceeded_handler(request, exc)
+
+
+_rate_limit_settings = get_settings()
+_default_limits, _rate_limit_enabled = _build_rate_limit_config(
+    _rate_limit_settings.rate_limit_per_minute
+)
+
+limiter = Limiter(
+    key_func=get_remote_address,
+    default_limits=_default_limits,
+    headers_enabled=True,
+    enabled=_rate_limit_enabled,
+)
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _handle_rate_limit_exceeded)
+app.add_middleware(SlowAPIMiddleware)
 
 
 def verify_api_key(x_api_key: str | None = Header(default=None, alias="X-API-Key")) -> None:
@@ -71,6 +138,7 @@ def root():
 
 
 @app.get("/health")
+@limiter.exempt
 def health():
     """Liveness/readiness check for container orchestration.
 
