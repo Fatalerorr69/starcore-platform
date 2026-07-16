@@ -26,6 +26,7 @@ dependencies = [
     "docker>=7.2.0",
     "proxmoxer>=2.3.0",
     "anthropic>=0.116.0",
+    "slowapi>=0.1.10",
 ]
 
 [project.optional-dependencies]
@@ -38,6 +39,7 @@ dev = [
     "pyright>=1.1.390",
     "mkdocs>=1.6.1",
     "mkdocs-material>=9.6.15",
+    "pip-audit>=2.10.1",
 ]
 
 [project.scripts]
