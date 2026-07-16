@@ -42,3 +42,33 @@ def test_missing_server_key_configuration_returns_503(monkeypatch):
         assert response.status_code == 503
     finally:
         get_settings.cache_clear()
+
+
+# ---------------------------------------------------------------------------
+# TD-11 regression tests: API key comparison must use hmac.compare_digest,
+# not `!=`, to avoid a timing side-channel on the shared secret.
+# ---------------------------------------------------------------------------
+
+
+def test_protected_endpoint_rejects_key_of_different_length():
+    """A key of a different length than the configured one must still be
+    rejected. hmac.compare_digest() handles length mismatches safely; this
+    test asserts observable behavior only, not the comparison mechanism,
+    since timing itself isn't practically measurable in a unit test.
+    """
+    response = client.get("/providers", headers={"X-API-Key": "short"})
+    assert response.status_code == 401
+
+
+def test_protected_endpoint_rejects_key_matching_prefix_only():
+    """A key that shares a long common prefix with the real key (but
+    differs later) must be rejected. This is the specific shape of guess
+    a timing attack would exploit against a naive `!=` comparison.
+    """
+    response = client.get("/providers", headers={"X-API-Key": "test-api-keyXXXX"})
+    assert response.status_code == 401
+
+
+def test_protected_endpoint_rejects_empty_key():
+    response = client.get("/providers", headers={"X-API-Key": ""})
+    assert response.status_code == 401

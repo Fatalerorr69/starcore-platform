@@ -40,7 +40,14 @@ def _check_api_key() -> CheckResult:
     )
 
 
-def _check_database() -> CheckResult:
+def check_database_connectivity() -> CheckResult:
+    """Verify the configured database is reachable.
+
+    This is a fast, local-only check (no external network calls) and is
+    intentionally reused by both `/diagnostics` (authenticated, full
+    deployment check) and `/health` (public, liveness/readiness check) so
+    the two endpoints never diverge on what "database is reachable" means.
+    """
     settings = get_settings()
     try:
         ensure_sqlite_directory(settings.database_url)
@@ -230,7 +237,7 @@ async def _diagnose_docker() -> tuple[CheckResult, dict[str, Any]]:
 async def run_diagnostics() -> dict[str, Any]:
     checks: list[CheckResult] = [
         _check_api_key(),
-        _check_database(),
+        check_database_connectivity(),
         _check_migrations(),
         _check_proxmox_config(),
     ]
