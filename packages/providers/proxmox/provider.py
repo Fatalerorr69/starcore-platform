@@ -14,47 +14,68 @@ from proxmoxer import ProxmoxAPI
 
 
 class ProxmoxProvider(BaseProvider):
+    """Infrastructure provider backed by a Proxmox VE cluster.
+
+    A single :class:`ProxmoxProvider` instance is shared, via the global
+    :class:`~provider_sdk.registry.ProviderRegistry`, across every
+    orchestration task that targets the ``proxmox`` provider. :meth:`connect`
+    is therefore safe to call concurrently from multiple tasks in the same
+    scheduler wave: the underlying ``ProxmoxAPI`` session (including its
+    authentication handshake) is established at most once per instance,
+    guarded by :attr:`~provider_sdk.base.BaseProvider._connect_lock`, no
+    matter how many orchestration tasks call :meth:`connect` at the same
+    time.
+    """
+
     name = "proxmox"
 
     def __init__(self) -> None:
         self._client: ProxmoxAPI | None = None
 
     async def connect(self) -> bool:
-        settings = get_settings()
+        async with self._connect_lock:
+            if self._client is not None:
+                # Already connected by this call or by a concurrent caller
+                # that acquired the lock first; nothing further to do.
+                return True
 
-        if not all(
-            [
-                settings.proxmox_host,
-                settings.proxmox_user,
-                settings.proxmox_token_name,
-                settings.proxmox_token_value,
-            ]
-        ):
-            logger.error(
-                "Proxmox credentials missing. Set STARCORE_PROXMOX_HOST, "
-                "STARCORE_PROXMOX_USER, STARCORE_PROXMOX_TOKEN_NAME, "
-                "STARCORE_PROXMOX_TOKEN_VALUE (see .env.example)."
-            )
-            return False
+            settings = get_settings()
 
-        try:
-            self._client = await asyncio.to_thread(
-                ProxmoxAPI,
-                settings.proxmox_host,
-                user=settings.proxmox_user,
-                token_name=settings.proxmox_token_name,
-                token_value=settings.proxmox_token_value,
-                verify_ssl=settings.proxmox_verify_ssl,
-            )
-            await asyncio.to_thread(self._client.version.get)
+            if not all(
+                [
+                    settings.proxmox_host,
+                    settings.proxmox_user,
+                    settings.proxmox_token_name,
+                    settings.proxmox_token_value,
+                ]
+            ):
+                logger.error(
+                    "Proxmox credentials missing. Set STARCORE_PROXMOX_HOST, "
+                    "STARCORE_PROXMOX_USER, STARCORE_PROXMOX_TOKEN_NAME, "
+                    "STARCORE_PROXMOX_TOKEN_VALUE (see .env.example)."
+                )
+                return False
+
+            try:
+                client = await asyncio.to_thread(
+                    ProxmoxAPI,
+                    settings.proxmox_host,
+                    user=settings.proxmox_user,
+                    token_name=settings.proxmox_token_name,
+                    token_value=settings.proxmox_token_value,
+                    verify_ssl=settings.proxmox_verify_ssl,
+                )
+                await asyncio.to_thread(client.version.get)
+            except Exception as exc:
+                logger.error("Proxmox connection failed: {}", exc)
+                self._client = None
+                return False
+            self._client = client
             return True
-        except Exception as exc:
-            logger.error("Proxmox connection failed: {}", exc)
-            self._client = None
-            return False
 
     async def disconnect(self) -> None:
-        self._client = None
+        async with self._connect_lock:
+            self._client = None
 
     async def health(self) -> dict[str, Any]:
         if self._client is None:

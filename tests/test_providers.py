@@ -4,10 +4,14 @@ Provider Tests
 
 from __future__ import annotations
 
+import asyncio
+import time
 from unittest.mock import MagicMock, patch
 
 import pytest
 from core.config import Settings
+from provider_sdk.base import BaseProvider
+from providers.docker.provider import DockerProvider
 from providers.proxmox.provider import ProxmoxProvider
 
 
@@ -362,3 +366,124 @@ async def test_proxmox_snapshot_rollback_calls_rollback_endpoint():
 
     fake_rollback.post.assert_called_once()
     assert task.result["snapshot_name"] == "old-snap"
+
+
+# ---------------------------------------------------------------------------
+# RISK-01 / TD-02 regression tests: provider connect() must be safe under
+# concurrent invocation from multiple orchestration tasks in the same
+# scheduler wave (see orchestrator/scheduler.py, Scheduler.execute).
+# ---------------------------------------------------------------------------
+
+
+async def test_base_provider_connect_lock_is_memoized_and_instance_scoped():
+    """The lock is created once per instance and never shared across instances."""
+
+    class _MinimalProvider(BaseProvider):
+        name = "minimal"
+
+        async def connect(self) -> bool:
+            return True
+
+        async def disconnect(self) -> None:
+            return None
+
+        async def health(self) -> dict:
+            return {"status": "ok", "provider": self.name}
+
+        async def list_resources(self) -> list[dict]:
+            return []
+
+        async def execute(self, task) -> None:
+            return None
+
+    provider_a = _MinimalProvider()
+    provider_b = _MinimalProvider()
+
+    # Same instance -> same lock object across repeated access.
+    assert provider_a._connect_lock is provider_a._connect_lock
+    # Different instances -> independent locks.
+    assert provider_a._connect_lock is not provider_b._connect_lock
+    assert isinstance(provider_a._connect_lock, asyncio.Lock)
+
+
+async def test_proxmox_connect_is_safe_under_concurrent_calls():
+    """Concurrent connect() calls on one shared ProxmoxProvider instance
+    must perform the actual (slow) connection handshake exactly once.
+    """
+    call_count = 0
+
+    def _slow_constructor(*args, **kwargs):
+        nonlocal call_count
+        call_count += 1
+        time.sleep(0.05)  # simulates the blocking handshake done in a thread
+        client = MagicMock()
+        client.version.get.return_value = {"version": "8.0"}
+        return client
+
+    settings = _settings(
+        proxmox_host="fatalab.local",
+        proxmox_user="root@pam",
+        proxmox_token_name="starcore",
+        proxmox_token_value="secret",
+    )
+
+    with (
+        patch("providers.proxmox.provider.get_settings", return_value=settings),
+        patch("providers.proxmox.provider.ProxmoxAPI", side_effect=_slow_constructor),
+    ):
+        provider = ProxmoxProvider()
+        results = await asyncio.gather(provider.connect(), provider.connect(), provider.connect())
+
+    assert results == [True, True, True]
+    assert call_count == 1
+    assert provider._client is not None
+
+
+async def test_proxmox_connect_failure_is_visible_to_all_concurrent_callers():
+    """If the (single) real connection attempt fails, every concurrent
+    caller must observe the failure -- not just the one that happened to
+    perform the actual work.
+    """
+    settings = _settings()  # no credentials configured -> connect() fails fast
+
+    with patch("providers.proxmox.provider.get_settings", return_value=settings):
+        provider = ProxmoxProvider()
+        results = await asyncio.gather(provider.connect(), provider.connect())
+
+    assert results == [False, False]
+    assert provider._client is None
+
+
+async def test_docker_connect_is_safe_under_concurrent_calls():
+    """Concurrent connect() calls on one shared DockerProvider instance
+    must construct the underlying Docker client exactly once.
+    """
+    call_count = 0
+
+    def _slow_from_env(*args, **kwargs):
+        nonlocal call_count
+        call_count += 1
+        time.sleep(0.05)  # simulates the blocking daemon handshake
+        client = MagicMock()
+        client.ping.return_value = True
+        return client
+
+    with patch("providers.docker.provider.docker.from_env", side_effect=_slow_from_env):
+        provider = DockerProvider()
+        results = await asyncio.gather(provider.connect(), provider.connect(), provider.connect())
+
+    assert results == [True, True, True]
+    assert call_count == 1
+    assert provider._client is not None
+
+
+async def test_docker_disconnect_is_idempotent_under_concurrent_calls():
+    fake_client = MagicMock()
+
+    provider = DockerProvider()
+    provider._client = fake_client
+
+    await asyncio.gather(provider.disconnect(), provider.disconnect())
+
+    fake_client.close.assert_called_once()
+    assert provider._client is None
