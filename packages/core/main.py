@@ -6,6 +6,7 @@ Core API
 from __future__ import annotations
 
 import asyncio
+import hmac
 from pathlib import Path
 
 from ai.generator import BlueprintGenerationError, generate_blueprint_yaml
@@ -15,7 +16,7 @@ from blueprints.models import Blueprint
 from blueprints.planner import ExecutionPlanner
 from blueprints.template_resolver import TemplateResolutionError, resolve_templates
 from fastapi import Depends, FastAPI, Header, HTTPException
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from orchestrator.scheduler import Scheduler
 from provider_sdk.registry import register_default_providers, registry
@@ -23,7 +24,7 @@ from pydantic import BaseModel
 
 from core.config import get_settings
 from core.database import get_session
-from core.diagnostics import run_diagnostics
+from core.diagnostics import check_database_connectivity, run_diagnostics
 from core.discovery import discover_proxmox_environment
 from core.plugin_manager import plugin_manager
 from core.repository import get_run, list_runs, save_run
@@ -42,7 +43,12 @@ def verify_api_key(x_api_key: str | None = Header(default=None, alias="X-API-Key
             status_code=503,
             detail="API key not configured on server. Set STARCORE_API_KEY in .env.",
         )
-    if x_api_key != settings.api_key:
+    # Constant-time comparison: a plain `!=` here would leak the number of
+    # matching leading characters via response-timing differences to a
+    # network-positioned attacker. compare_digest() is safe for this even
+    # though `x_api_key` is attacker-controlled, because it always compares
+    # the full length of both inputs regardless of where they first differ.
+    if x_api_key is None or not hmac.compare_digest(x_api_key, settings.api_key):
         raise HTTPException(
             status_code=401,
             detail="Missing or invalid API key. Provide it via the X-API-Key header.",
@@ -66,7 +72,24 @@ def root():
 
 @app.get("/health")
 def health():
-    return {"status": "healthy"}
+    """Liveness/readiness check for container orchestration.
+
+    Intentionally checks only local, fast dependencies (currently: the
+    database). It deliberately does NOT call out to external providers
+    (Docker daemon, Proxmox API) the way `/diagnostics` does: this endpoint
+    is public and unauthenticated by design (so orchestrators can probe it
+    without a credential), and triggering slow, attacker-triggerable
+    outbound network calls to infrastructure providers from an
+    unauthenticated endpoint would itself be a denial-of-service and
+    provider-abuse surface. Use the authenticated `/diagnostics` endpoint
+    for a full deployment/provider health check.
+    """
+    db_check = check_database_connectivity()
+    status = "healthy" if db_check.status == "ok" else "unhealthy"
+    body = {"status": status, "database": db_check.detail}
+    if db_check.status != "ok":
+        return JSONResponse(status_code=503, content=body)
+    return body
 
 
 @app.get("/providers", dependencies=[Depends(verify_api_key)])
