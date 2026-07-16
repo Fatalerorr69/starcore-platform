@@ -14,25 +14,44 @@ from provider_sdk.base import BaseProvider
 
 
 class DockerProvider(BaseProvider):
+    """Infrastructure provider backed by a local or remote Docker daemon.
+
+    A single :class:`DockerProvider` instance is shared, via the global
+    :class:`~provider_sdk.registry.ProviderRegistry`, across every
+    orchestration task that targets the ``docker`` provider. :meth:`connect`
+    is therefore safe to call concurrently from multiple tasks in the same
+    scheduler wave: the underlying ``docker.DockerClient`` is created at
+    most once per instance, guarded by
+    :attr:`~provider_sdk.base.BaseProvider._connect_lock`, no matter how
+    many orchestration tasks call :meth:`connect` at the same time.
+    """
+
     name = "docker"
 
     def __init__(self) -> None:
         self._client: docker.DockerClient | None = None
 
     async def connect(self) -> bool:
-        try:
-            self._client = await asyncio.to_thread(docker.from_env)
-            await asyncio.to_thread(self._client.ping)
+        async with self._connect_lock:
+            if self._client is not None:
+                # Already connected by this call or by a concurrent caller
+                # that acquired the lock first; nothing further to do.
+                return True
+            try:
+                client = await asyncio.to_thread(docker.from_env)
+                await asyncio.to_thread(client.ping)
+            except DockerException as exc:
+                logger.error("Docker connection failed: {}", exc)
+                self._client = None
+                return False
+            self._client = client
             return True
-        except DockerException as exc:
-            logger.error("Docker connection failed: {}", exc)
-            self._client = None
-            return False
 
     async def disconnect(self) -> None:
-        if self._client is not None:
-            await asyncio.to_thread(self._client.close)
-            self._client = None
+        async with self._connect_lock:
+            if self._client is not None:
+                await asyncio.to_thread(self._client.close)
+                self._client = None
 
     async def health(self) -> dict[str, Any]:
         if self._client is None:

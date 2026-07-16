@@ -112,6 +112,103 @@ def test_lxc_example_loads_with_lxc_kind():
     assert blueprint.resources[0].kind == "lxc"
 
 
+async def test_executor_respects_dependency_order_despite_declaration_order():
+    """RISK-02 / TD-01 regression test.
+
+    A resource declared *before* its dependency in the YAML/blueprint must
+    still be executed *after* it, even on the default sequential path
+    (no ``--parallel``). Before the fix, ``BlueprintExecutor`` iterated the
+    plan strictly in file-declaration order and ignored ``depends_on``
+    entirely.
+    """
+    fake = FakeProvider()
+    registry.register(fake)
+
+    blueprint = Blueprint(
+        name="dependency-order-test",
+        resources=[
+            # Declared first, but depends on "db" which is declared second.
+            ResourceSpec(
+                name="app",
+                provider="fake",
+                kind="svc",
+                config={},
+                depends_on=["db"],
+            ),
+            ResourceSpec(name="db", provider="fake", kind="svc", config={}),
+        ],
+    )
+
+    tasks = await BlueprintExecutor().execute(blueprint)
+
+    assert all(task.status == TaskStatus.SUCCESS for task in tasks)
+    assert fake.executed.index("db") < fake.executed.index("app")
+
+
+def test_planner_create_plan_preserves_declaration_order_without_dependencies():
+    """Backward-compatibility guarantee: no depends_on -> no reordering."""
+    blueprint = BlueprintLoader.load(EXAMPLE_PATH)
+    plan = ExecutionPlanner().create_plan(blueprint)
+
+    assert [step["resource"] for step in plan] == ["web-vm", "postgres"]
+
+
+def test_planner_create_plan_orders_diamond_dependency_correctly():
+    blueprint = Blueprint(
+        name="diamond-test",
+        resources=[
+            # Declared out of order on purpose: "c" first, its dependencies after.
+            ResourceSpec(name="c", provider="fake", kind="svc", config={}, depends_on=["a", "b"]),
+            ResourceSpec(name="a", provider="fake", kind="svc", config={}),
+            ResourceSpec(name="b", provider="fake", kind="svc", config={}),
+        ],
+    )
+
+    plan = ExecutionPlanner().create_plan(blueprint)
+    order = [step["resource"] for step in plan]
+
+    assert order.index("c") > order.index("a")
+    assert order.index("c") > order.index("b")
+    assert set(order) == {"a", "b", "c"}
+
+
+def test_planner_create_plan_rejects_unknown_dependency():
+    blueprint = Blueprint(
+        name="unknown-dependency-test",
+        resources=[
+            ResourceSpec(name="a", provider="fake", kind="svc", config={}, depends_on=["ghost"]),
+        ],
+    )
+
+    with pytest.raises(ValueError, match="unknown resource"):
+        ExecutionPlanner().create_plan(blueprint)
+
+
+def test_planner_create_plan_rejects_circular_dependency():
+    blueprint = Blueprint(
+        name="cycle-test",
+        resources=[
+            ResourceSpec(name="a", provider="fake", kind="svc", config={}, depends_on=["b"]),
+            ResourceSpec(name="b", provider="fake", kind="svc", config={}, depends_on=["a"]),
+        ],
+    )
+
+    with pytest.raises(ValueError, match="circular dependency"):
+        ExecutionPlanner().create_plan(blueprint)
+
+
+def test_planner_create_plan_rejects_self_dependency():
+    blueprint = Blueprint(
+        name="self-cycle-test",
+        resources=[
+            ResourceSpec(name="a", provider="fake", kind="svc", config={}, depends_on=["a"]),
+        ],
+    )
+
+    with pytest.raises(ValueError, match="circular dependency"):
+        ExecutionPlanner().create_plan(blueprint)
+
+
 async def test_executor_emits_run_completed_event():
     from core.events import event_bus
 
