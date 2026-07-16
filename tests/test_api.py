@@ -97,6 +97,14 @@ def test_list_runs_returns_array():
     assert isinstance(response.json(), list)
 
 
+def test_list_runs_rejects_invalid_pagination_params():
+    """TD-20: limit/offset are validated (limit 1..200, offset >= 0)."""
+    assert client.get("/runs", params={"limit": 0}).status_code == 422
+    assert client.get("/runs", params={"limit": 201}).status_code == 422
+    assert client.get("/runs", params={"offset": -1}).status_code == 422
+    assert client.get("/runs", params={"limit": 200, "offset": 0}).status_code == 200
+
+
 def test_list_plugins_endpoint_includes_example_plugin():
     response = client.get("/plugins")
     assert response.status_code == 200

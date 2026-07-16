@@ -16,7 +16,7 @@ from blueprints.loader import BlueprintLoader
 from blueprints.models import Blueprint
 from blueprints.planner import ExecutionPlanner
 from blueprints.template_resolver import TemplateResolutionError, resolve_templates
-from fastapi import Depends, FastAPI, Header, HTTPException, Request
+from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request
 from fastapi.responses import FileResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 from orchestrator.scheduler import Scheduler
@@ -354,11 +354,14 @@ async def run_blueprint(blueprint: Blueprint, parallel: bool = False):
 
 
 @app.get("/runs", response_model=list[RunRecordResponse], dependencies=[Depends(verify_api_key)])
-async def get_runs():
+async def get_runs(
+    limit: int = Query(default=50, ge=1, le=200, description="Max number of runs to return."),
+    offset: int = Query(default=0, ge=0, description="Number of most-recent runs to skip."),
+):
     def _list() -> list[RunRecordResponse]:
         session = get_session()
         try:
-            records = list_runs(session)
+            records = list_runs(session, limit=limit, offset=offset)
             return [
                 RunRecordResponse(
                     id=r.id,

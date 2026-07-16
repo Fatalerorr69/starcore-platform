@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import asyncio
 import time
+from typing import Any, cast
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -13,10 +14,11 @@ from core.config import Settings
 from provider_sdk.base import BaseProvider
 from providers.docker.provider import DockerProvider
 from providers.proxmox.provider import ProxmoxProvider
+from proxmoxer import ProxmoxAPI
 
 
-def _settings(**overrides) -> Settings:
-    defaults = dict(
+def _settings(**overrides: Any) -> Settings:
+    defaults: dict[str, Any] = dict(
         proxmox_host=None,
         proxmox_user=None,
         proxmox_token_name=None,
@@ -267,7 +269,7 @@ async def test_proxmox_snapshot_create_requires_snapshot_name():
     from orchestrator.task import Task
 
     provider = ProxmoxProvider()
-    provider._client = object()
+    provider._client = cast(ProxmoxAPI, object())
 
     task = Task(
         id="1",

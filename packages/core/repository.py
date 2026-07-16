@@ -34,8 +34,15 @@ def save_run(
     return run
 
 
-def list_runs(session: Session) -> list[BlueprintRunRecord]:
-    return session.query(BlueprintRunRecord).order_by(BlueprintRunRecord.created_at.desc()).all()
+def list_runs(
+    session: Session, limit: int | None = None, offset: int = 0
+) -> list[BlueprintRunRecord]:
+    query = session.query(BlueprintRunRecord).order_by(BlueprintRunRecord.created_at.desc())
+    if offset:
+        query = query.offset(offset)
+    if limit is not None:
+        query = query.limit(limit)
+    return query.all()
 
 
 def get_run(session: Session, run_id: str) -> BlueprintRunRecord | None:

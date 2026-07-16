@@ -30,9 +30,9 @@ def test_exceeding_the_limit_returns_429_with_retry_after():
     internals (which would depend on slowapi implementation details and
     would pollute the counters other tests in this module rely on).
     """
+    from core.main import _handle_rate_limit_exceeded
     from fastapi import FastAPI
     from slowapi import Limiter as _Limiter
-    from slowapi import _rate_limit_exceeded_handler
     from slowapi.errors import RateLimitExceeded as _RateLimitExceeded
     from slowapi.middleware import SlowAPIMiddleware as _SlowAPIMiddleware
 
@@ -45,7 +45,7 @@ def test_exceeding_the_limit_returns_429_with_retry_after():
         enabled=enabled,
     )
     probe_app.state.limiter = probe_limiter
-    probe_app.add_exception_handler(_RateLimitExceeded, _rate_limit_exceeded_handler)
+    probe_app.add_exception_handler(_RateLimitExceeded, _handle_rate_limit_exceeded)
     probe_app.add_middleware(_SlowAPIMiddleware)
 
     @probe_app.get("/probe")

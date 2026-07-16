@@ -4,11 +4,14 @@ Resource Actions Tests
 
 from __future__ import annotations
 
+from typing import cast
+
 import pytest
 from core.resource_actions import execute_resource_action
 from orchestrator.task import TaskStatus
 from provider_sdk.base import BaseProvider
 from provider_sdk.registry import registry
+from proxmoxer import ProxmoxAPI
 
 
 class FakeProvider(BaseProvider):
@@ -107,7 +110,7 @@ async def test_proxmox_destroy_requires_node_and_vmid():
     from providers.proxmox.provider import ProxmoxProvider
 
     provider = ProxmoxProvider()
-    provider._client = object()
+    provider._client = cast(ProxmoxAPI, object())
 
     task = Task(id="1", provider="proxmox", action="destroy", resource="old-vm")
 

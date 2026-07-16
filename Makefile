@@ -4,19 +4,19 @@ install:
 	uv sync
 
 lint:
-	ruff check .
+	uv run ruff check .
 
 format:
-	ruff format .
+	uv run ruff format .
 
 test:
-	pytest
+	uv run pytest -q
 
 docs:
-	mkdocs serve
+	uv run mkdocs serve
 
 dev:
-	uv run python -m packages.core
+	uv run uvicorn core.main:app --reload
 
 clean:
 	find . -type d -name "__pycache__" -exec rm -rf {} +
