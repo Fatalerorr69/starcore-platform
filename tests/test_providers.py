@@ -115,6 +115,110 @@ async def test_proxmox_create_vm_clones_template_and_sets_result():
     )
 
 
+async def test_proxmox_wait_for_task_accepts_warnings_exitstatus():
+    from orchestrator.task import Task
+
+    fake_client = MagicMock()
+    fake_client.cluster.nextid.get.return_value = "101"
+    fake_client.nodes.return_value.lxc.return_value.clone.post.return_value = "UPID:starcore:clone"
+    fake_client.nodes.return_value.tasks.return_value.status.get.return_value = {
+        "status": "stopped",
+        "exitstatus": "WARNINGS: 1",
+    }
+    provider = ProxmoxProvider()
+    provider._client = fake_client
+    task = Task(
+        id="1",
+        provider="proxmox",
+        action="create",
+        kind="lxc",
+        resource="test-ct",
+        payload={"node": "starcore", "template_vmid": 100, "cores": 1, "memory": 512},
+    )
+    await provider.execute(task)
+    assert task.result["vmid"] == 101
+
+
+async def test_proxmox_create_lxc_uses_put_for_config_update():
+    from orchestrator.task import Task
+
+    fake_client = MagicMock()
+    fake_client.cluster.nextid.get.return_value = "103"
+    fake_client.nodes.return_value.lxc.return_value.clone.post.return_value = "UPID:starcore:clone"
+    fake_client.nodes.return_value.tasks.return_value.status.get.return_value = {
+        "status": "stopped",
+        "exitstatus": "OK",
+    }
+    provider = ProxmoxProvider()
+    provider._client = fake_client
+    task = Task(
+        id="1",
+        provider="proxmox",
+        action="create",
+        kind="lxc",
+        resource="test-ct",
+        payload={"node": "starcore", "template_vmid": 100, "cores": 1, "memory": 512},
+    )
+    await provider.execute(task)
+    fake_client.nodes.return_value.lxc.return_value.config.put.assert_called_once_with(
+        cores=1, memory=512
+    )
+    fake_client.nodes.return_value.lxc.return_value.config.post.assert_not_called()
+
+
+async def test_proxmox_create_vm_still_uses_post_for_config_update():
+    from orchestrator.task import Task
+
+    fake_client = MagicMock()
+    fake_client.cluster.nextid.get.return_value = "104"
+    fake_client.nodes.return_value.qemu.return_value.clone.post.return_value = "UPID:starcore:clone"
+    fake_client.nodes.return_value.tasks.return_value.status.get.return_value = {
+        "status": "stopped",
+        "exitstatus": "OK",
+    }
+    provider = ProxmoxProvider()
+    provider._client = fake_client
+    task = Task(
+        id="1",
+        provider="proxmox",
+        action="create",
+        resource="web-vm",
+        payload={"node": "starcore", "template_vmid": 9000, "cores": 2, "memory": 2048},
+    )
+    await provider.execute(task)
+    fake_client.nodes.return_value.qemu.return_value.config.post.assert_called_once_with(
+        cores=2, memory=2048
+    )
+    fake_client.nodes.return_value.qemu.return_value.config.put.assert_not_called()
+
+
+async def test_proxmox_wait_for_task_raises_on_real_error_exitstatus():
+    from orchestrator.task import Task
+
+    fake_client = MagicMock()
+    fake_client.cluster.nextid.get.return_value = "102"
+    fake_client.nodes.return_value.lxc.return_value.clone.post.return_value = "UPID:starcore:clone"
+    fake_client.nodes.return_value.tasks.return_value.status.get.return_value = {
+        "status": "stopped",
+        "exitstatus": "unable to allocate storage",
+    }
+    provider = ProxmoxProvider()
+    provider._client = fake_client
+    task = Task(
+        id="1",
+        provider="proxmox",
+        action="create",
+        kind="lxc",
+        resource="test-ct",
+        payload={"node": "starcore", "template_vmid": 100},
+    )
+    try:
+        await provider.execute(task)
+        raise AssertionError("expected RuntimeError")
+    except RuntimeError as exc:
+        assert "unable to allocate storage" in str(exc)
+
+
 async def test_proxmox_create_vm_requires_node_and_template_vmid():
     from orchestrator.task import Task
 
@@ -173,7 +277,7 @@ async def test_proxmox_create_lxc_clones_template_and_sets_result():
     fake_client.nodes.return_value.lxc.return_value.clone.post.assert_called_once()
     call_kwargs = fake_client.nodes.return_value.lxc.return_value.clone.post.call_args.kwargs
     assert call_kwargs["hostname"] == "web-lxc"
-    fake_client.nodes.return_value.lxc.return_value.config.post.assert_called_once_with(
+    fake_client.nodes.return_value.lxc.return_value.config.put.assert_called_once_with(
         cores=1, memory=512
     )
 

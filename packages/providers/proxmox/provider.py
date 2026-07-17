@@ -279,7 +279,13 @@ class ProxmoxProvider(BaseProvider):
             config_updates["memory"] = memory
         if config_updates:
             target_endpoint = self._resource_endpoint(node, vmid, resource_kind)
-            await asyncio.to_thread(target_endpoint.config.post, **config_updates)
+            if resource_kind == "lxc":
+                await asyncio.to_thread(target_endpoint.config.put, **config_updates)
+            else:
+                if resource_kind == "lxc":
+                    await asyncio.to_thread(target_endpoint.config.put, **config_updates)
+                else:
+                    await asyncio.to_thread(target_endpoint.config.post, **config_updates)
 
         task.result["vmid"] = vmid
         task.result["node"] = node
@@ -425,9 +431,14 @@ class ProxmoxProvider(BaseProvider):
             if status is None:
                 raise RuntimeError(f"Proxmox returned no status for task {upid}")
             if status.get("status") == "stopped":
-                if status.get("exitstatus") != "OK":
-                    raise RuntimeError(f"Proxmox task {upid} failed: {status.get('exitstatus')}")
-                return
+                exitstatus = status.get("exitstatus") or ""
+                if exitstatus == "OK" or exitstatus.startswith("WARNINGS"):
+                    if exitstatus != "OK":
+                        logger.warning(
+                            "[Proxmox] Task {} completed with warnings: {}", upid, exitstatus
+                        )
+                    return
+                raise RuntimeError(f"Proxmox task {upid} failed: {exitstatus}")
             await asyncio.sleep(interval)
             elapsed += interval
         raise TimeoutError(f"Proxmox task {upid} did not complete within {timeout}s")
