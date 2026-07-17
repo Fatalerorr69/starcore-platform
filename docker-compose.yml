@@ -11,13 +11,25 @@ services:
       STARCORE_DATABASE_URL: sqlite:////data/starcore.db
     volumes:
       - starcore-data:/data
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
 
+  # Scaffolding for future use (Postgres/Redis/NATS-backed features are
+  # not yet wired into the application -- see README). Not started by
+  # `docker compose up` on its own; opt in explicitly with
+  # `docker compose --profile scaffold up` to reduce the default exposed
+  # surface (TD-15).
   postgres:
     image: postgres:17
     restart: unless-stopped
+    profiles: ["scaffold"]
     environment:
       POSTGRES_USER: starcore
-      POSTGRES_PASSWORD: starcore
+      POSTGRES_PASSWORD: ${STARCORE_POSTGRES_PASSWORD:?set STARCORE_POSTGRES_PASSWORD in .env before enabling the postgres scaffold service}
       POSTGRES_DB: starcore
     ports:
       - "5432:5432"
@@ -27,12 +39,14 @@ services:
   redis:
     image: redis:8
     restart: unless-stopped
+    profiles: ["scaffold"]
     ports:
       - "6379:6379"
 
   nats:
     image: nats:latest
     restart: unless-stopped
+    profiles: ["scaffold"]
     ports:
       - "4222:4222"
 
