@@ -1,0 +1,13 @@
+name: sprint1-verification-lxc
+version: "1.0"
+resources:
+  - name: starcore-test-ct
+    provider: proxmox
+    kind: lxc
+    config:
+      node: starcore
+      template_vmid: 100
+      storage: local-zfs
+      cores: 1
+      memory: 512
+      full: true
