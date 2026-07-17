@@ -11,6 +11,9 @@ services:
       STARCORE_DATABASE_URL: sqlite:////data/starcore.db
     volumes:
       - starcore-data:/data
+      - /var/run/docker.sock:/var/run/docker.sock
+    group_add:
+      - "${DOCKER_GID}"
     healthcheck:
       test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
       interval: 30s
