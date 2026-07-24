@@ -23,6 +23,9 @@ jobs:
       - name: Install dependencies
         run: uv sync --extra dev
 
+      - name: Lockfile consistency check
+        run: uv lock --check
+
       - name: Ruff check
         run: uv run ruff check .
 
@@ -33,7 +36,12 @@ jobs:
         run: uv run pip-audit
 
       - name: Pytest
-        run: uv run pytest -q --cov --cov-report=term-missing
+        run: uv run pytest -q --cov --cov-report=term-missing --cov-fail-under=80
+
+      - name: Alembic check (detect un-migrated model changes)
+        run: |
+          STARCORE_DATABASE_URL=sqlite:///./ci-check.db uv run alembic upgrade head
+          STARCORE_DATABASE_URL=sqlite:///./ci-check.db uv run alembic check
 
   docker-build:
     runs-on: ubuntu-latest
