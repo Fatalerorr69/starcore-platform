@@ -1,0 +1,18 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "STARCORE API",
+      "runtimeExecutable": "uv",
+      "runtimeArgs": ["run", "uvicorn", "core.main:app", "--reload", "--port", "8000"],
+      "port": 8000,
+      "url": "http://localhost:8000"
+    },
+    {
+      "name": "STARCORE Docs",
+      "runtimeExecutable": "uv",
+      "runtimeArgs": ["run", "mkdocs", "serve", "--dev-addr", "localhost:8001"],
+      "port": 8001
+    }
+  ]
+}
