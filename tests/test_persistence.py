@@ -5,7 +5,7 @@ Persistence Tests
 from __future__ import annotations
 
 from core.database import get_session
-from core.repository import get_run, list_runs, save_run
+from core.repository import get_run, list_known_provider_vmids, list_runs, save_run
 from orchestrator.task import Task, TaskStatus
 
 
@@ -67,5 +67,35 @@ def test_get_run_returns_none_for_unknown_id():
     session = get_session()
     try:
         assert get_run(session, "does-not-exist") is None
+    finally:
+        session.close()
+
+
+def test_list_known_provider_vmids_skips_records_without_vmid():
+    """Line 58: tasks whose result dict has no 'vmid' key are silently skipped."""
+    session = get_session()
+    try:
+        task = Task(id="t-no-vmid", provider="proxmox", action="create", resource="vm-x")
+        task.status = TaskStatus.SUCCESS
+        task.result = {}
+        save_run(session, "no-vmid-run", "1.0", False, [task])
+
+        vmids = list_known_provider_vmids(session, "proxmox")
+        assert len(vmids) == 0
+    finally:
+        session.close()
+
+
+def test_list_known_provider_vmids_skips_non_numeric_vmids():
+    """Lines 61-62: a vmid value that cannot be cast to int is silently skipped."""
+    session = get_session()
+    try:
+        task = Task(id="t-bad-vmid", provider="proxmox", action="create", resource="vm-y")
+        task.status = TaskStatus.SUCCESS
+        task.result = {"vmid": "not-a-number"}
+        save_run(session, "bad-vmid-run", "1.0", False, [task])
+
+        vmids = list_known_provider_vmids(session, "proxmox")
+        assert len(vmids) == 0
     finally:
         session.close()
