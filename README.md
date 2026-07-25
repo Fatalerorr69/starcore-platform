@@ -32,7 +32,7 @@ This README reflects the **actual current state of the codebase**, not the long-
 | Persistence | Done | SQLite (via SQLAlchemy) stores blueprint run history and task results |
 | Config | Done | .env-based settings via pydantic-settings; STARCORE_LOG_JSON for structured JSON logging |
 | Observability | Done | GET /metrics — Prometheus text format, authenticated; structured loguru logging (STARCORE_LOG_JSON) |
-| Tests | 361 passing | ruff, pyright, pytest (incl. Hypothesis property tests), pre-commit, CI on every PR |
+| Tests | 366 passing | ruff, pyright, pytest (incl. Hypothesis property tests), pre-commit, CI on every PR |
 
 ## What's Planned, Not Built Yet
 
