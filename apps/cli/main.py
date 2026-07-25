@@ -73,10 +73,12 @@ def doctor(
 
     JSON schema (--json):
         {"gates": [{"name": str, "status": "pass"|"fail", "detail": str}],
-         "passed": int, "failed": int}
+         "passed": int, "failed": int,
+         "runtime_environment": "proxmox-host"|"container"|"local"}
 
     Exit codes: 0 = all gates passed, 1 = one or more gates failed.
     """
+    runtime_environment = detect_runtime_environment()
     gates: list[tuple[str, list[str]]] = [
         ("Lockfile", ["uv", "lock", "--check"]),
         ("Ruff lint", ["uv", "run", "ruff", "check", "."]),
@@ -106,12 +108,17 @@ def doctor(
     if json_output:
         print(
             json.dumps(
-                {"gates": results, "passed": len(results) - n_failed, "failed": n_failed},
+                {
+                    "gates": results,
+                    "passed": len(results) - n_failed,
+                    "failed": n_failed,
+                    "runtime_environment": runtime_environment,
+                },
                 indent=2,
             )
         )
     elif not quiet:
-        table = Table(title="Quality Gates")
+        table = Table(title=f"Quality Gates (runtime environment: {runtime_environment})")
         table.add_column("Gate")
         table.add_column("Status")
         table.add_column("Detail")
