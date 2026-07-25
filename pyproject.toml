@@ -78,6 +78,9 @@ pythonpath = [
     "packages",
 ]
 addopts = "-ra"
+filterwarnings = [
+    "ignore:Using `httpx` with `starlette.testclient`",
+]
 
 [tool.coverage.run]
 source = ["packages", "apps"]

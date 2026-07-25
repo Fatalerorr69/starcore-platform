@@ -31,11 +31,11 @@ class PluginManager:
         if not self.plugins_dir.exists():
             return []
 
-        discovered = []
-        for plugin_path in sorted(self.plugins_dir.iterdir()):
-            if plugin_path.is_dir() and (plugin_path / "__init__.py").exists():
-                discovered.append(plugin_path.name)
-        return discovered
+        return [
+            plugin_path.name
+            for plugin_path in sorted(self.plugins_dir.iterdir())
+            if plugin_path.is_dir() and (plugin_path / "__init__.py").exists()
+        ]
 
     def load_all(self) -> list[str]:
         base_dir = str(self.plugins_dir.parent.resolve())

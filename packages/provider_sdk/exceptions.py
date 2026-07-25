@@ -11,5 +11,5 @@ class ProviderConnectionError(ProviderError):
     """Raised when a provider fails to connect."""
 
 
-class ResourceNotFound(ProviderError):
+class ResourceNotFoundError(ProviderError):
     """Raised when a requested resource does not exist."""

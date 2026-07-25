@@ -10,6 +10,7 @@ import hmac
 import time
 from collections.abc import Callable
 from pathlib import Path
+from typing import Annotated
 
 from ai.generator import BlueprintGenerationError, generate_blueprint_yaml
 from blueprints.executor import BlueprintExecutor
@@ -394,8 +395,8 @@ async def run_blueprint(blueprint: Blueprint, parallel: bool = False):
 
 @app.get("/runs", response_model=list[RunRecordResponse], dependencies=[Depends(verify_api_key)])
 async def get_runs(
-    limit: int = Query(default=50, ge=1, le=200, description="Max number of runs to return."),
-    offset: int = Query(default=0, ge=0, description="Number of most-recent runs to skip."),
+    limit: Annotated[int, Query(ge=1, le=200, description="Max number of runs to return.")] = 50,
+    offset: Annotated[int, Query(ge=0, description="Number of most-recent runs to skip.")] = 0,
 ):
     def _list() -> list[RunRecordResponse]:
         session = get_session()

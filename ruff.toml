@@ -2,9 +2,12 @@ line-length = 100
 target-version = "py312"
 
 [lint]
-select = ["E", "F", "I", "UP", "B"]
+select = ["E", "F", "I", "UP", "B", "PERF", "N", "FAST"]
 
 [lint.per-file-ignores]
 # Typer requires Argument/Option in function default values (B008) — this is the
 # documented and idiomatic pattern; suppressing per-file is cleaner than per-line noqa.
 "apps/cli/main.py" = ["B008"]
+# Proxmox provider uses nested loops with conditional appends; flattening them
+# would harm readability without measurable perf benefit in network-bound code.
+"packages/providers/proxmox/provider.py" = ["PERF401"]
