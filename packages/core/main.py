@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import asyncio
 import hmac
+import time
 from collections.abc import Callable
 from pathlib import Path
 
@@ -20,6 +21,7 @@ from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request
 from fastapi.responses import FileResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 from orchestrator.scheduler import Scheduler
+from prometheus_client import CONTENT_TYPE_LATEST
 from provider_sdk.registry import register_default_providers, registry
 from pydantic import BaseModel
 from slowapi import Limiter, _rate_limit_exceeded_handler
@@ -27,10 +29,12 @@ from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
 from slowapi.util import get_remote_address
 
+import core.logger  # noqa: F401 -- side effect: configures the process-wide loguru sink
 from core.config import get_settings
 from core.database import get_session
 from core.diagnostics import check_database_connectivity, run_diagnostics
 from core.discovery import discover_proxmox_environment
+from core.metrics import HTTP_REQUEST_DURATION_SECONDS, HTTP_REQUESTS_TOTAL, render_metrics
 from core.plugin_manager import plugin_manager
 from core.repository import get_run, list_runs, save_run
 from core.resource_actions import execute_resource_action
@@ -101,6 +105,26 @@ limiter = Limiter(
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _handle_rate_limit_exceeded)
 app.add_middleware(SlowAPIMiddleware)
+
+
+@app.middleware("http")
+async def _metrics_middleware(request: Request, call_next):
+    """Record HTTP request count and latency for GET /metrics.
+
+    Uses the matched route's path template (e.g. "/runs/{run_id}") rather
+    than the raw request path, so per-resource IDs don't blow up metric
+    cardinality. Starlette sets `request.scope["route"]` once routing has
+    resolved, which has already happened by the time `call_next` returns;
+    falls back to the raw path if routing didn't match (e.g. a 404).
+    """
+    start = time.perf_counter()
+    response = await call_next(request)
+    duration = time.perf_counter() - start
+    route = request.scope.get("route")
+    path = route.path if route is not None else request.url.path
+    HTTP_REQUESTS_TOTAL.labels(method=request.method, path=path, status=response.status_code).inc()
+    HTTP_REQUEST_DURATION_SECONDS.labels(method=request.method, path=path).observe(duration)
+    return response
 
 
 def verify_api_key(x_api_key: str | None = Header(default=None, alias="X-API-Key")) -> None:
@@ -184,6 +208,19 @@ async def provider_health(name: str):
 @app.get("/diagnostics", dependencies=[Depends(verify_api_key)])
 async def get_diagnostics():
     return await run_diagnostics()
+
+
+@app.get("/metrics", dependencies=[Depends(verify_api_key)])
+def get_metrics():
+    """Prometheus scrape endpoint.
+
+    Authenticated like every other non-/health endpoint (see verify_api_key):
+    metrics can reveal deployment shape (which providers are configured, run
+    volume), so they're not exposed without a credential. Configure your
+    Prometheus scrape job with the X-API-Key header via `authorization`
+    (bearer token config won't match this header-based scheme).
+    """
+    return Response(content=render_metrics(), media_type=CONTENT_TYPE_LATEST)
 
 
 @app.get("/proxmox/discover", dependencies=[Depends(verify_api_key)])

@@ -2,6 +2,7 @@ import asyncio
 import subprocess
 from pathlib import Path
 
+import core.logger  # noqa: F401 -- side effect: configures the process-wide loguru sink
 import typer
 from ai.generator import BlueprintGenerationError, generate_blueprint_yaml
 from blueprints.executor import BlueprintExecutor

@@ -57,8 +57,12 @@ graphs) instead of hanging.
 (fresh databases are bootstrapped and stamped automatically; databases
 behind the migration head fail fast at startup), an in-process event bus,
 a plugin manager (`plugins/` directory, `register(context)` convention),
-deep diagnostics (`/diagnostics`, `starcore diagnose`), and API-wide
-per-IP rate limiting (`slowapi`, `/health` exempt).
+deep diagnostics (`/diagnostics`, `starcore diagnose`), API-wide per-IP
+rate limiting (`slowapi`, `/health` exempt), Prometheus metrics
+(`/metrics`, `core/metrics.py` — HTTP request count/latency via
+middleware, blueprint task outcomes via an event-bus subscription), and
+structured logging (`core/logger.py`; set `STARCORE_LOG_JSON=true` for
+one JSON object per log line, suited for log aggregators).
 
 **Security model** — a single static shared API key (`X-API-Key` header,
 compared in constant time) protects all endpoints except `/`, `/health`,
