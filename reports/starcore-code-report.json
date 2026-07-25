@@ -4,10 +4,10 @@
   "repository": "Fatalerorr69/starcore-platform",
   "branch": "claude/new-session-s52x55",
   "initial_sha": "39964337120afb0b20d071201f0ea8e0c3c2c3bc",
-  "final_sha": "af4edc9",
+  "final_sha": "09dcf2290a12e6211c2a578830ca28704950a8e7",
   "execution_mode": "MODE 5 — CONTROLLED AUTONOMY",
   "overall_status": "HEALTHY",
-  "health_score": 98,
+  "health_score": 100,
   "facts": [
     "355 tests passing, 0 failures",
     "Coverage 100%",
@@ -29,10 +29,13 @@
     "redis and nats-py unused dependencies removed (C03)",
     "GET /metrics Prometheus endpoint added, authenticated (C01)",
     "structured JSON logging wired via STARCORE_LOG_JSON (C01)",
-    "Snapshot/Rollback (C02) found already fully implemented during discovery -- corrected stale recommendation, no action needed"
+    "Snapshot/Rollback (C02) found already fully implemented during discovery -- corrected stale recommendation, no action needed",
+    "alembic check runbook documented in docs/development.md with throwaway-DB pattern (TD-C05)",
+    "CONTRIBUTING.md cross-references docs/development.md#database-migrations (TD-C05)",
+    "mkdocs<2.0.0 and mkdocs-material<10.0.0 caps added to pyproject.toml (TD-C06)",
+    "mkdocs cap rationale documented in docs/development.md (TD-C06)"
   ],
   "observations": [
-    "MkDocs Material v2.0 deprecation warning (future)",
     "Docker daemon not accessible in sandbox environment"
   ],
   "assumptions": [],
@@ -42,20 +45,7 @@
     "GitHub branch protection rules (gh CLI not available)",
     "Docker container build (daemon not accessible)"
   ],
-  "risks": [
-    {
-      "id": "TD-C05",
-      "title": "Alembic check requires local DB (docs missing)",
-      "priority": "P3",
-      "status": "OPEN"
-    },
-    {
-      "id": "TD-C06",
-      "title": "MkDocs Material v2.0 compatibility warning",
-      "priority": "P4",
-      "status": "OPEN"
-    }
-  ],
+  "risks": [],
   "actions": [
     {
       "id": "A01",
@@ -130,6 +120,22 @@
       "priority": "P4",
       "status": "NOT_NEEDED",
       "note": "Discovery found starcore snapshot create/list/delete/rollback (apps/cli/main.py) already wired end-to-end through core/resource_actions.py into packages/providers/proxmox/provider.py's _snapshot_create/_snapshot_list/_snapshot_delete/_snapshot_rollback, which call the real Proxmox API via proxmoxer. 16+ pre-existing tests cover it across test_cli.py, test_providers.py, and test_property_based_cli.py. The prior session's report recommendation was stale/incorrect; no implementation work was performed for this item."
+    },
+    {
+      "id": "TD-C05",
+      "title": "Document alembic check workflow (throwaway DB pattern)",
+      "priority": "P4",
+      "status": "EXECUTED",
+      "commit": "09dcf2290a12e6211c2a578830ca28704950a8e7",
+      "files": ["docs/development.md", "CONTRIBUTING.md"]
+    },
+    {
+      "id": "TD-C06",
+      "title": "Pin mkdocs<2.0.0 and mkdocs-material<10.0.0 + document rationale",
+      "priority": "P4",
+      "status": "EXECUTED",
+      "commit": "09dcf2290a12e6211c2a578830ca28704950a8e7",
+      "files": ["pyproject.toml", "uv.lock", "docs/development.md"]
     }
   ],
   "approvals": [
@@ -153,6 +159,11 @@
       "approved_by": "user",
       "timestamp": "2026-07-25",
       "note": "C03 already executed from prior approval; C02 required no code change (see actions[].note); C01 executed."
+    },
+    {
+      "bundle": "TD-C05,TD-C06",
+      "approved_by": "user",
+      "timestamp": "2026-07-25"
     }
   ],
   "validation": {
@@ -245,19 +256,6 @@
       {"file": "test_property_based_cli.py", "module": "cli", "tests": 12}
     ]
   },
-  "recommendations": [
-    {
-      "id": "TD-C05",
-      "title": "Document that the Alembic check requires a local DB",
-      "priority": "P4",
-      "effort": "XS"
-    },
-    {
-      "id": "TD-C06",
-      "title": "Resolve MkDocs Material v2.0 compatibility warning",
-      "priority": "P4",
-      "effort": "XS"
-    }
-  ],
-  "next_actions": ["SCHVÁLIT TD-C05,TD-C06", "STOP"]
+  "recommendations": [],
+  "next_actions": ["STOP"]
 }
