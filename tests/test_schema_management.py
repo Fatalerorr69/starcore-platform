@@ -126,3 +126,51 @@ def test_stale_database_revision_fails_fast_instead_of_drifting(tmp_path):
 
     with pytest.raises(RuntimeError, match="alembic upgrade head"):
         init_db(settings)
+
+
+def test_ensure_sqlite_directory_is_noop_for_non_sqlite_url():
+    """Line 32: ensure_sqlite_directory() returns early for non-SQLite URLs."""
+    from core.database import ensure_sqlite_directory
+
+    ensure_sqlite_directory("postgresql://user:pass@localhost/db")
+
+
+def test_ensure_sqlite_directory_is_noop_for_in_memory_sqlite():
+    """Line 35: ensure_sqlite_directory() returns early for sqlite:///:memory:."""
+    from core.database import ensure_sqlite_directory
+
+    ensure_sqlite_directory("sqlite:///:memory:")
+
+
+def test_init_db_returns_cached_engine_when_called_without_settings():
+    """Line 80: init_db() with no args returns the already-initialised engine."""
+    import core.database as db_module
+
+    assert db_module._engine is not None
+    cached = db_module._engine
+    result = init_db()
+    assert result is cached
+
+
+def test_get_session_lazily_initialises_db_when_session_factory_is_none(tmp_path, monkeypatch):
+    """Line 136: get_session() calls init_db() when _session_factory is None."""
+    import core.database as db_module
+    from core.config import get_settings
+    from core.database import get_session
+
+    db_url = f"sqlite:///{tmp_path / 'lazy.db'}"
+    monkeypatch.setenv("STARCORE_DATABASE_URL", db_url)
+    get_settings.cache_clear()
+
+    saved_engine = db_module._engine
+    saved_factory = db_module._session_factory
+    db_module._engine = None
+    db_module._session_factory = None
+    try:
+        session = get_session()
+        assert session is not None
+        session.close()
+    finally:
+        get_settings.cache_clear()
+        db_module._engine = saved_engine
+        db_module._session_factory = saved_factory
