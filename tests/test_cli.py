@@ -399,3 +399,119 @@ def test_snapshot_rollback_reports_failure():
         result = runner.invoke(app, ["snapshot", "rollback", "pve", "101", "snap1", "--yes"])
     assert result.exit_code == 1
     assert "rollback failed" in result.stdout
+
+
+# ---------------------------------------------------------------------------
+# doctor: all-pass, fast mode, gate failure, long output truncation
+# ---------------------------------------------------------------------------
+
+
+def _mock_proc(returncode: int = 0, stdout: str = "", stderr: str = "") -> MagicMock:
+    proc = MagicMock()
+    proc.returncode = returncode
+    proc.stdout = stdout
+    proc.stderr = stderr
+    return proc
+
+
+def test_doctor_all_pass():
+    with patch("apps.cli.main.subprocess.run", return_value=_mock_proc(0)):
+        result = runner.invoke(app, ["doctor"])
+    assert result.exit_code == 0
+    assert "All gates passed" in result.stdout
+
+
+def test_doctor_fast_mode_skips_tests():
+    calls: list = []
+
+    def _side(cmd: list, **_: object) -> MagicMock:
+        calls.append(cmd)
+        return _mock_proc(0)
+
+    with patch("apps.cli.main.subprocess.run", side_effect=_side):
+        result = runner.invoke(app, ["doctor", "--fast"])
+
+    assert result.exit_code == 0
+    assert not any("pytest" in " ".join(c) for c in calls)
+
+
+def test_doctor_gate_failure_exits_one():
+    def _side(cmd: list, **_: object) -> MagicMock:
+        failing = "ruff" in " ".join(cmd)
+        return _mock_proc(1 if failing else 0, stdout="ruff error output")
+
+    with patch("apps.cli.main.subprocess.run", side_effect=_side):
+        result = runner.invoke(app, ["doctor", "--fast"])
+
+    assert result.exit_code == 1
+    assert "gate(s) failed" in result.stdout
+
+
+def test_doctor_long_failure_output_is_truncated():
+    long_out = "e" * 200
+    with patch("apps.cli.main.subprocess.run", return_value=_mock_proc(1, stdout=long_out)):
+        result = runner.invoke(app, ["doctor", "--fast"])
+
+    assert result.exit_code == 1
+    assert "e" * 200 not in result.stdout  # full 200-char string must not appear verbatim
+
+
+def test_doctor_short_failure_output_no_ellipsis():
+    with patch("apps.cli.main.subprocess.run", return_value=_mock_proc(1, stdout="short error")):
+        result = runner.invoke(app, ["doctor", "--fast"])
+
+    assert result.exit_code == 1
+    assert "short error" in result.stdout
+
+
+# ---------------------------------------------------------------------------
+# audit: clean tree, dirty tree, git unavailable
+# ---------------------------------------------------------------------------
+
+
+def _git_mock(branch: str, sha: str, status: str, log: str) -> MagicMock:
+    """Return a side-effect function that dispatches git subcommand responses."""
+
+    def _side(cmd: list, **_: object) -> MagicMock:
+        if cmd[0] != "git":
+            return _mock_proc(0)
+        subcmd = cmd[1] if len(cmd) > 1 else ""
+        if subcmd == "log":
+            return _mock_proc(0, stdout=log)
+        if subcmd == "status":
+            return _mock_proc(0, stdout=status)
+        if "--abbrev-ref" in cmd:
+            return _mock_proc(0, stdout=branch)
+        if "--short" in cmd:
+            return _mock_proc(0, stdout=sha)
+        return _mock_proc(0)
+
+    return MagicMock(side_effect=_side)
+
+
+def test_audit_clean_tree():
+    mock = _git_mock("main", "abc1234", "", "abc1234 fix: something")
+    with patch("apps.cli.main.subprocess.run", mock):
+        result = runner.invoke(app, ["audit"])
+
+    assert result.exit_code == 0
+    assert "main" in result.stdout
+    assert "clean" in result.stdout
+    assert "Recent commits" in result.stdout
+
+
+def test_audit_dirty_tree():
+    mock = _git_mock("feature/x", "def5678", "M readme.md", "")
+    with patch("apps.cli.main.subprocess.run", mock):
+        result = runner.invoke(app, ["audit"])
+
+    assert result.exit_code == 0
+    assert "dirty" in result.stdout
+
+
+def test_audit_git_unavailable():
+    with patch("apps.cli.main.subprocess.run", return_value=_mock_proc(1)):
+        result = runner.invoke(app, ["audit"])
+
+    assert result.exit_code == 0
+    assert "N/A" in result.stdout

@@ -1,4 +1,5 @@
 import asyncio
+import subprocess
 from pathlib import Path
 
 import typer
@@ -48,6 +49,95 @@ def version():
 @app.command()
 def health():
     print("System OK")
+
+
+@app.command()
+def doctor(
+    fast: bool = typer.Option(
+        False, "--fast", help="Skip tests; check lint, types, and security only."
+    ),
+):
+    """Run all local quality gates: lint, type-check, security scan, tests."""
+    gates: list[tuple[str, list[str]]] = [
+        ("Lockfile", ["uv", "lock", "--check"]),
+        ("Ruff lint", ["uv", "run", "ruff", "check", "."]),
+        ("Ruff format", ["uv", "run", "ruff", "format", "--check", "."]),
+        ("Pyright", ["uv", "run", "pyright"]),
+        ("pip-audit", ["uv", "run", "pip-audit"]),
+    ]
+    if not fast:
+        gates.append(("Tests", ["uv", "run", "pytest", "-q", "--tb=short"]))
+
+    table = Table(title="Quality Gates")
+    table.add_column("Gate")
+    table.add_column("Status")
+    table.add_column("Detail")
+
+    n_failed = 0
+    for name, cmd in gates:
+        proc = subprocess.run(cmd, capture_output=True, text=True)
+        if proc.returncode == 0:
+            status = "[green]PASS[/green]"
+            detail = ""
+        else:
+            n_failed += 1
+            status = "[red]FAIL[/red]"
+            out = (proc.stdout + proc.stderr).strip()
+            detail = out[:120] + ("..." if len(out) > 120 else "")
+        table.add_row(name, status, detail)
+
+    console.print(table)
+
+    if n_failed:
+        console.print(f"[red]{n_failed} gate(s) failed[/red]")
+        raise typer.Exit(code=1)
+
+    console.print("[green]All gates passed[/green]")
+
+
+@app.command()
+def audit():
+    """Show a quick local project state summary: git state, file counts."""
+
+    def _git(*args: str) -> str:
+        proc = subprocess.run(["git", *args], capture_output=True, text=True)
+        return proc.stdout.strip() if proc.returncode == 0 else "N/A"
+
+    branch = _git("rev-parse", "--abbrev-ref", "HEAD")
+    sha = _git("rev-parse", "--short", "HEAD")
+
+    status_out = _git("status", "--short")
+    if status_out == "N/A":
+        tree_label = "N/A"
+    elif status_out:
+        tree_label = "dirty"
+    else:
+        tree_label = "clean"
+
+    log_raw = _git("log", "--oneline", "-5")
+    log_lines = [] if log_raw == "N/A" else log_raw.splitlines()
+
+    py_files = sorted(
+        f
+        for f in Path(".").rglob("*.py")
+        if ".venv" not in f.parts and "__pycache__" not in f.parts
+    )
+    test_files = [f for f in py_files if f.name.startswith("test_")]
+
+    table = Table(title="Project State")
+    table.add_column("Item")
+    table.add_column("Value")
+    table.add_row("Branch", branch)
+    table.add_row("SHA", sha)
+    table.add_row("Working tree", tree_label)
+    table.add_row("Python files", str(len(py_files)))
+    table.add_row("Test files", str(len(test_files)))
+    console.print(table)
+
+    if log_lines:
+        console.print("\n[bold]Recent commits:[/bold]")
+        for line in log_lines:
+            console.print(f"  {line}")
 
 
 @blueprint_app.command("plan")
