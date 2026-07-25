@@ -3,6 +3,7 @@ CLI Tests
 """
 
 from pathlib import Path
+from unittest.mock import AsyncMock, MagicMock, patch
 
 from typer.testing import CliRunner
 
@@ -126,3 +127,266 @@ def test_snapshot_delete_prompts_for_confirmation():
 def test_snapshot_delete_skips_confirmation_with_yes_flag():
     result = runner.invoke(app, ["snapshot", "delete", "fatalab", "105", "old-snap", "--yes"])
     assert result.exit_code == 1
+
+
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
+
+
+def _make_task(status_val: str, result_dict: dict | None = None) -> MagicMock:
+    task = MagicMock()
+    task.status.value = status_val
+    task.result = result_dict or {}
+    return task
+
+
+_VALID_BLUEPRINT_YAML = """\
+name: gen-test
+version: "1.0"
+resources:
+  - name: web
+    provider: docker
+    kind: container
+"""
+
+
+# ---------------------------------------------------------------------------
+# plugins: no-plugins path (lines 211-212)
+# ---------------------------------------------------------------------------
+
+
+def test_plugins_list_no_plugins_found():
+    with patch("core.plugin_manager.plugin_manager") as mock_pm:
+        mock_pm.discover.return_value = []
+        result = runner.invoke(app, ["plugins"])
+    assert result.exit_code == 0
+    assert "No plugins found" in result.stdout
+
+
+# ---------------------------------------------------------------------------
+# diagnose: proxmox nodes/storage/orphaned + docker containers (lines 252-295)
+# ---------------------------------------------------------------------------
+
+
+def test_diagnose_renders_proxmox_and_docker_sections():
+    report = {
+        "overall_status": "ok",
+        "checks": [{"name": "db", "status": "ok", "detail": "alive"}],
+        "proxmox": {
+            "nodes": [
+                {
+                    "node": "pve",
+                    "cpu_percent": 10,
+                    "memory_used_gb": 4,
+                    "memory_total_gb": 16,
+                    "disk_used_gb": 20,
+                    "disk_total_gb": 100,
+                }
+            ],
+            "storage": [
+                {
+                    "node": "pve",
+                    "storage": "local",
+                    "type": "dir",
+                    "used_gb": 5,
+                    "total_gb": 50,
+                }
+            ],
+            "orphaned_resources": [{"kind": "vm", "vmid": 999, "name": "old-vm", "node": "pve"}],
+        },
+        "docker": {"containers": {"running": 3}},
+    }
+    with patch("apps.cli.main.run_diagnostics", new=AsyncMock(return_value=report)):
+        result = runner.invoke(app, ["diagnose"])
+    assert result.exit_code == 0
+    assert "pve" in result.stdout
+    assert "local" in result.stdout
+    assert "orphaned" in result.stdout.lower()
+    assert "Docker containers" in result.stdout
+
+
+def test_diagnose_exits_nonzero_on_error_status():
+    report = {
+        "overall_status": "error",
+        "checks": [{"name": "db", "status": "error", "detail": "down"}],
+        "proxmox": {},
+        "docker": {},
+    }
+    with patch("apps.cli.main.run_diagnostics", new=AsyncMock(return_value=report)):
+        result = runner.invoke(app, ["diagnose"])
+    assert result.exit_code == 1
+
+
+# ---------------------------------------------------------------------------
+# ai generate: success paths + validation failure (lines 317-342)
+# ---------------------------------------------------------------------------
+
+
+def test_ai_generate_success_prints_yaml():
+    with patch(
+        "apps.cli.main.generate_blueprint_yaml", new=AsyncMock(return_value=_VALID_BLUEPRINT_YAML)
+    ):
+        result = runner.invoke(app, ["ai", "generate", "a nginx container"])
+    assert result.exit_code == 0
+    assert "gen-test" in result.stdout
+
+
+def test_ai_generate_success_writes_output_file(tmp_path: Path):
+    out = tmp_path / "bp.yaml"
+    with patch(
+        "apps.cli.main.generate_blueprint_yaml", new=AsyncMock(return_value=_VALID_BLUEPRINT_YAML)
+    ):
+        result = runner.invoke(app, ["ai", "generate", "a nginx container", "--output", str(out)])
+    assert result.exit_code == 0
+    assert out.exists()
+    assert "Blueprint written to" in result.stdout
+
+
+def test_ai_generate_validation_failure_exits_one():
+    invalid_yaml = "not_a_blueprint: true\n"
+    with patch("apps.cli.main.generate_blueprint_yaml", new=AsyncMock(return_value=invalid_yaml)):
+        result = runner.invoke(app, ["ai", "generate", "bad description"])
+    assert result.exit_code == 1
+    assert "validation" in result.stdout.lower()
+
+
+# ---------------------------------------------------------------------------
+# proxmox discover: connected path (lines 355-411)
+# ---------------------------------------------------------------------------
+
+
+def test_proxmox_discover_connected_with_all_data():
+    report = {
+        "connected": True,
+        "nodes": [
+            {
+                "node": "pve",
+                "cpu_percent": 5,
+                "memory_used_gb": 2,
+                "memory_total_gb": 8,
+                "disk_used_gb": 10,
+                "disk_total_gb": 200,
+            }
+        ],
+        "storage": [
+            {"node": "pve", "storage": "local", "type": "dir", "used_gb": 5, "total_gb": 50}
+        ],
+        "templates": [{"node": "pve", "vmid": 100, "name": "ubuntu-22.04", "kind": "vm"}],
+        "networks": [{"node": "pve", "bridge": "vmbr0", "active": True}],
+        "existing_resources": ["vm-101", "vm-102"],
+    }
+    with patch("apps.cli.main.discover_proxmox_environment", new=AsyncMock(return_value=report)):
+        result = runner.invoke(app, ["proxmox", "discover"])
+    assert result.exit_code == 0
+    assert "ubuntu-22.04" in result.stdout
+    assert "vmbr0" in result.stdout
+    assert "Existing resources: 2" in result.stdout
+
+
+def test_proxmox_discover_connected_no_templates():
+    report = {
+        "connected": True,
+        "nodes": [],
+        "storage": [],
+        "templates": [],
+        "networks": [],
+        "existing_resources": [],
+    }
+    with patch("apps.cli.main.discover_proxmox_environment", new=AsyncMock(return_value=report)):
+        result = runner.invoke(app, ["proxmox", "discover"])
+    assert result.exit_code == 0
+    assert "No VM/LXC templates found" in result.stdout
+
+
+# ---------------------------------------------------------------------------
+# resource action: node/vmid options, error print, failed exit (lines 428-443)
+# ---------------------------------------------------------------------------
+
+
+def test_resource_action_with_node_and_vmid_prints_error_detail():
+    task = _make_task("success", {"error": "minor warning"})
+    with patch("apps.cli.main.execute_resource_action", new=AsyncMock(return_value=task)):
+        result = runner.invoke(
+            app,
+            ["resource", "action", "proxmox", "start", "vm-101", "--node", "pve", "--vmid", "101"],
+        )
+    assert result.exit_code == 0
+    assert "minor warning" in result.stdout
+
+
+def test_resource_action_failed_exits_one():
+    task = _make_task("failed", {"error": "connection refused"})
+    with patch("apps.cli.main.execute_resource_action", new=AsyncMock(return_value=task)):
+        result = runner.invoke(app, ["resource", "action", "proxmox", "start", "vm-101"])
+    assert result.exit_code == 1
+    assert "connection refused" in result.stdout
+
+
+# ---------------------------------------------------------------------------
+# snapshot create: success + description payload (lines 453, 474)
+# ---------------------------------------------------------------------------
+
+
+def test_snapshot_create_success():
+    task = _make_task("success")
+    with patch("apps.cli.main.execute_resource_action", new=AsyncMock(return_value=task)):
+        result = runner.invoke(
+            app,
+            ["snapshot", "create", "pve", "101", "snap1", "--description", "before update"],
+        )
+    assert result.exit_code == 0
+    assert "snap1" in result.stdout
+
+
+# ---------------------------------------------------------------------------
+# snapshot list: success paths (lines 489-499)
+# ---------------------------------------------------------------------------
+
+
+def test_snapshot_list_with_snapshots():
+    task = _make_task("success", {"snapshots": [{"name": "snap1", "description": "before update"}]})
+    with patch("apps.cli.main.execute_resource_action", new=AsyncMock(return_value=task)):
+        result = runner.invoke(app, ["snapshot", "list", "pve", "101"])
+    assert result.exit_code == 0
+    assert "snap1" in result.stdout
+    assert "before update" in result.stdout
+
+
+def test_snapshot_list_empty():
+    task = _make_task("success", {"snapshots": []})
+    with patch("apps.cli.main.execute_resource_action", new=AsyncMock(return_value=task)):
+        result = runner.invoke(app, ["snapshot", "list", "pve", "101"])
+    assert result.exit_code == 0
+    assert "No snapshots found" in result.stdout
+
+
+# ---------------------------------------------------------------------------
+# snapshot delete: success path (line 520)
+# ---------------------------------------------------------------------------
+
+
+def test_snapshot_delete_success():
+    task = _make_task("success")
+    with patch("apps.cli.main.execute_resource_action", new=AsyncMock(return_value=task)):
+        result = runner.invoke(app, ["snapshot", "delete", "pve", "101", "snap1", "--yes"])
+    assert result.exit_code == 0
+    assert "deleted" in result.stdout
+
+
+# ---------------------------------------------------------------------------
+# snapshot rollback: confirm no + success (lines 532-543)
+# ---------------------------------------------------------------------------
+
+
+def test_snapshot_rollback_aborts_when_declined():
+    result = runner.invoke(app, ["snapshot", "rollback", "pve", "101", "snap1"], input="n\n")
+    assert result.exit_code == 0
+
+
+def test_snapshot_rollback_success():
+    task = _make_task("success")
+    with patch("apps.cli.main.execute_resource_action", new=AsyncMock(return_value=task)):
+        result = runner.invoke(app, ["snapshot", "rollback", "pve", "101", "snap1", "--yes"])
+    assert result.exit_code == 0
+    assert "snap1" in result.stdout
