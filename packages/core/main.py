@@ -35,6 +35,7 @@ from core.config import get_settings
 from core.database import get_session
 from core.diagnostics import check_database_connectivity, run_diagnostics
 from core.discovery import discover_proxmox_environment
+from core.environment import classify_client_platform
 from core.metrics import HTTP_REQUEST_DURATION_SECONDS, HTTP_REQUESTS_TOTAL, render_metrics
 from core.plugin_manager import plugin_manager
 from core.repository import get_run, list_runs, save_run
@@ -209,8 +210,14 @@ async def provider_health(name: str):
 
 
 @app.get("/diagnostics", dependencies=[Depends(verify_api_key)])
-async def get_diagnostics():
-    return await run_diagnostics()
+async def get_diagnostics(request: Request):
+    report = await run_diagnostics()
+    user_agent = request.headers.get("user-agent")
+    report["client"] = {
+        "user_agent": user_agent,
+        "platform": classify_client_platform(user_agent),
+    }
+    return report
 
 
 @app.get("/metrics", dependencies=[Depends(verify_api_key)])

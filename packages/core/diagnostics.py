@@ -21,7 +21,7 @@ from core.database import (
     get_migration_head,
     get_session,
 )
-from core.environment import detect_runtime_environment
+from core.environment import detect_cloud_provider, detect_os_platform, detect_runtime_environment
 from core.repository import list_known_provider_vmids
 
 
@@ -252,9 +252,18 @@ async def run_diagnostics() -> dict[str, Any]:
     else:
         overall = "ok"
 
+    runtime_environment = detect_runtime_environment()
+    cloud_provider = (
+        None if runtime_environment == "proxmox-host" else await detect_cloud_provider()
+    )
+
     return {
         "overall_status": overall,
-        "runtime_environment": detect_runtime_environment(),
+        "runtime_environment": runtime_environment,
+        "environment_details": {
+            "os_platform": detect_os_platform(),
+            "cloud_provider": cloud_provider,
+        },
         "checks": [{"name": c.name, "status": c.status, "detail": c.detail} for c in checks],
         "proxmox": proxmox_details,
         "docker": docker_details,

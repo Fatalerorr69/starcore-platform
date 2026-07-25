@@ -12,7 +12,7 @@ from blueprints.planner import ExecutionPlanner
 from core.database import get_session
 from core.diagnostics import run_diagnostics
 from core.discovery import discover_proxmox_environment
-from core.environment import detect_runtime_environment
+from core.environment import detect_os_platform, detect_runtime_environment
 from core.repository import get_run, list_runs, save_run
 from core.resource_actions import execute_resource_action
 from orchestrator.scheduler import Scheduler
@@ -152,6 +152,7 @@ def audit(
     JSON schema (--json):
         {"branch": str, "sha": str, "working_tree": str,
          "runtime_environment": "proxmox-host"|"container"|"local",
+         "os_platform": {"system": str, "release": str, "is_wsl": bool},
          "python_files": int, "test_files": int, "recent_commits": [str]}
 
     Exit code: always 0.
@@ -162,6 +163,7 @@ def audit(
         return proc.stdout.strip() if proc.returncode == 0 else "N/A"
 
     runtime_environment = detect_runtime_environment()
+    os_platform = detect_os_platform()
     branch = _git("rev-parse", "--abbrev-ref", "HEAD")
     sha = _git("rev-parse", "--short", "HEAD")
 
@@ -191,6 +193,7 @@ def audit(
                     "sha": sha,
                     "working_tree": tree_label,
                     "runtime_environment": runtime_environment,
+                    "os_platform": os_platform,
                     "python_files": len(py_files),
                     "test_files": len(test_files),
                     "recent_commits": log_lines,
@@ -206,6 +209,10 @@ def audit(
         table.add_row("SHA", sha)
         table.add_row("Working tree", tree_label)
         table.add_row("Runtime environment", runtime_environment)
+        os_label = f"{os_platform['system']} {os_platform['release']}"
+        if os_platform["is_wsl"]:
+            os_label += " (WSL)"
+        table.add_row("OS platform", os_label)
         table.add_row("Python files", str(len(py_files)))
         table.add_row("Test files", str(len(test_files)))
         console.print(table)
@@ -421,6 +428,13 @@ def diagnose(
         status_colors = {"ok": "green", "warning": "yellow", "error": "red"}
         color = status_colors.get(overall, "white")
         console.print(f"Overall status: [{color}]{overall}[/{color}]")
+
+        env_details = report.get("environment_details") or {}
+        cloud_provider = env_details.get("cloud_provider")
+        env_label = report.get("runtime_environment", "unknown")
+        if cloud_provider:
+            env_label += f" ({cloud_provider})"
+        console.print(f"Runtime environment: {env_label}")
 
         table = Table(title="Checks")
         table.add_column("Check")

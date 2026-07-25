@@ -73,18 +73,16 @@ two providers via `STARCORE_AI_PROVIDER`:
 ## Deployment environments
 
 STARCORE can run in three distinct contexts, and `starcore audit` / `starcore
-diagnose` / `GET /diagnostics` all report which one they detect
-(`runtime_environment`: `proxmox-host`, `container`, or `local`) so you don't
-have to infer it from symptoms:
+doctor` / `starcore diagnose` / `GET /diagnostics` all report which one they
+detect (`runtime_environment`: `proxmox-host`, `container`, or `local`) so
+you don't have to infer it from symptoms:
 
 - **Proxmox host** — the STARCORE process itself runs directly on a Proxmox
   VE node (uncommon, but possible for a minimal single-box homelab). Detected
   via the presence of `/etc/pve/.version`.
 - **Container** — the documented Docker/Docker Compose deployment (see
-  below). This covers both a container on your local machine and one on a
-  cloud VPS — the two are indistinguishable from inside the container itself
-  without probing cloud-provider metadata endpoints, which this
-  homelab-focused tool does not attempt.
+  below). Covers both a container on your local machine and one on a cloud
+  VPS.
 - **Local** — a bare process on a developer workstation, e.g. running via
   `uv run uvicorn core.main:app --reload` outside of any container. This is
   also the fallback for any environment that matches neither of the above.
@@ -94,9 +92,37 @@ In every case, the Proxmox/Docker *targets* STARCORE orchestrates
 runs — you can run STARCORE locally on your laptop and have it manage VMs on
 a remote Proxmox cluster, or run it in a container on that same cluster.
 
-**Client access** is a separate concern from server-side environment
-detection: the REST API and CLI are client-agnostic. `GET /ui` (the static
-web dashboard) works from any modern browser, including one on a phone or
-tablet (e.g. Android) on the same network — it stores the `X-API-Key` in
-`localStorage` and requires no native app. No special server-side handling
-exists per client type, by design.
+### Distinguishing "local PC" from "cloud"
+
+`starcore audit`/`doctor` (documented as instant, local-only commands) add an
+`os_platform` field — OS family, release, and whether it's WSL (Windows
+Subsystem for Linux, common for a Windows development workstation) — entirely
+from local, offline checks.
+
+`GET /diagnostics` / `starcore diagnose` go one step further with
+`environment_details.cloud_provider`: a bounded-timeout (250ms per provider)
+probe of the AWS/GCP/Azure link-local metadata endpoints, which only respond
+when actually running on that provider's infrastructure. This is what
+distinguishes "container on a cloud VPS" from "container on your local
+machine" — a distinction `runtime_environment` alone cannot make. It's
+deliberately *not* run from `audit`/`doctor`, which are documented as
+instant and local-only; `diagnose`/`/diagnostics` already make comparable
+network calls to Docker/Proxmox and are the appropriate place for it. A
+homelab machine or Proxmox node simply gets `cloud_provider: null` — the
+probes fail fast rather than hang, since these addresses are normally
+unreachable outside their respective clouds.
+
+### Client access
+
+`GET /diagnostics` also reports `client.platform` — a best-effort
+classification (`browser-desktop`, `browser-mobile`, `cli-or-script`, or
+`unknown`) of whoever is *currently calling* the API, derived from the
+request's `User-Agent` header. This is what tells you a given request came
+from, say, a mobile browser (including Android) rather than a desktop one or
+a script — a per-request concern, not a server property.
+
+Otherwise, client access is client-agnostic by design: the REST API and CLI
+work identically regardless of caller. `GET /ui` (the static web dashboard)
+works from any modern browser, including one on a phone or tablet, on the
+same network — it stores the `X-API-Key` in `localStorage` and requires no
+native app.

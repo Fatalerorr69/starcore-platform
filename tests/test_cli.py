@@ -173,6 +173,11 @@ def test_plugins_list_no_plugins_found():
 def test_diagnose_renders_proxmox_and_docker_sections():
     report = {
         "overall_status": "ok",
+        "runtime_environment": "local",
+        "environment_details": {
+            "os_platform": {"system": "Linux", "release": "6.1", "is_wsl": False},
+            "cloud_provider": None,
+        },
         "checks": [{"name": "db", "status": "ok", "detail": "alive"}],
         "proxmox": {
             "nodes": [
@@ -518,6 +523,19 @@ def test_audit_git_unavailable():
     assert "N/A" in result.stdout
 
 
+def test_audit_shows_wsl_suffix_when_detected():
+    mock = _git_mock("main", "abc1234", "", "")
+    wsl_platform = {"system": "Linux", "release": "5.15.0-microsoft-standard", "is_wsl": True}
+    with (
+        patch("apps.cli.main.subprocess.run", mock),
+        patch("apps.cli.main.detect_os_platform", return_value=wsl_platform),
+    ):
+        result = runner.invoke(app, ["audit"])
+
+    assert result.exit_code == 0
+    assert "WSL" in result.stdout
+
+
 # ---------------------------------------------------------------------------
 # CI-001: doctor --json / --quiet / --non-interactive
 # ---------------------------------------------------------------------------
@@ -698,6 +716,7 @@ def test_diagnose_quiet_error_exits_one_no_output():
 def test_diagnose_non_interactive_behaves_same_as_default():
     report = {
         "overall_status": "ok",
+        "runtime_environment": "local",
         "checks": [{"name": "db", "status": "ok", "detail": "alive"}],
         "proxmox": {},
         "docker": {},
@@ -707,6 +726,25 @@ def test_diagnose_non_interactive_behaves_same_as_default():
 
     assert result.exit_code == 0
     assert "overall status" in result.stdout.lower()
+
+
+def test_diagnose_shows_cloud_provider_when_detected():
+    report = {
+        "overall_status": "ok",
+        "runtime_environment": "container",
+        "environment_details": {
+            "os_platform": {"system": "Linux", "release": "6.1", "is_wsl": False},
+            "cloud_provider": "aws",
+        },
+        "checks": [{"name": "db", "status": "ok", "detail": "alive"}],
+        "proxmox": {},
+        "docker": {},
+    }
+    with patch("apps.cli.main.run_diagnostics", new=AsyncMock(return_value=report)):
+        result = runner.invoke(app, ["diagnose"])
+
+    assert result.exit_code == 0
+    assert "container (aws)" in result.stdout
 
 
 # ---------------------------------------------------------------------------

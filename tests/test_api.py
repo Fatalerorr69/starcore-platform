@@ -121,6 +121,24 @@ def test_diagnostics_endpoint_returns_report():
     body = response.json()
     assert "overall_status" in body
     assert "checks" in body
+    assert "runtime_environment" in body
+    assert "environment_details" in body
+
+
+def test_diagnostics_endpoint_classifies_client_platform():
+    response = client.get(
+        "/diagnostics",
+        headers={"User-Agent": "Mozilla/5.0 (Linux; Android 14) Chrome Mobile"},
+    )
+    assert response.status_code == 200
+    assert response.json()["client"]["platform"] == "browser-mobile"
+
+
+def test_diagnostics_endpoint_reports_unknown_client_without_user_agent():
+    response = client.get("/diagnostics", headers={"User-Agent": ""})
+    assert response.status_code == 200
+    body = response.json()["client"]
+    assert body["platform"] == "unknown"
 
 
 def test_dashboard_ui_serves_html():
