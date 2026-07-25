@@ -27,11 +27,12 @@ This README reflects the **actual current state of the codebase**, not the long-
 | Docker Provider | Done | Real implementation via docker-py: connect, health, list, create/start/stop/remove containers |
 | Proxmox Provider | Done | Real implementation via proxmoxer: connect, health, list, start/stop/shutdown VMs and LXC containers, clone VM or LXC from template |
 | Blueprint Engine | Done | Load YAML, plan, execute. Sequential (BlueprintExecutor) or parallel graph execution (Scheduler + TaskGraph) via depends_on |
-| CLI | Done | starcore blueprint plan/run [--parallel], starcore version, starcore health |
+| CLI | Done | starcore blueprint plan/run [--parallel], starcore health, starcore doctor [--fast], starcore audit |
 | Core API | Done | FastAPI: providers, blueprint plan/run, run history |
 | Persistence | Done | SQLite (via SQLAlchemy) stores blueprint run history and task results |
-| Config | Done | .env-based settings via pydantic-settings |
-| Tests | 114 passing | ruff, pyright, pytest, pre-commit, CI on every PR |
+| Config | Done | .env-based settings via pydantic-settings; STARCORE_LOG_JSON for structured JSON logging |
+| Observability | Done | GET /metrics — Prometheus text format, authenticated; structured loguru logging (STARCORE_LOG_JSON) |
+| Tests | 361 passing | ruff, pyright, pytest (incl. Hypothesis property tests), pre-commit, CI on every PR |
 
 ## What's Planned, Not Built Yet
 

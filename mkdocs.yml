@@ -16,10 +16,14 @@ nav:
       - Sprint 003: changelog/sprint-003.md
       - Sprint 004: changelog/sprint-004.md
       - Sprint 005: changelog/sprint-005.md
+      - Sprint 006: changelog/sprint-006.md
+      - Sprint 007: changelog/sprint-007.md
+      - Sprint 008: changelog/sprint-008.md
   - ADRs:
       - ADR-001 Blueprint Dependency Execution: adr/ADR-001-blueprint-dependency-execution.md
       - ADR-002 Provider Lifecycle: adr/ADR-002-provider-lifecycle.md
       - ADR-003 Rate Limiting: adr/ADR-003-rate-limiting.md
       - ADR-004 Dependency Vulnerability Scanning: adr/ADR-004-dependency-vulnerability-scanning.md
       - ADR-005 Unified Schema Management: adr/ADR-005-unified-schema-management.md
+      - ADR-006 Observability: adr/ADR-006-observability.md
   - Vision (SES): ses/SES-0000-MASTER-INDEX.md

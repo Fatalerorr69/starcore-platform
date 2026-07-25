@@ -198,6 +198,57 @@ def test_planner_create_graph_raises_for_unknown_dependency(name: str) -> None:
         ExecutionPlanner().create_graph(blueprint)
 
 
+# ── ExecutionPlanner.create_plan properties ────────────────────────────────────
+
+
+@given(blueprint=valid_dag_blueprint())
+def test_planner_plan_length_equals_resource_count(blueprint: Blueprint) -> None:
+    """create_plan() returns exactly one step per resource."""
+    plan = ExecutionPlanner().create_plan(blueprint)
+    assert len(plan) == len(blueprint.resources)
+
+
+@given(blueprint=valid_dag_blueprint())
+def test_planner_plan_resource_names_match_blueprint(blueprint: Blueprint) -> None:
+    """The set of resource names in create_plan() equals the set declared in the blueprint."""
+    plan = ExecutionPlanner().create_plan(blueprint)
+    plan_names = {step["resource"] for step in plan}
+    blueprint_names = {r.name for r in blueprint.resources}
+    assert plan_names == blueprint_names
+
+
+@given(blueprint=valid_dag_blueprint())
+def test_planner_plan_respects_dependency_order(blueprint: Blueprint) -> None:
+    """Every dependency appears at an earlier index than its dependent in create_plan()."""
+    plan = ExecutionPlanner().create_plan(blueprint)
+    position = {step["resource"]: i for i, step in enumerate(plan)}
+    by_name = {r.name: r for r in blueprint.resources}
+    for step in plan:
+        resource = by_name[step["resource"]]
+        for dep in resource.depends_on:
+            assert position[dep] < position[step["resource"]], (
+                f"Dependency '{dep}' appears after '{step['resource']}' in plan"
+            )
+
+
+@given(blueprint=valid_dag_blueprint())
+def test_planner_plan_and_graph_agree_on_provider(blueprint: Blueprint) -> None:
+    """create_plan() and create_graph() assign the same provider to each resource."""
+    plan = ExecutionPlanner().create_plan(blueprint)
+    graph = ExecutionPlanner().create_graph(blueprint)
+    plan_providers = {step["resource"]: step["provider"] for step in plan}
+    for task in graph.all():
+        assert task.provider == plan_providers[task.resource]
+
+
+@given(blueprint=valid_dag_blueprint())
+def test_planner_plan_no_duplicate_resources(blueprint: Blueprint) -> None:
+    """create_plan() never emits the same resource name more than once."""
+    plan = ExecutionPlanner().create_plan(blueprint)
+    names = [step["resource"] for step in plan]
+    assert len(names) == len(set(names))
+
+
 # ── BlueprintLoader properties ─────────────────────────────────────────────────
 
 
