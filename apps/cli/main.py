@@ -1,4 +1,5 @@
 import asyncio
+import json
 import subprocess
 from pathlib import Path
 
@@ -57,8 +58,24 @@ def doctor(
     fast: bool = typer.Option(
         False, "--fast", help="Skip tests; check lint, types, and security only."
     ),
+    json_output: bool = typer.Option(
+        False, "--json", help="Emit results as a JSON object instead of a Rich table."
+    ),
+    quiet: bool = typer.Option(
+        False, "--quiet", help="Suppress all output; rely on exit code only."
+    ),
+    non_interactive: bool = typer.Option(
+        False, "--non-interactive", help="Disable interactive prompts (safe for CI/cron/systemd)."
+    ),
 ):
-    """Run all local quality gates: lint, type-check, security scan, tests."""
+    """Run all local quality gates: lint, type-check, security scan, tests.
+
+    JSON schema (--json):
+        {"gates": [{"name": str, "status": "pass"|"fail", "detail": str}],
+         "passed": int, "failed": int}
+
+    Exit codes: 0 = all gates passed, 1 = one or more gates failed.
+    """
     gates: list[tuple[str, list[str]]] = [
         ("Lockfile", ["uv", "lock", "--check"]),
         ("Ruff lint", ["uv", "run", "ruff", "check", "."]),
@@ -69,39 +86,66 @@ def doctor(
     if not fast:
         gates.append(("Tests", ["uv", "run", "pytest", "-q", "--tb=short"]))
 
-    table = Table(title="Quality Gates")
-    table.add_column("Gate")
-    table.add_column("Status")
-    table.add_column("Detail")
-
+    results: list[dict[str, str]] = []
     n_failed = 0
     for name, cmd in gates:
         proc = subprocess.run(cmd, capture_output=True, text=True)  # noqa: S603 — cmd is a hardcoded constant list
         if proc.returncode == 0:
-            status = "[green]PASS[/green]"
-            detail = ""
+            results.append({"name": name, "status": "pass", "detail": ""})
         else:
             n_failed += 1
-            status = "[red]FAIL[/red]"
             out = (proc.stdout + proc.stderr).strip()
             detail = out[:120] + ("..." if len(out) > 120 else "")
-        table.add_row(name, status, detail)
+            results.append({"name": name, "status": "fail", "detail": detail})
 
-    console.print(table)
+    if json_output:
+        print(
+            json.dumps(
+                {"gates": results, "passed": len(results) - n_failed, "failed": n_failed},
+                indent=2,
+            )
+        )
+    elif not quiet:
+        table = Table(title="Quality Gates")
+        table.add_column("Gate")
+        table.add_column("Status")
+        table.add_column("Detail")
+        for r in results:
+            status = "[green]PASS[/green]" if r["status"] == "pass" else "[red]FAIL[/red]"
+            table.add_row(r["name"], status, r["detail"])
+        console.print(table)
+        if n_failed:
+            console.print(f"[red]{n_failed} gate(s) failed[/red]")
+        else:
+            console.print("[green]All gates passed[/green]")
 
     if n_failed:
-        console.print(f"[red]{n_failed} gate(s) failed[/red]")
         raise typer.Exit(code=1)
-
-    console.print("[green]All gates passed[/green]")
 
 
 @app.command()
-def audit():
-    """Show a quick local project state summary: git state, file counts."""
+def audit(
+    json_output: bool = typer.Option(
+        False, "--json", help="Emit results as a JSON object instead of a Rich table."
+    ),
+    quiet: bool = typer.Option(
+        False, "--quiet", help="Suppress all output; rely on exit code only."
+    ),
+    non_interactive: bool = typer.Option(
+        False, "--non-interactive", help="Disable interactive prompts (safe for CI/cron/systemd)."
+    ),
+):
+    """Show a quick local project state summary: git state, file counts.
+
+    JSON schema (--json):
+        {"branch": str, "sha": str, "working_tree": str,
+         "python_files": int, "test_files": int, "recent_commits": [str]}
+
+    Exit code: always 0.
+    """
 
     def _git(*args: str) -> str:
-        proc = subprocess.run(["git", *args], capture_output=True, text=True)
+        proc = subprocess.run(["git", *args], capture_output=True, text=True)  # noqa: S603
         return proc.stdout.strip() if proc.returncode == 0 else "N/A"
 
     branch = _git("rev-parse", "--abbrev-ref", "HEAD")
@@ -125,20 +169,35 @@ def audit():
     )
     test_files = [f for f in py_files if f.name.startswith("test_")]
 
-    table = Table(title="Project State")
-    table.add_column("Item")
-    table.add_column("Value")
-    table.add_row("Branch", branch)
-    table.add_row("SHA", sha)
-    table.add_row("Working tree", tree_label)
-    table.add_row("Python files", str(len(py_files)))
-    table.add_row("Test files", str(len(test_files)))
-    console.print(table)
+    if json_output:
+        print(
+            json.dumps(
+                {
+                    "branch": branch,
+                    "sha": sha,
+                    "working_tree": tree_label,
+                    "python_files": len(py_files),
+                    "test_files": len(test_files),
+                    "recent_commits": log_lines,
+                },
+                indent=2,
+            )
+        )
+    elif not quiet:
+        table = Table(title="Project State")
+        table.add_column("Item")
+        table.add_column("Value")
+        table.add_row("Branch", branch)
+        table.add_row("SHA", sha)
+        table.add_row("Working tree", tree_label)
+        table.add_row("Python files", str(len(py_files)))
+        table.add_row("Test files", str(len(test_files)))
+        console.print(table)
 
-    if log_lines:
-        console.print("\n[bold]Recent commits:[/bold]")
-        for line in log_lines:
-            console.print(f"  {line}")
+        if log_lines:
+            console.print("\n[bold]Recent commits:[/bold]")
+            for line in log_lines:
+                console.print(f"  {line}")
 
 
 @blueprint_app.command("plan")
@@ -319,71 +378,89 @@ def plugins_list():
 
 
 @app.command("diagnose")
-def diagnose():
-    """Run a deep health/status check of the STARCORE deployment and configured providers."""
+def diagnose(
+    json_output: bool = typer.Option(
+        False, "--json", help="Emit the full diagnostics report as JSON."
+    ),
+    quiet: bool = typer.Option(
+        False, "--quiet", help="Suppress all output; rely on exit code only."
+    ),
+    non_interactive: bool = typer.Option(
+        False, "--non-interactive", help="Disable interactive prompts (safe for CI/cron/systemd)."
+    ),
+):
+    """Run a deep health/status check of the STARCORE deployment and configured providers.
+
+    JSON schema (--json): the raw diagnostics dict from core.diagnostics.run_diagnostics().
+        {"overall_status": "ok"|"warning"|"error", "checks": [...], "proxmox": {...}, ...}
+
+    Exit codes: 0 = overall_status ok, 1 = warning or error.
+    """
     report = asyncio.run(run_diagnostics())
-
-    status_colors = {"ok": "green", "warning": "yellow", "error": "red"}
-
     overall = report["overall_status"]
-    color = status_colors.get(overall, "white")
-    console.print(f"Overall status: [{color}]{overall}[/{color}]")
 
-    table = Table(title="Checks")
-    table.add_column("Check")
-    table.add_column("Status")
-    table.add_column("Detail")
-    for check in report["checks"]:
-        c = status_colors.get(check["status"], "white")
-        table.add_row(check["name"], f"[{c}]{check['status']}[/{c}]", check["detail"])
-    console.print(table)
+    if json_output:
+        print(json.dumps(report, indent=2, default=str))
+    elif not quiet:
+        status_colors = {"ok": "green", "warning": "yellow", "error": "red"}
+        color = status_colors.get(overall, "white")
+        console.print(f"Overall status: [{color}]{overall}[/{color}]")
 
-    proxmox = report.get("proxmox") or {}
-    if proxmox.get("nodes"):
-        node_table = Table(title="Proxmox Nodes")
-        node_table.add_column("Node")
-        node_table.add_column("CPU %")
-        node_table.add_column("Memory")
-        node_table.add_column("Disk")
-        for node in proxmox["nodes"]:
-            node_table.add_row(
-                str(node["node"]),
-                f"{node['cpu_percent']}%",
-                f"{node['memory_used_gb']} / {node['memory_total_gb']} GB",
-                f"{node['disk_used_gb']} / {node['disk_total_gb']} GB",
-            )
-        console.print(node_table)
+        table = Table(title="Checks")
+        table.add_column("Check")
+        table.add_column("Status")
+        table.add_column("Detail")
+        for check in report["checks"]:
+            c = status_colors.get(check["status"], "white")
+            table.add_row(check["name"], f"[{c}]{check['status']}[/{c}]", check["detail"])
+        console.print(table)
 
-    if proxmox.get("storage"):
-        storage_table = Table(title="Proxmox Storage")
-        storage_table.add_column("Node")
-        storage_table.add_column("Storage")
-        storage_table.add_column("Type")
-        storage_table.add_column("Used / Total")
-        for s in proxmox["storage"]:
-            storage_table.add_row(
-                str(s["node"]),
-                str(s["storage"]),
-                str(s["type"]),
-                f"{s['used_gb']} / {s['total_gb']} GB",
-            )
-        console.print(storage_table)
+        proxmox = report.get("proxmox") or {}
+        if proxmox.get("nodes"):
+            node_table = Table(title="Proxmox Nodes")
+            node_table.add_column("Node")
+            node_table.add_column("CPU %")
+            node_table.add_column("Memory")
+            node_table.add_column("Disk")
+            for node in proxmox["nodes"]:
+                node_table.add_row(
+                    str(node["node"]),
+                    f"{node['cpu_percent']}%",
+                    f"{node['memory_used_gb']} / {node['memory_total_gb']} GB",
+                    f"{node['disk_used_gb']} / {node['disk_total_gb']} GB",
+                )
+            console.print(node_table)
 
-    if proxmox.get("orphaned_resources"):
-        console.print(
-            f"[yellow]{len(proxmox['orphaned_resources'])} orphaned Proxmox "
-            "resource(s) found (exist on host but not tracked in STARCORE run "
-            "history):[/yellow]"
-        )
-        for res in proxmox["orphaned_resources"]:
+        if proxmox.get("storage"):
+            storage_table = Table(title="Proxmox Storage")
+            storage_table.add_column("Node")
+            storage_table.add_column("Storage")
+            storage_table.add_column("Type")
+            storage_table.add_column("Used / Total")
+            for s in proxmox["storage"]:
+                storage_table.add_row(
+                    str(s["node"]),
+                    str(s["storage"]),
+                    str(s["type"]),
+                    f"{s['used_gb']} / {s['total_gb']} GB",
+                )
+            console.print(storage_table)
+
+        if proxmox.get("orphaned_resources"):
             console.print(
-                f"  - {res.get('kind')} vmid={res.get('vmid')} "
-                f"name={res.get('name')} on {res.get('node')}"
+                f"[yellow]{len(proxmox['orphaned_resources'])} orphaned Proxmox "
+                "resource(s) found (exist on host but not tracked in STARCORE run "
+                "history):[/yellow]"
             )
+            for res in proxmox["orphaned_resources"]:
+                console.print(
+                    f"  - {res.get('kind')} vmid={res.get('vmid')} "
+                    f"name={res.get('name')} on {res.get('node')}"
+                )
 
-    docker = report.get("docker") or {}
-    if docker.get("containers"):
-        console.print(f"Docker containers by status: {docker['containers']}")
+        docker = report.get("docker") or {}
+        if docker.get("containers"):
+            console.print(f"Docker containers by status: {docker['containers']}")
 
     if overall != "ok":
         raise typer.Exit(code=1)
