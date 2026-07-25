@@ -22,8 +22,6 @@ class Settings(BaseSettings):
     # expect structured input. See core/logger.py.
     log_json: bool = False
 
-    postgres_url: str = "postgresql://starcore:starcore@localhost:5432/starcore"
-
     database_url: str = "sqlite:///./data/starcore.db"
 
     api_key: str | None = None

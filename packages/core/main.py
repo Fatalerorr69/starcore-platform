@@ -109,7 +109,7 @@ app.add_middleware(SlowAPIMiddleware)
 
 @app.middleware("http")
 async def _metrics_middleware(request: Request, call_next):
-    """Record HTTP request count and latency for GET /metrics.
+    """Record HTTP request count and latency for all HTTP routes.
 
     Uses the matched route's path template (e.g. "/runs/{run_id}") rather
     than the raw request path, so per-resource IDs don't blow up metric
@@ -122,7 +122,9 @@ async def _metrics_middleware(request: Request, call_next):
     duration = time.perf_counter() - start
     route = request.scope.get("route")
     path = route.path if route is not None else request.url.path
-    HTTP_REQUESTS_TOTAL.labels(method=request.method, path=path, status=response.status_code).inc()
+    HTTP_REQUESTS_TOTAL.labels(
+        method=request.method, path=path, status=str(response.status_code)
+    ).inc()
     HTTP_REQUEST_DURATION_SECONDS.labels(method=request.method, path=path).observe(duration)
     return response
 

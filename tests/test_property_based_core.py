@@ -13,7 +13,7 @@ from typing import Any
 from core.events import EventBus
 from core.plugin_manager import PluginManager
 from core.repository import get_run, list_known_provider_vmids, list_runs, save_run
-from hypothesis import given
+from hypothesis import HealthCheck, given, settings
 from hypothesis import strategies as st
 from orchestrator.task import Task, TaskStatus
 
@@ -283,6 +283,7 @@ def test_repository_list_runs_limit_returns_at_most_k_records(bp_name: str, limi
     provider=st.sampled_from(["proxmox", "docker", "fake"]),
     vmids=st.lists(st.integers(min_value=100, max_value=9999), min_size=1, max_size=5, unique=True),
 )
+@settings(suppress_health_check=[HealthCheck.function_scoped_fixture])
 def test_repository_list_known_provider_vmids_returns_saved_vmids(
     provider: str, vmids: list[int]
 ) -> None:

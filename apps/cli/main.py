@@ -76,7 +76,7 @@ def doctor(
 
     n_failed = 0
     for name, cmd in gates:
-        proc = subprocess.run(cmd, capture_output=True, text=True)
+        proc = subprocess.run(cmd, capture_output=True, text=True)  # noqa: S603 — cmd is a hardcoded constant list
         if proc.returncode == 0:
             status = "[green]PASS[/green]"
             detail = ""

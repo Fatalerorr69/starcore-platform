@@ -30,7 +30,7 @@ _COL = 16
 
 
 def _run(cmd: list[str]) -> tuple[bool, str]:
-    proc = subprocess.run(cmd, cwd=REPO_ROOT, capture_output=True, text=True)
+    proc = subprocess.run(cmd, cwd=REPO_ROOT, capture_output=True, text=True)  # noqa: S603 — cmd is a hardcoded constant list
     ok = proc.returncode == 0
     out = (proc.stdout + proc.stderr).strip()
     return ok, out
