@@ -1,0 +1,736 @@
+{
+  "audit_metadata": {
+    "schema_version": "1.0",
+    "timestamp": "2026-07-25",
+    "auditor": "Claude Code (claude-sonnet-4-6)",
+    "mode": "READ-ONLY / AUDIT ONLY — no code changes made",
+    "repository": "Fatalerorr69/starcore-platform",
+    "branch": "claude/new-session-s52x55",
+    "head_sha": "4e278c2431e0c2c53ec356bc24848e948fb02dcf",
+    "pull_request": 73,
+    "python_version": "3.12.3",
+    "uv_version": "0.8.17"
+  },
+  "repository": {
+    "path": "/home/user/starcore-platform",
+    "working_tree": "clean",
+    "untracked_files": [],
+    "modified_files": [],
+    "staged_files": []
+  },
+  "git": {
+    "branch": "claude/new-session-s52x55",
+    "head_sha": "4e278c2431e0c2c53ec356bc24848e948fb02dcf",
+    "remote": "origin",
+    "remote_url": "http://local_proxy@127.0.0.1:41729/git/Fatalerorr69/starcore-platform",
+    "commits_ahead_of_merge_base": 9,
+    "merge_base_with_main": "39964337120afb0b20d071201f0ea8e0c3c2c3bc",
+    "origin_main_sha": "6f513fd84f48fa416cf96da48ec72d8958673d64",
+    "main_commits_not_on_branch": ["6f513fd84f48fa416cf96da48ec72d8958673d64"],
+    "local_merge_tree_conflicts": 0
+  },
+  "pull_request": {
+    "number": 73,
+    "title": "feat: session 2026-07-25 — observability, automation, cleanup, docs",
+    "state": "open",
+    "merged": false,
+    "draft": false,
+    "mergeable": null,
+    "mergeable_state": "dirty",
+    "html_url": "https://github.com/Fatalerorr69/starcore-platform/pull/73",
+    "head_branch": "claude/new-session-s52x55",
+    "base_branch": "main",
+    "author": "Fatalerorr69",
+    "created_at": "2026-07-25T09:47:53Z",
+    "updated_at": "2026-07-25T09:49:41Z",
+    "commits": 9,
+    "changed_files": 19,
+    "additions": 974,
+    "deletions": 199,
+    "check_runs": [
+      {
+        "id": 89667512260,
+        "name": "Socket Security: Pull Request Alerts",
+        "status": "completed",
+        "conclusion": "neutral"
+      },
+      {
+        "id": 89667393588,
+        "name": "Sourcery review",
+        "status": "completed",
+        "conclusion": "failure"
+      },
+      {
+        "id": 89667392247,
+        "name": "Socket Security: Project Report",
+        "status": "completed",
+        "conclusion": "success"
+      }
+    ],
+    "github_actions_ci_visible": false,
+    "sourcery_findings": {
+      "security_issues": 2,
+      "general_comments": 2,
+      "locations": [
+        "apps/cli/main.py:79",
+        "scripts/doctor.py:33",
+        "packages/core/main.py:110-119"
+      ]
+    }
+  },
+  "commits": [
+    {
+      "sha": "d14f5b047a64aeea26ea94f7bbe903e3d08f9334",
+      "message": "chore: align Dockerfile to Python 3.12 and add pyright pre-commit hook",
+      "bundles": ["A01", "A02"]
+    },
+    {
+      "sha": "371e071e08072602eafb162db2d446b4306fbce1",
+      "message": "reports: update code report for session claude/new-session-s52x55",
+      "bundles": ["B03"]
+    },
+    {
+      "sha": "0b0b72deaac7278d99b416ec2850cf5b9085c5be",
+      "message": "feat(B01,B02): add scripts/ automation and starcore doctor/audit CLI commands",
+      "bundles": ["B01", "B02"]
+    },
+    {
+      "sha": "873d1a3e27f5f3a42f7dcd089d223e594b29c404",
+      "message": "chore(reports): update code report — B01,B02 EXECUTED, health score 97",
+      "bundles": ["B03"]
+    },
+    {
+      "sha": "4f337f7fc1479dfb0b75355d455a6157db517254",
+      "message": "chore(C03): remove unused redis and nats-py dependencies",
+      "bundles": ["C03"]
+    },
+    {
+      "sha": "af4edc92e220e5fbfba16f0ffd63ee8745768950",
+      "message": "feat(C01): add Prometheus metrics endpoint and structured logging",
+      "bundles": ["C01"]
+    },
+    {
+      "sha": "4d0cf3739783bba8108d288055304717f0d807fe",
+      "message": "chore(reports): finalize session report — C01,C03 EXECUTED, C02 corrected",
+      "bundles": ["B03"]
+    },
+    {
+      "sha": "09dcf2290a12e6211c2a578830ca28704950a8e7",
+      "message": "docs(TD-C05,TD-C06): document alembic check workflow and pin mkdocs below v2",
+      "bundles": ["TD-C05", "TD-C06"]
+    },
+    {
+      "sha": "4e278c2431e0c2c53ec356bc24848e948fb02dcf",
+      "message": "chore(reports): final session report — health 100/100, zero tech debt",
+      "bundles": ["B03"]
+    }
+  ],
+  "action_bundles": [
+    {
+      "id": "A01",
+      "claimed_status": "EXECUTED",
+      "actual_status": "CONFIRMED",
+      "evidence": "FROM python:3.12-slim in Dockerfile",
+      "commit": "d14f5b0",
+      "risk": "none"
+    },
+    {
+      "id": "A02",
+      "claimed_status": "EXECUTED",
+      "actual_status": "CONFIRMED",
+      "evidence": "pyright hook in .pre-commit-config.yaml rev v1.1.400",
+      "commit": "d14f5b0",
+      "risk": "none"
+    },
+    {
+      "id": "B01",
+      "claimed_status": "EXECUTED",
+      "actual_status": "CONFIRMED",
+      "evidence": "scripts/doctor.py and scripts/health.py exist and are executable",
+      "commit": "0b0b72d",
+      "risk": "subprocess SAST flag (F-04)"
+    },
+    {
+      "id": "B02",
+      "claimed_status": "EXECUTED",
+      "actual_status": "CONFIRMED",
+      "evidence": "starcore doctor and starcore audit commands in apps/cli/main.py",
+      "commit": "0b0b72d",
+      "risk": "subprocess SAST flag (F-04); duplicate GATES (TD-NEW-09)"
+    },
+    {
+      "id": "B03",
+      "claimed_status": "EXECUTED",
+      "actual_status": "CONFIRMED",
+      "evidence": "reports updated across multiple commits",
+      "commit": "371e071-4e278c2",
+      "risk": "none"
+    },
+    {
+      "id": "C01",
+      "claimed_status": "EXECUTED",
+      "actual_status": "CONFIRMED",
+      "evidence": "packages/core/metrics.py, /metrics endpoint, STARCORE_LOG_JSON; 9 new tests",
+      "commit": "af4edc9",
+      "risk": "status label int not str (F-05); docstring inaccuracy (F-06)"
+    },
+    {
+      "id": "C02",
+      "claimed_status": "NOT_NEEDED",
+      "actual_status": "CONFIRMED",
+      "evidence": "_snapshot_create/list/delete/rollback in proxmox/provider.py lines 347-404; CLI in apps/cli/main.py:550+; resource_actions.py chain",
+      "commit": "N/A",
+      "risk": "runtime not verified; no timeout on asyncio.to_thread"
+    },
+    {
+      "id": "C03",
+      "claimed_status": "EXECUTED",
+      "actual_status": "CONFIRMED_PARTIAL",
+      "evidence": "redis and nats-py absent from pyproject.toml; redis_url/nats_url absent from config.py. BUT: postgres_url still present in config.py; .env.example still has STARCORE_REDIS_URL and STARCORE_NATS_URL",
+      "commit": "4f337f7",
+      "risk": "stale .env.example (F-07); dead postgres_url field (F-07)"
+    },
+    {
+      "id": "TD-C05",
+      "claimed_status": "EXECUTED",
+      "actual_status": "CONFIRMED",
+      "evidence": "docs/development.md has alembic check runbook; CONTRIBUTING.md has cross-reference",
+      "commit": "09dcf22",
+      "risk": "none"
+    },
+    {
+      "id": "TD-C06",
+      "claimed_status": "EXECUTED",
+      "actual_status": "CONFIRMED",
+      "evidence": "pyproject.toml: mkdocs>=1.6.1,<2.0.0 and mkdocs-material>=9.6.15,<10.0.0; rationale in docs/development.md",
+      "commit": "09dcf22",
+      "risk": "none"
+    }
+  ],
+  "tests": {
+    "collected": 355,
+    "run_1": {"passed": 354, "failed": 1, "warning": 1},
+    "run_2": {"passed": 355, "failed": 0, "warning": 1},
+    "isolation_test": {"passed": 1, "failed": 0},
+    "flaky_test": "tests/test_property_based_core.py::test_repository_list_known_provider_vmids_returns_saved_vmids",
+    "property_based_count": 90,
+    "duration_seconds_range": "36-53"
+  },
+  "coverage": {
+    "line_coverage_percent": 100,
+    "total_lines": 1679,
+    "missed_lines": 0,
+    "branch_coverage_measured": false,
+    "scope": ["packages/", "apps/"],
+    "excluded": ["*/static/*"]
+  },
+  "ci_cd": {
+    "local_gates": {
+      "ruff_format": "PASS",
+      "ruff_lint": "PASS",
+      "pyright": "PASS (0 errors, 0 warnings)",
+      "pip_audit": "PASS (0 vulnerabilities)",
+      "pytest": "PASS (354-355/355, 100% coverage)",
+      "uv_lock_check": "PASS",
+      "alembic_check": "NOT RUN LOCALLY"
+    },
+    "github_actions": {
+      "quality_job": "NOT VISIBLE IN PR CHECK RUNS",
+      "docker_build_job": "NOT VISIBLE IN PR CHECK RUNS",
+      "sourcery": "FAILURE",
+      "socket_security_project": "SUCCESS",
+      "socket_security_pr_alerts": "NEUTRAL"
+    }
+  },
+  "dependencies": {
+    "redis_removed": true,
+    "nats_py_removed": true,
+    "postgres_url_in_settings": true,
+    "stale_env_example_redis_url": true,
+    "stale_env_example_nats_url": true,
+    "mkdocs_cap": ">=1.6.1,<2.0.0",
+    "mkdocs_material_cap": ">=9.6.15,<10.0.0",
+    "pip_audit_cves": 0
+  },
+  "docker": {
+    "base_image": "python:3.12-slim",
+    "non_root_user": true,
+    "user": "starcore",
+    "healthcheck": true,
+    "healthcheck_cmd": "python3 -c \"import urllib.request; urllib.request.urlopen('http://localhost:8000/health')\"",
+    "healthcheck_interval": "30s",
+    "multi_stage": false,
+    "docker_socket_mounted": true,
+    "secrets_in_dockerfile": false,
+    "compose_scaffold_profile": ["postgres", "redis", "nats"],
+    "postgres_password_hardcoded": false,
+    "build_verified": false,
+    "daemon_accessible": false
+  },
+  "runtime": {
+    "endpoints": {
+      "/": {"auth": false, "implemented": true},
+      "/health": {"auth": false, "implemented": true, "rate_limited": false},
+      "/diagnostics": {"auth": true, "implemented": true},
+      "/metrics": {"auth": true, "implemented": true, "prometheus_format": true},
+      "/blueprints/validate": {"auth": true, "implemented": true},
+      "/blueprints/plan": {"auth": true, "implemented": true},
+      "/blueprints/execute": {"auth": true, "implemented": true},
+      "/ai/generate-blueprint": {"auth": true, "implemented": true},
+      "/runs": {"auth": true, "implemented": true},
+      "/runs/{run_id}": {"auth": true, "implemented": true}
+    },
+    "api_key_comparison": "hmac.compare_digest (constant-time)",
+    "fails_closed_without_key": true,
+    "rate_limiting": "slowapi per-IP; /health exempt",
+    "live_stack_verified": false
+  },
+  "observability": {
+    "metrics_endpoint": "/metrics",
+    "metrics_auth": "X-API-Key",
+    "prometheus_registry": "dedicated CollectorRegistry (not global default)",
+    "metrics": [
+      {
+        "name": "starcore_http_requests_total",
+        "type": "Counter",
+        "labels": ["method", "path", "status"],
+        "issue": "status label is int not str — should be str(response.status_code)"
+      },
+      {
+        "name": "starcore_http_request_duration_seconds",
+        "type": "Histogram",
+        "labels": ["method", "path"]
+      },
+      {
+        "name": "starcore_blueprint_tasks_total",
+        "type": "Counter",
+        "labels": ["provider", "status"]
+      }
+    ],
+    "middleware_docstring_accurate": false,
+    "cardinality_risk": "LOW (route template used, not raw path)"
+  },
+  "logging": {
+    "library": "loguru",
+    "default_format": "human-readable text",
+    "json_mode_env": "STARCORE_LOG_JSON=true",
+    "sink_wired_at_startup": true,
+    "sensitive_data_in_logs": "NONE FOUND",
+    "diagnose": false
+  },
+  "security": {
+    "secrets_in_code": false,
+    "env_file_gitignored": true,
+    "env_example_present": true,
+    "env_example_has_real_secrets": false,
+    "pip_audit_cves": 0,
+    "api_key_constant_time": true,
+    "subprocess_sast_flags": [
+      {"file": "apps/cli/main.py", "line": 79, "assessment": "false positive — hardcoded cmd list"},
+      {"file": "scripts/doctor.py", "line": 33, "assessment": "false positive — hardcoded GATES constant"}
+    ],
+    "postgres_url_default_credential": "starcore:starcore (dead field, not used by app)"
+  },
+  "infrastructure": {
+    "proxmox": {
+      "accessible": false,
+      "code_implemented": true,
+      "unit_tested": true,
+      "integration_tested": false,
+      "runtime_verified": false
+    },
+    "docker_provider": {
+      "accessible": false,
+      "code_implemented": true,
+      "unit_tested": true
+    }
+  },
+  "proxmox": {
+    "snapshot_create": {"code_implemented": true, "tested": true, "runtime_verified": false},
+    "snapshot_list": {"code_implemented": true, "tested": true, "runtime_verified": false},
+    "snapshot_delete": {"code_implemented": true, "tested": true, "runtime_verified": false},
+    "snapshot_rollback": {"code_implemented": true, "tested": true, "runtime_verified": false},
+    "timeout_on_async_calls": false,
+    "retry": false,
+    "error_handling": "try/except in execute_resource_action -> TaskStatus.FAILED"
+  },
+  "ai_integrations": [
+    {
+      "provider": "Anthropic",
+      "client": "AsyncAnthropic",
+      "model_config": "STARCORE_ANTHROPIC_MODEL (default claude-sonnet-5)",
+      "implemented": true,
+      "unit_tested": true,
+      "mocked_in_tests": true,
+      "retry": false,
+      "timeout": false,
+      "rate_limit_handling": false,
+      "fallback": false,
+      "runtime_verified": false
+    }
+  ],
+  "mcp": {
+    "client": false,
+    "server": false,
+    "note": "MCP not implemented in STARCORE application (Claude Code tooling uses MCP separately)"
+  },
+  "github": {
+    "open_prs": 1,
+    "pr_73_state": "open",
+    "dependabot": "active",
+    "workflows": ["ci.yml", "docker-publish.yml", "dependabot-auto-merge.yml"],
+    "branch_protection_verified": false
+  },
+  "documentation": {
+    "readme": "present",
+    "contributing": "present, updated",
+    "security_md": "present",
+    "docs_development_md": "present, updated (alembic runbook, mkdocs cap)",
+    "architecture_md": "present, updated (metrics, logging)",
+    "adrs": 5,
+    "changelogs": 5,
+    "sprint_006_changelog": "MISSING",
+    "sprint_007_changelog": "MISSING"
+  },
+  "technical_debt": [
+    {
+      "id": "TD-NEW-01",
+      "title": "PR #73 merge conflict (dirty state)",
+      "priority": "P1",
+      "status": "OPEN",
+      "evidence": "mergeable_state=dirty; 1 commit on main not on branch"
+    },
+    {
+      "id": "TD-NEW-02",
+      "title": "GitHub Actions CI not visible for PR #73",
+      "priority": "P1",
+      "status": "OPEN",
+      "evidence": "Only 3 external check runs visible; quality and docker-build missing"
+    },
+    {
+      "id": "TD-NEW-03",
+      "title": "Flaky property-based test",
+      "priority": "P2",
+      "status": "OPEN",
+      "evidence": "test_repository_list_known_provider_vmids_returns_saved_vmids: 1 failed on run 1, 0 failed on run 2"
+    },
+    {
+      "id": "TD-NEW-04",
+      "title": "Prometheus status label is int not str",
+      "priority": "P2",
+      "status": "OPEN",
+      "evidence": "packages/core/main.py:125 — status=response.status_code (int)"
+    },
+    {
+      "id": "TD-NEW-05",
+      "title": "postgres_url dead config field remains in Settings",
+      "priority": "P3",
+      "status": "OPEN",
+      "evidence": "packages/core/config.py:25"
+    },
+    {
+      "id": "TD-NEW-06",
+      "title": "Stale REDIS_URL/NATS_URL in .env.example",
+      "priority": "P3",
+      "status": "OPEN",
+      "evidence": ".env.example lines 6-7"
+    },
+    {
+      "id": "TD-NEW-07",
+      "title": "Metrics middleware docstring inaccuracy",
+      "priority": "P3",
+      "status": "OPEN",
+      "evidence": "packages/core/main.py:112 — says GET /metrics; runs on all routes"
+    },
+    {
+      "id": "TD-NEW-08",
+      "title": "subprocess SAST flag needs suppression comment",
+      "priority": "P3",
+      "status": "OPEN",
+      "evidence": "apps/cli/main.py:79, scripts/doctor.py:33 — false positive but flagged by Sourcery"
+    },
+    {
+      "id": "TD-NEW-09",
+      "title": "Duplicate GATES definitions (doctor.py and CLI command)",
+      "priority": "P4",
+      "status": "OPEN",
+      "evidence": "scripts/doctor.py GATES vs apps/cli/main.py doctor() — near-identical"
+    },
+    {
+      "id": "TD-NEW-10",
+      "title": "Missing sprint-006/007 changelog entries",
+      "priority": "P4",
+      "status": "OPEN",
+      "evidence": "docs/changelog/ has sprint-001 through sprint-005 only"
+    },
+    {
+      "id": "TD-NEW-11",
+      "title": "AI generator: no retry or timeout",
+      "priority": "P4",
+      "status": "OPEN",
+      "evidence": "packages/ai/generator.py — no timeout= on client.messages.create()"
+    },
+    {
+      "id": "TD-NEW-12",
+      "title": "Proxmox snapshot calls: no asyncio timeout",
+      "priority": "P4",
+      "status": "OPEN",
+      "evidence": "packages/providers/proxmox/provider.py — asyncio.to_thread without wait_for"
+    }
+  ],
+  "production_readiness": {
+    "code_quality": {"status": "PASS", "confidence": "HIGH"},
+    "tests": {"status": "PASS_WITH_CAVEAT", "confidence": "MEDIUM", "caveat": "1 flaky test"},
+    "coverage": {"status": "100_LINE", "confidence": "HIGH"},
+    "ci_cd": {"status": "LOCAL_PASS_GITHUB_UNCONFIRMED", "confidence": "MEDIUM"},
+    "security": {"status": "PASS", "confidence": "HIGH"},
+    "dependencies": {"status": "PASS", "confidence": "HIGH"},
+    "docker": {"status": "CONFIGURED", "confidence": "MEDIUM"},
+    "runtime": {"status": "NOT_VERIFIED", "confidence": "LOW"},
+    "database": {"status": "IMPLEMENTED", "confidence": "MEDIUM"},
+    "proxmox": {"status": "CODE_ONLY", "confidence": "LOW"},
+    "infrastructure": {"status": "NOT_VERIFIED", "confidence": "LOW"},
+    "ai": {"status": "PARTIAL", "confidence": "MEDIUM"},
+    "mcp": {"status": "NOT_IMPLEMENTED", "confidence": "N/A"},
+    "observability": {"status": "IMPLEMENTED", "confidence": "MEDIUM"},
+    "logging": {"status": "IMPLEMENTED", "confidence": "HIGH"},
+    "automation": {"status": "IMPLEMENTED", "confidence": "HIGH"},
+    "github": {"status": "OPEN_PR_BLOCKED", "confidence": "HIGH"},
+    "documentation": {"status": "GOOD", "confidence": "HIGH"}
+  },
+  "findings": [
+    {
+      "id": "F-01",
+      "severity": "P1",
+      "title": "PR #73 merge conflict — unmergeable",
+      "description": "main advanced to 6f513fd after branch creation; GitHub mergeable_state=dirty",
+      "evidence": "GitHub API: mergeable=null, mergeable_state=dirty; git: 1 commit on main not on branch",
+      "impact": "PR cannot be merged",
+      "action": "Rebase claude/new-session-s52x55 onto origin/main and push"
+    },
+    {
+      "id": "F-02",
+      "severity": "P1",
+      "title": "GitHub Actions CI not confirmed for PR #73",
+      "description": "quality and docker-build check runs not present in PR check run list",
+      "evidence": "get_check_runs returned 3 external checks; 0 from ci.yml",
+      "impact": "Required CI gates unknown for merge decision",
+      "action": "Verify CI triggered; force push or empty commit if needed to trigger workflow"
+    },
+    {
+      "id": "F-03",
+      "severity": "P2",
+      "title": "Flaky property-based test",
+      "description": "test_repository_list_known_provider_vmids_returns_saved_vmids fails intermittently in full suite",
+      "evidence": "Run 1: 354/355; Run 2: 355/355; Isolation: 1/1",
+      "impact": "Intermittent CI failures erode trust in test suite",
+      "action": "Investigate Hypothesis state leak; add explicit state reset or health check suppression"
+    },
+    {
+      "id": "F-04",
+      "severity": "P3",
+      "title": "subprocess SAST false positive needs suppression",
+      "description": "opengrep flags subprocess.run(cmd) in apps/cli/main.py:79 and scripts/doctor.py:33; cmd is hardcoded constant",
+      "evidence": "Sourcery review failure; code inspection confirms no user input in cmd",
+      "impact": "Sourcery review shows failure; future SAST noise",
+      "action": "Add inline comment explaining cmd is a hardcoded constant list"
+    },
+    {
+      "id": "F-05",
+      "severity": "P3",
+      "title": "Prometheus status label passed as int, not str",
+      "description": "HTTP_REQUESTS_TOTAL.labels(status=response.status_code) uses int; Prometheus labels are strings",
+      "evidence": "packages/core/main.py:125",
+      "impact": "Label type inconsistency; potential query issues in Prometheus/Grafana",
+      "action": "Change to str(response.status_code)"
+    },
+    {
+      "id": "F-06",
+      "severity": "P3",
+      "title": "Metrics middleware docstring inaccurate",
+      "description": "Docstring says 'GET /metrics' but middleware runs on every HTTP request",
+      "evidence": "packages/core/main.py:112; Sourcery review comment",
+      "impact": "Misleading documentation",
+      "action": "Update docstring: 'Record HTTP request count and latency for all HTTP routes'"
+    },
+    {
+      "id": "F-07",
+      "severity": "P3",
+      "title": "Stale .env.example entries and dead postgres_url config field",
+      "description": ".env.example still has STARCORE_REDIS_URL and STARCORE_NATS_URL (removed from Settings); postgres_url remains in Settings with weak default credential",
+      "evidence": ".env.example lines 6-7; packages/core/config.py:25",
+      "impact": "Misleads contributors; postgres_url default could appear in Settings dumps",
+      "action": "Remove stale entries from .env.example; remove postgres_url from Settings"
+    }
+  ],
+  "recommendations": {
+    "immediate": [
+      {
+        "priority": "P1",
+        "action": "Rebase branch onto origin/main and push",
+        "file": "branch operation",
+        "rationale": "PR unmergeable"
+      },
+      {
+        "priority": "P1",
+        "action": "Confirm GitHub Actions CI triggered; re-push if not",
+        "file": ".github/workflows/ci.yml",
+        "rationale": "Required CI gates must pass before merge"
+      },
+      {
+        "priority": "P2",
+        "action": "Investigate and fix flaky property-based test",
+        "file": "tests/test_property_based_core.py",
+        "rationale": "Intermittent failure erodes CI reliability"
+      },
+      {
+        "priority": "P3",
+        "action": "Change status=str(response.status_code) in metrics middleware",
+        "file": "packages/core/main.py:125",
+        "rationale": "Prometheus label type correctness"
+      },
+      {
+        "priority": "P3",
+        "action": "Update metrics middleware docstring",
+        "file": "packages/core/main.py:112",
+        "rationale": "Accuracy; clears Sourcery comment"
+      },
+      {
+        "priority": "P3",
+        "action": "Add SAST suppression comment for subprocess calls",
+        "file": "apps/cli/main.py:79, scripts/doctor.py:33",
+        "rationale": "Clears Sourcery failure"
+      }
+    ],
+    "near_term": [
+      {
+        "priority": "P3",
+        "action": "Remove postgres_url from Settings",
+        "file": "packages/core/config.py"
+      },
+      {
+        "priority": "P3",
+        "action": "Remove STARCORE_REDIS_URL and STARCORE_NATS_URL from .env.example",
+        "file": ".env.example"
+      },
+      {
+        "priority": "P4",
+        "action": "Extract shared GATES constant to eliminate duplication",
+        "file": "New: packages/core/doctor_gates.py or scripts/gates.py"
+      },
+      {
+        "priority": "P4",
+        "action": "Add sprint-006.md and sprint-007.md changelogs",
+        "file": "docs/changelog/"
+      },
+      {
+        "priority": "P4",
+        "action": "Add timeout to Anthropic client.messages.create()",
+        "file": "packages/ai/generator.py"
+      },
+      {
+        "priority": "P4",
+        "action": "Wrap Proxmox asyncio.to_thread calls with asyncio.wait_for",
+        "file": "packages/providers/proxmox/provider.py"
+      }
+    ],
+    "strategic": [
+      {
+        "priority": "P3",
+        "action": "Add --cov-branch to pytest for branch coverage measurement",
+        "benefit": "Reveals conditional logic gaps not caught by line coverage"
+      },
+      {
+        "priority": "P3",
+        "action": "Add retry with exponential backoff to Anthropic client",
+        "benefit": "Resilience to transient API failures"
+      },
+      {
+        "priority": "P4",
+        "action": "Add starcore_blueprint_runs_total counter",
+        "benefit": "Full-run observability beyond per-task granularity"
+      },
+      {
+        "priority": "P4",
+        "action": "Evaluate MCP server for STARCORE (expose blueprint ops as tools)",
+        "benefit": "AI-native infrastructure management"
+      },
+      {
+        "priority": "P4",
+        "action": "Add multi-stage Docker build",
+        "benefit": "Smaller image, reduced attack surface"
+      }
+    ]
+  },
+  "automation_opportunities": [
+    {
+      "name": "starcore release-check",
+      "description": "CLI command verifying PR readiness: CI green, changelog entry, no conflicts",
+      "complexity": "low",
+      "benefit": "Prevents incomplete merges"
+    },
+    {
+      "name": "Hypothesis database persistence in CI",
+      "description": "Cache Hypothesis database across CI runs to reproduce flaky test failures consistently",
+      "complexity": "low",
+      "benefit": "Catches flaky tests reliably"
+    },
+    {
+      "name": "GitHub Action: auto-rebase on main push",
+      "description": "Automatically rebase open PRs when main receives new commits",
+      "complexity": "medium",
+      "benefit": "Prevents dirty merge state"
+    },
+    {
+      "name": "AI PR reviewer (Claude Code)",
+      "description": "Automatically identifies F-class findings in PRs before human review",
+      "complexity": "high",
+      "benefit": "Zero manual review overhead for mechanical issues"
+    }
+  ],
+  "verified_vs_claimed": {
+    "VERIFIED": [
+      "All 10 action bundles implemented (A01-TD-C06)",
+      "All local quality gates pass",
+      "355 tests collected; 100% line coverage",
+      "Dockerfile uses python:3.12-slim",
+      "Non-root container user (starcore)",
+      "redis/nats-py removed from pyproject.toml and config.py",
+      "Prometheus /metrics endpoint authenticated",
+      "loguru sink wired at startup",
+      "mkdocs/mkdocs-material version caps in place",
+      "alembic check runbook documented",
+      "snapshot chain code-implemented (C02)",
+      ".env gitignored",
+      "constant-time API key comparison"
+    ],
+    "CLAIMED_INACCURATE": [
+      "355 tests passing (actual: 354/355 on first run — flaky test exists)",
+      "Nulovy tech debt (actual: 12 new findings)",
+      "redis/nats fully removed (actual: .env.example still has REDIS_URL/NATS_URL; postgres_url still in Settings)"
+    ],
+    "NOT_VERIFIED": [
+      "GitHub Actions CI results for PR #73",
+      "Proxmox API connectivity",
+      "Docker container build success",
+      "Anthropic API key validity",
+      "Branch protection rules",
+      "Docker socket access at runtime"
+    ],
+    "UNKNOWN": [
+      "Open GitHub issues count",
+      "Security alert state",
+      "Secret scanning results",
+      "Image build time and size"
+    ]
+  },
+  "final_assessment": {
+    "status": "READY_FOR_MERGE_PENDING_BLOCKERS",
+    "overall_quality": "EXCELLENT",
+    "blockers": 2,
+    "p2_findings": 2,
+    "p3_findings": 3,
+    "p4_findings": 5,
+    "recommended_next_step": "Rebase claude/new-session-s52x55 onto origin/main, push, confirm CI triggers, then fix F-04 through F-06 (one-line changes each) to clear Sourcery review before merging"
+  }
+}
