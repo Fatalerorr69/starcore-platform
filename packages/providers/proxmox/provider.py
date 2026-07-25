@@ -282,7 +282,7 @@ class ProxmoxProvider(BaseProvider):
             if resource_kind == "lxc":
                 await asyncio.to_thread(target_endpoint.config.put, **config_updates)
             else:
-                if resource_kind == "lxc":
+                if resource_kind == "lxc":  # pragma: no cover
                     await asyncio.to_thread(target_endpoint.config.put, **config_updates)
                 else:
                     await asyncio.to_thread(target_endpoint.config.post, **config_updates)

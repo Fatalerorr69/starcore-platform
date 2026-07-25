@@ -906,3 +906,486 @@ async def test_docker_execute_unsupported_action_raises():
 
     with pytest.raises(ValueError, match="Unsupported Docker action"):
         await provider.execute(task)
+
+
+# ---------------------------------------------------------------------------
+# ProxmoxProvider — additional coverage
+# ---------------------------------------------------------------------------
+
+
+async def test_proxmox_connect_fails_when_version_check_raises():
+    """Lines 69-72: ProxmoxAPI constructs fine but version.get raises."""
+    fake_client = MagicMock()
+    fake_client.version.get.side_effect = Exception("connection refused")
+
+    settings = _settings(
+        proxmox_host="fatalab.local",
+        proxmox_user="root@pam",
+        proxmox_token_name="starcore",
+        proxmox_token_value="secret",
+    )
+
+    with (
+        patch("providers.proxmox.provider.get_settings", return_value=settings),
+        patch("providers.proxmox.provider.ProxmoxAPI", return_value=fake_client),
+    ):
+        provider = ProxmoxProvider()
+        result = await provider.connect()
+
+    assert result is False
+    assert provider._client is None
+
+
+async def test_proxmox_disconnect_clears_client():
+    """Lines 77-78: disconnect() sets _client to None."""
+    provider = ProxmoxProvider()
+    provider._client = MagicMock()
+    await provider.disconnect()
+    assert provider._client is None
+
+
+async def test_proxmox_health_disconnected():
+    """Line 81-82: health() returns disconnected when _client is None."""
+    provider = ProxmoxProvider()
+    result = await provider.health()
+    assert result["status"] == "disconnected"
+    assert result["provider"] == "proxmox"
+
+
+async def test_proxmox_health_ok_when_connected():
+    """Lines 83-85: health() returns ok when version.get succeeds."""
+    fake_client = MagicMock()
+    fake_client.version.get.return_value = {"version": "8.0"}
+    provider = ProxmoxProvider()
+    provider._client = fake_client
+    result = await provider.health()
+    assert result["status"] == "ok"
+    assert result["provider"] == "proxmox"
+
+
+async def test_proxmox_health_error_when_version_check_raises():
+    """Lines 86-87: health() returns error when version.get raises."""
+    fake_client = MagicMock()
+    fake_client.version.get.side_effect = Exception("timeout")
+    provider = ProxmoxProvider()
+    provider._client = fake_client
+    result = await provider.health()
+    assert result["status"] == "error"
+    assert "timeout" in result["detail"]
+
+
+async def test_proxmox_list_resources_returns_empty_when_disconnected():
+    """Lines 90-91: list_resources() returns [] when _client is None."""
+    provider = ProxmoxProvider()
+    result = await provider.list_resources()
+    assert result == []
+
+
+async def test_proxmox_list_resources_returns_vms_and_containers():
+    """Lines 92-117: list_resources() returns VMs and LXC containers."""
+    fake_client = MagicMock()
+    fake_client.nodes.get.return_value = [{"node": "pve"}]
+    fake_client.nodes.return_value.qemu.get.return_value = [
+        {"vmid": 100, "name": "web-vm", "status": "running"}
+    ]
+    fake_client.nodes.return_value.lxc.get.return_value = [
+        {"vmid": 200, "name": "db-ct", "status": "stopped"}
+    ]
+
+    provider = ProxmoxProvider()
+    provider._client = fake_client
+
+    result = await provider.list_resources()
+
+    assert len(result) == 2
+    vm = next(r for r in result if r["kind"] == "vm")
+    ct = next(r for r in result if r["kind"] == "lxc")
+    assert vm["vmid"] == 100
+    assert ct["vmid"] == 200
+    assert ct["node"] == "pve"
+
+
+async def test_proxmox_list_templates_returns_empty_when_disconnected():
+    """Line 121: list_templates() returns [] when _client is None."""
+    provider = ProxmoxProvider()
+    result = await provider.list_templates()
+    assert result == []
+
+
+async def test_proxmox_list_templates_returns_vm_and_lxc_templates():
+    """Lines 122-148: list_templates() returns VMs and LXC containers marked template=1."""
+    fake_client = MagicMock()
+    fake_client.nodes.get.return_value = [{"node": "pve"}]
+    fake_client.nodes.return_value.qemu.get.return_value = [
+        {"vmid": 9000, "name": "ubuntu-22.04", "template": 1},
+        {"vmid": 101, "name": "running-vm", "template": 0},
+    ]
+    fake_client.nodes.return_value.lxc.get.return_value = [
+        {"vmid": 8000, "name": "debian-ct", "template": 1},
+    ]
+
+    provider = ProxmoxProvider()
+    provider._client = fake_client
+
+    result = await provider.list_templates()
+
+    assert len(result) == 2
+    vmids = {t["vmid"] for t in result}
+    assert vmids == {9000, 8000}
+    kinds = {t["kind"] for t in result}
+    assert kinds == {"vm", "lxc"}
+
+
+async def test_proxmox_list_networks_returns_empty_when_disconnected():
+    """Line 152: list_networks() returns [] when _client is None."""
+    provider = ProxmoxProvider()
+    result = await provider.list_networks()
+    assert result == []
+
+
+async def test_proxmox_list_networks_returns_bridge_interfaces():
+    """Lines 153-167: list_networks() returns only bridge-type interfaces."""
+    fake_client = MagicMock()
+    fake_client.nodes.get.return_value = [{"node": "pve"}]
+    fake_client.nodes.return_value.network.get.return_value = [
+        {"iface": "vmbr0", "type": "bridge", "active": 1},
+        {"iface": "eth0", "type": "eth", "active": 1},
+    ]
+
+    provider = ProxmoxProvider()
+    provider._client = fake_client
+
+    result = await provider.list_networks()
+
+    assert len(result) == 1
+    assert result[0]["bridge"] == "vmbr0"
+    assert result[0]["active"] is True
+    assert result[0]["node"] == "pve"
+
+
+async def test_proxmox_node_status_returns_empty_when_disconnected():
+    """Line 171: node_status() returns [] when _client is None."""
+    provider = ProxmoxProvider()
+    result = await provider.node_status()
+    assert result == []
+
+
+async def test_proxmox_storage_status_returns_empty_when_disconnected():
+    """Line 182: storage_status() returns [] when _client is None."""
+    provider = ProxmoxProvider()
+    result = await provider.storage_status()
+    assert result == []
+
+
+async def test_proxmox_execute_start_requires_node_and_vmid():
+    """Line 209: execute() raises ValueError when node/vmid missing for start."""
+    from orchestrator.task import Task
+
+    provider = ProxmoxProvider()
+    provider._client = MagicMock()
+
+    task = Task(id="1", provider="proxmox", action="start", resource="web-vm", payload={})
+
+    with pytest.raises(ValueError, match="node.*vmid"):
+        await provider.execute(task)
+
+
+async def test_proxmox_execute_raises_for_unsupported_action():
+    """Line 229: execute() raises ValueError for unknown action."""
+    from orchestrator.task import Task
+
+    provider = ProxmoxProvider()
+    provider._client = MagicMock()
+
+    task = Task(id="1", provider="proxmox", action="teleport", resource="web-vm")
+
+    with pytest.raises(ValueError, match="Unsupported Proxmox action"):
+        await provider.execute(task)
+
+
+async def test_proxmox_create_raises_when_nextid_returns_none():
+    """Line 247: _create_resource() raises when cluster.nextid.get returns None."""
+    from orchestrator.task import Task
+
+    fake_client = MagicMock()
+    fake_client.cluster.nextid.get.return_value = None
+
+    provider = ProxmoxProvider()
+    provider._client = fake_client
+
+    task = Task(
+        id="1",
+        provider="proxmox",
+        action="create",
+        resource="web-vm",
+        payload={"node": "pve", "template_vmid": 9000},
+    )
+
+    with pytest.raises(RuntimeError, match="Failed to allocate next ID"):
+        await provider.execute(task)
+
+
+async def test_proxmox_create_uses_explicit_vmid_when_provided():
+    """Line 250: _create_resource() uses payload vmid without calling nextid."""
+    from orchestrator.task import Task
+
+    fake_client = MagicMock()
+    fake_client.nodes.return_value.qemu.return_value.clone.post.return_value = "UPID:pve:clone"
+    fake_client.nodes.return_value.tasks.return_value.status.get.return_value = {
+        "status": "stopped",
+        "exitstatus": "OK",
+    }
+
+    provider = ProxmoxProvider()
+    provider._client = fake_client
+
+    task = Task(
+        id="1",
+        provider="proxmox",
+        action="create",
+        resource="web-vm",
+        payload={"node": "pve", "template_vmid": 9000, "vmid": 150},
+    )
+
+    await provider.execute(task)
+
+    assert task.result["vmid"] == 150
+    fake_client.cluster.nextid.get.assert_not_called()
+
+
+async def test_proxmox_create_passes_storage_and_target_node():
+    """Lines 261, 263: _create_resource() forwards storage and target_node to clone."""
+    from orchestrator.task import Task
+
+    fake_client = MagicMock()
+    fake_client.cluster.nextid.get.return_value = "110"
+    fake_client.nodes.return_value.qemu.return_value.clone.post.return_value = "UPID:pve:clone"
+    fake_client.nodes.return_value.tasks.return_value.status.get.return_value = {
+        "status": "stopped",
+        "exitstatus": "OK",
+    }
+
+    provider = ProxmoxProvider()
+    provider._client = fake_client
+
+    task = Task(
+        id="1",
+        provider="proxmox",
+        action="create",
+        resource="web-vm",
+        payload={
+            "node": "pve",
+            "template_vmid": 9000,
+            "storage": "local-zfs",
+            "target_node": "pve2",
+        },
+    )
+
+    await provider.execute(task)
+
+    kwargs = fake_client.nodes.return_value.qemu.return_value.clone.post.call_args.kwargs
+    assert kwargs["storage"] == "local-zfs"
+    assert kwargs["target"] == "pve2"
+
+
+async def test_proxmox_create_raises_when_clone_returns_none_upid():
+    """Line 268: _create_resource() raises when clone returns no task ID."""
+    from orchestrator.task import Task
+
+    fake_client = MagicMock()
+    fake_client.cluster.nextid.get.return_value = "111"
+    fake_client.nodes.return_value.qemu.return_value.clone.post.return_value = None
+
+    provider = ProxmoxProvider()
+    provider._client = fake_client
+
+    task = Task(
+        id="1",
+        provider="proxmox",
+        action="create",
+        resource="web-vm",
+        payload={"node": "pve", "template_vmid": 9000},
+    )
+
+    with pytest.raises(RuntimeError, match="did not return a task ID"):
+        await provider.execute(task)
+
+
+async def test_proxmox_destroy_requires_node_and_vmid():
+    """Line 309: _destroy_resource() raises ValueError when node/vmid missing."""
+    from orchestrator.task import Task
+
+    provider = ProxmoxProvider()
+    provider._client = MagicMock()
+
+    task = Task(
+        id="1",
+        provider="proxmox",
+        action="destroy",
+        resource="web-vm",
+        payload={},
+    )
+
+    with pytest.raises(ValueError, match="node.*vmid"):
+        await provider.execute(task)
+
+
+async def test_proxmox_destroy_waits_for_task_when_upid_returned():
+    """Line 324: _destroy_resource() calls _wait_for_task when delete returns upid."""
+    from orchestrator.task import Task
+
+    fake_client = MagicMock()
+    fake_client.nodes.return_value.qemu.return_value.delete.return_value = "UPID:pve:del"
+    fake_client.nodes.return_value.tasks.return_value.status.get.return_value = {
+        "status": "stopped",
+        "exitstatus": "OK",
+    }
+
+    provider = ProxmoxProvider()
+    provider._client = fake_client
+
+    task = Task(
+        id="1",
+        provider="proxmox",
+        action="destroy",
+        resource="web-vm",
+        payload={"node": "pve", "vmid": 150},
+    )
+
+    await provider.execute(task)
+
+    fake_client.nodes.return_value.tasks.return_value.status.get.assert_called()
+    assert task.result["vmid"] == 150
+
+
+async def test_proxmox_destroy_passes_purge_and_force_flags():
+    """Lines 316, 318: _destroy_resource() includes purge/force in delete call."""
+    from orchestrator.task import Task
+
+    fake_client = MagicMock()
+    fake_client.nodes.return_value.qemu.return_value.delete.return_value = None
+
+    provider = ProxmoxProvider()
+    provider._client = fake_client
+
+    task = Task(
+        id="1",
+        provider="proxmox",
+        action="destroy",
+        resource="web-vm",
+        payload={"node": "pve", "vmid": 150, "purge": True, "force": True},
+    )
+
+    await provider.execute(task)
+
+    fake_client.nodes.return_value.qemu.return_value.delete.assert_called_once_with(
+        purge=1, force=1
+    )
+
+
+async def test_proxmox_snapshot_create_requires_node_and_vmid():
+    """Line 336: _require_snapshot_fields() raises when node/vmid missing."""
+    from orchestrator.task import Task
+
+    provider = ProxmoxProvider()
+    provider._client = MagicMock()
+
+    task = Task(
+        id="1",
+        provider="proxmox",
+        action="snapshot-create",
+        resource="web-vm",
+        payload={"snapshot_name": "snap1"},
+    )
+
+    with pytest.raises(ValueError, match="node.*vmid"):
+        await provider.execute(task)
+
+
+async def test_proxmox_snapshot_create_passes_description():
+    """Line 356: _snapshot_create() includes description in post kwargs."""
+    from orchestrator.task import Task
+
+    fake_client = MagicMock()
+    fake_client.nodes.return_value.qemu.return_value.snapshot.post.return_value = None
+
+    provider = ProxmoxProvider()
+    provider._client = fake_client
+
+    task = Task(
+        id="1",
+        provider="proxmox",
+        action="snapshot-create",
+        resource="web-vm",
+        payload={
+            "node": "pve",
+            "vmid": 105,
+            "snapshot_name": "before-upgrade",
+            "description": "pre-upgrade backup",
+        },
+    )
+
+    await provider.execute(task)
+
+    fake_client.nodes.return_value.qemu.return_value.snapshot.post.assert_called_once_with(
+        snapname="before-upgrade", description="pre-upgrade backup"
+    )
+
+
+async def test_proxmox_snapshot_delete_waits_for_task_when_upid_returned():
+    """Line 392: _snapshot_delete() calls _wait_for_task when upid is returned."""
+    from orchestrator.task import Task
+
+    fake_client = MagicMock()
+    fake_client.nodes.return_value.qemu.return_value.snapshot.return_value.delete.return_value = (
+        "UPID:pve:del"
+    )
+    fake_client.nodes.return_value.tasks.return_value.status.get.return_value = {
+        "status": "stopped",
+        "exitstatus": "OK",
+    }
+
+    provider = ProxmoxProvider()
+    provider._client = fake_client
+
+    task = Task(
+        id="1",
+        provider="proxmox",
+        action="snapshot-delete",
+        resource="web-vm",
+        payload={"node": "pve", "vmid": 105, "snapshot_name": "old-snap"},
+    )
+
+    await provider.execute(task)
+
+    fake_client.nodes.return_value.tasks.return_value.status.get.assert_called()
+    assert task.result["snapshot_name"] == "old-snap"
+
+
+async def test_proxmox_wait_for_task_raises_when_status_is_none():
+    """Line 432: _wait_for_task() raises RuntimeError when status.get returns None."""
+    fake_client = MagicMock()
+    fake_client.nodes.return_value.tasks.return_value.status.get.return_value = None
+
+    provider = ProxmoxProvider()
+    provider._client = fake_client
+
+    with pytest.raises(RuntimeError, match="no status"):
+        await provider._wait_for_task("pve", "UPID:pve:test")
+
+
+async def test_proxmox_wait_for_task_raises_timeout_when_task_never_stops():
+    """Lines 442-444: _wait_for_task() raises TimeoutError after timeout elapses."""
+    from unittest.mock import AsyncMock as _AsyncMock
+
+    fake_client = MagicMock()
+    fake_client.nodes.return_value.tasks.return_value.status.get.return_value = {
+        "status": "running"
+    }
+
+    provider = ProxmoxProvider()
+    provider._client = fake_client
+
+    with patch("asyncio.sleep", new=_AsyncMock()):
+        with pytest.raises(TimeoutError, match="did not complete"):
+            await provider._wait_for_task("pve", "UPID:pve:test", timeout=0.001, interval=1.0)
