@@ -8,7 +8,9 @@
 
 Stav repozitáře po ukončení session: **HEALTHY**.
 
-Provedeny schválené akce A01 a A02: oprava Python verze v Dockerfile (3.14-slim → 3.12-slim) a přidání pyright hooku do pre-commit konfigurace. Všechny CI gates procházejí. **338 testů zelených, 100% coverage.** Zdravotní skóre: **94/100**.
+Provedeny schválené akce A01, A02, B01, B02, B03, C03 a C01. Oprava Python verze v Dockerfile, přidání pyright hooku, nové automation skripty (`scripts/doctor.py`, `scripts/health.py`), nové CLI příkazy (`starcore doctor`, `starcore audit`), odstranění nevyužitých závislostí (redis, nats-py), a nová observabilita — authentikovaný `/metrics` endpoint (Prometheus) a strukturované JSON logování. C02 (Snapshot/Rollback) byl při DISCOVER fázi ověřen jako **již plně implementovaný** — doporučení z předchozího reportu bylo zastaralé/chybné, žádná kódová změna nebyla potřeba.
+
+Všechny CI gates procházejí. **355 testů zelených, 100% coverage.** Zdravotní skóre: **98/100**.
 
 ---
 
@@ -22,7 +24,7 @@ Provedeny schválené akce A01 a A02: oprava Python verze v Dockerfile (3.14-sli
 | Repository | Fatalerorr69/starcore-platform |
 | Branch | claude/new-session-s52x55 |
 | Initial SHA | 39964337120afb0b20d071201f0ea8e0c3c2c3bc |
-| Final SHA | d14f5b047a64aeea26ea94f7bbe903e3d08f9334 |
+| Final SHA | af4edc9 |
 | Execution Mode | MODE 5 — CONTROLLED AUTONOMY |
 | Python (venv) | 3.12.3 |
 | uv | 0.8.17 |
@@ -68,12 +70,53 @@ Provedeny schválené akce A01 a A02: oprava Python verze v Dockerfile (3.14-sli
 | Riziko | Minimální |
 | Status | MERGED do commitu `d14f5b0` |
 
+### B01 — `scripts/` automation directory (EXECUTED, APPROVED)
+
+| Soubor | Účel |
+|---|---|
+| `scripts/doctor.py` | Standalone runner pro všechny CI gates (lockfile, ruff, pyright, pip-audit, pytest) |
+| `scripts/health.py` | Runtime probe `/health` endpointu s `--url` flagem |
+
+Status: MERGED do commitu `0b0b72d`.
+
+### B02 — `starcore doctor` / `starcore audit` CLI příkazy (EXECUTED, APPROVED)
+
+| Příkaz | Popis |
+|---|---|
+| `starcore doctor [--fast]` | Spustí všechny quality gates, Rich tabulka, exit 1 při selhání; `--fast` přeskočí testy |
+| `starcore audit` | Zobrazí git branch/SHA/stav stromu, poslední commity, počty Python/test souborů |
+
+8 nových testů v `tests/test_cli.py`. Status: MERGED do commitu `0b0b72d`.
+
 ### B03 — Aktualizace reportů (EXECUTED, APPROVED)
 
-| Soubor | Akce |
+Reporty aktualizovány průběžně po každém bundlu (viz commity `873d1a3`, tento report).
+
+### C03 — Odstranění nevyužitých redis/nats-py závislostí (EXECUTED, APPROVED)
+
+| Položka | Detail |
 |---|---|
-| `reports/starcore-code-report.md` | Aktualizováno pro tuto session |
-| `reports/starcore-code-report.json` | Aktualizováno pro tuto session |
+| Soubory | `pyproject.toml`, `uv.lock`, `packages/core/config.py` |
+| Změna | Odstraněny `redis>=6.2.0`, `nats-py>=2.11.0` a mrtvá pole `redis_url`/`nats_url` v `Settings` |
+| Důvod | Nikde v kódu nepoužito, pouze mrtvá config pole |
+| Riziko | Minimální |
+| Status | MERGED do commitu `4f337f7` |
+
+### C01 — Observability: `/metrics` + strukturované logování (EXECUTED, APPROVED)
+
+| Položka | Detail |
+|---|---|
+| Nový soubor | `packages/core/metrics.py` |
+| Endpoint | `GET /metrics` — autentikovaný (X-API-Key), Prometheus text format, vlastní `CollectorRegistry` |
+| Metriky | `starcore_http_requests_total{method,path,status}`, `starcore_http_request_duration_seconds{method,path}` (middleware), `starcore_blueprint_tasks_total{provider,status}` (EventBus subscriber na `task.completed`) |
+| Logování | `packages/core/logger.py` — sink konfigurace nebyla nikde importována, tudíž nikdy neúčinkovala; nyní importována v `core/main.py` a `apps/cli/main.py`. Nová proměnná `STARCORE_LOG_JSON` (default `false`) přepíná na JSON-per-line přes loguru `serialize=True` |
+| Nová závislost | `prometheus-client>=0.21.0` |
+| Testy | `tests/test_metrics.py` (9 nových), rozšířeno `tests/test_logger.py` |
+| Status | MERGED do commitu `af4edc9` |
+
+### C02 — Snapshot/Rollback (VERIFIED — no action needed)
+
+Během DISCOVER fáze zjištěno, že `starcore snapshot create/list/delete/rollback` je **již plně implementován** end-to-end: CLI (`apps/cli/main.py`) → `core/resource_actions.py` → `packages/providers/proxmox/provider.py` (`_snapshot_create/_snapshot_list/_snapshot_delete/_snapshot_rollback`) → reálné Proxmox API volání přes `proxmoxer`. Pokryto 16+ existujícími testy napříč `test_cli.py`, `test_providers.py` a property-based testy. Doporučení z minulého reportu bylo **zastaralé/chybné** — oprava zaznamenána, žádná kódová změna nebyla provedena.
 
 ---
 
@@ -84,11 +127,17 @@ Provedeny schválené akce A01 a A02: oprava Python verze v Dockerfile (3.14-sli
 | Ruff format | PASS | PASS | ✅ |
 | Ruff lint | PASS | PASS | ✅ |
 | Pyright | 0 errors | 0 errors | ✅ |
-| pytest | 338 passed | 338 passed | ✅ |
+| pytest | 338 passed | **355 passed** | ✅ |
 | Coverage | 100% | 100% | ✅ |
 | pip-audit | No vulns | No vulns | ✅ |
 | Dockerfile Python | 3.14 (beta) | **3.12** | ✅ FIXED |
 | pre-commit pyright | chybí | **přidán** | ✅ FIXED |
+| `scripts/` | chybí | **doctor.py, health.py** | ✅ ADDED |
+| `starcore doctor`/`audit` | chybí | **přidány** | ✅ ADDED |
+| redis/nats-py deps | nevyužity | **odstraněny** | ✅ FIXED |
+| `/metrics` endpoint | chybí | **přidán (auth)** | ✅ ADDED |
+| Structured logging | nekonfigurováno | **STARCORE_LOG_JSON** | ✅ ADDED |
+| Snapshot/Rollback | (report tvrdil chybí) | **ověřeno: již hotovo** | ✅ CORRECTED |
 
 ---
 
@@ -123,17 +172,17 @@ Provedeny schválené akce A01 a A02: oprava Python verze v Dockerfile (3.14-sli
 | Dimenze | Skóre | Poznámka |
 |---|---|---|
 | Code Quality | 100/100 | Ruff, Pyright vše zelené |
-| Testing | 100/100 | 338 testů, 100% coverage, property-based |
-| Security | 98/100 | Dobré (Dockerfile version fix aplikován) |
-| Dependencies | 97/100 | 0 CVE, redis/nats nevyužity |
+| Testing | 100/100 | 355 testů, 100% coverage, property-based |
+| Security | 98/100 | `/metrics` autentikován stejně jako `/diagnostics` |
+| Dependencies | 100/100 | 0 CVE, redis/nats odstraněny |
 | CI/CD | 100/100 | Všechny greeny, pyright pre-commit přidán |
 | GitHub | 100/100 | 0 PR, 0 Issues, CI success |
-| Documentation | 90/100 | ADRs, changelogy ✅, scripts/ chybí |
-| Architecture | 92/100 | Čistá architektura, stub deps |
+| Documentation | 95/100 | ADRs, changelogy, architecture.md aktualizován |
+| Architecture | 97/100 | Čistá architektura, žádný mrtvý kód |
 | AI Integration | 85/100 | Anthropic integrován, MCP N/A |
-| Observability | 80/100 | Loguru, diagnostics — metriky chybí |
-| Automation | 65/100 | CI/CD OK, automation skripty chybí |
-| **CELKEM** | **94/100** | |
+| Observability | 95/100 | Prometheus `/metrics`, structured logging |
+| Automation | 95/100 | `scripts/doctor.py`, `starcore doctor`/`audit` |
+| **CELKEM** | **98/100** | |
 
 ---
 
@@ -141,9 +190,7 @@ Provedeny schválené akce A01 a A02: oprava Python verze v Dockerfile (3.14-sli
 
 | ID | Problém | Priorita |
 |---|---|---|
-| RISK-NEW-03 | redis/nats-py v závislostech ale nevyužity | P3 |
-| RISK-NEW-04 | `scripts/` direktory chybí (automation skripty) | P3 |
-| TD-C05 | Alembic check vyžaduje lokální DB setup (docs chybí) | P3 |
+| TD-C05 | Alembic check vyžaduje lokální DB setup (docs chybí) | P4 |
 | TD-C06 | MkDocs Material v2.0 compatibility warning | P4 |
 
 ---
@@ -152,16 +199,13 @@ Provedeny schválené akce A01 a A02: oprava Python verze v Dockerfile (3.14-sli
 
 | Priorita | Oblast | Popis |
 |---|---|---|
-| P3 | Automation | Vytvořit `scripts/` s `doctor.py`, `health.py` |
-| P3 | CLI | Přidat `starcore doctor` a `starcore audit` příkazy |
-| P4 | Architecture | Sprint 006: Observability (metrics endpoint, structured logging) |
-| P4 | Architecture | Sprint 007: Snapshot/Rollback full implementation |
-| P4 | Tech Debt | Sprint 008: Redis/NATS integration nebo odstraní nevyužité deps |
+| P4 | Docs | Zdokumentovat, že Alembic check vyžaduje lokální DB |
+| P4 | Docs | Vyřešit MkDocs Material v2.0 compatibility warning |
 
 ---
 
 ## 11. Final State
 
-**HEALTHY — 100% test coverage, 338 tests, všechny CI gates zelené.**
+**HEALTHY — 100% test coverage, 355 tests, všechny CI gates zelené.**
 
-Opraveny dva konfigurační nesoulady (Dockerfile Python verze 3.14→3.12, pre-commit pyright hook přidán). Repozitář je ve vynikajícím stavu pro pokračování vývoje.
+Sedm bundlů akcí dokončeno tuto session (A01, A02, B01, B02, B03, C03, C01), jeden bundle (C02) ověřen jako již hotový beze změny kódu. Repozitář je ve vynikajícím stavu; zbývá pouze dokumentační tech debt s nízkou prioritou.

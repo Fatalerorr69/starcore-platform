@@ -1,15 +1,15 @@
 {
-  "schema_version": "1.3",
+  "schema_version": "1.4",
   "timestamp": "2026-07-25",
   "repository": "Fatalerorr69/starcore-platform",
   "branch": "claude/new-session-s52x55",
   "initial_sha": "39964337120afb0b20d071201f0ea8e0c3c2c3bc",
-  "final_sha": "0b0b72d",
+  "final_sha": "af4edc9",
   "execution_mode": "MODE 5 — CONTROLLED AUTONOMY",
   "overall_status": "HEALTHY",
-  "health_score": 97,
+  "health_score": 98,
   "facts": [
-    "346 tests passing, 0 failures",
+    "355 tests passing, 0 failures",
     "Coverage 100%",
     "Ruff format: PASS",
     "Ruff lint: PASS",
@@ -26,10 +26,12 @@
     "scripts/health.py created: runtime API health probe (B01)",
     "starcore doctor CLI command added with --fast flag (B02)",
     "starcore audit CLI command added (B02)",
-    "8 new CLI tests for doctor/audit commands"
+    "redis and nats-py unused dependencies removed (C03)",
+    "GET /metrics Prometheus endpoint added, authenticated (C01)",
+    "structured JSON logging wired via STARCORE_LOG_JSON (C01)",
+    "Snapshot/Rollback (C02) found already fully implemented during discovery -- corrected stale recommendation, no action needed"
   ],
   "observations": [
-    "redis, nats-py declared in dependencies but not wired into application",
     "MkDocs Material v2.0 deprecation warning (future)",
     "Docker daemon not accessible in sandbox environment"
   ],
@@ -41,12 +43,6 @@
     "Docker container build (daemon not accessible)"
   ],
   "risks": [
-    {
-      "id": "RISK-NEW-03",
-      "title": "redis/nats-py unused dependencies",
-      "priority": "P3",
-      "status": "OPEN"
-    },
     {
       "id": "TD-C05",
       "title": "Alembic check requires local DB (docs missing)",
@@ -102,6 +98,38 @@
         "reports/starcore-code-report.md",
         "reports/starcore-code-report.json"
       ]
+    },
+    {
+      "id": "C03",
+      "title": "Remove unused redis and nats-py dependencies",
+      "priority": "P4",
+      "status": "EXECUTED",
+      "commit": "4f337f7",
+      "files": ["pyproject.toml", "uv.lock", "packages/core/config.py"]
+    },
+    {
+      "id": "C01",
+      "title": "Sprint 006: Observability (metrics endpoint, structured logging)",
+      "priority": "P4",
+      "status": "EXECUTED",
+      "commit": "af4edc9",
+      "files": [
+        "packages/core/metrics.py",
+        "packages/core/logger.py",
+        "packages/core/main.py",
+        "packages/core/config.py",
+        "apps/cli/main.py",
+        "tests/test_metrics.py",
+        "tests/test_logger.py",
+        "docs/architecture.md"
+      ]
+    },
+    {
+      "id": "C02",
+      "title": "Sprint 007: Snapshot/Rollback -- VERIFIED already fully implemented, no code change made",
+      "priority": "P4",
+      "status": "NOT_NEEDED",
+      "note": "Discovery found starcore snapshot create/list/delete/rollback (apps/cli/main.py) already wired end-to-end through core/resource_actions.py into packages/providers/proxmox/provider.py's _snapshot_create/_snapshot_list/_snapshot_delete/_snapshot_rollback, which call the real Proxmox API via proxmoxer. 16+ pre-existing tests cover it across test_cli.py, test_providers.py, and test_property_based_cli.py. The prior session's report recommendation was stale/incorrect; no implementation work was performed for this item."
     }
   ],
   "approvals": [
@@ -114,13 +142,24 @@
       "bundle": "B01,B02",
       "approved_by": "user",
       "timestamp": "2026-07-25"
+    },
+    {
+      "bundle": "C03",
+      "approved_by": "user",
+      "timestamp": "2026-07-25"
+    },
+    {
+      "bundle": "C01,C02,C03",
+      "approved_by": "user",
+      "timestamp": "2026-07-25",
+      "note": "C03 already executed from prior approval; C02 required no code change (see actions[].note); C01 executed."
     }
   ],
   "validation": {
     "ruff_format": "PASS",
     "ruff_lint": "PASS",
     "pyright": "PASS (0 errors, 0 warnings)",
-    "pytest": "PASS (346 passed)",
+    "pytest": "PASS (355 passed)",
     "coverage": "100%",
     "pip_audit": "PASS (no vulnerabilities)",
     "uv_lock": "PASS (consistent)"
@@ -138,7 +177,8 @@
     "pip_audit": "CLEAN",
     "gitignore": "CORRECT",
     "api_key_comparison": "hmac.compare_digest (constant-time)",
-    "container_user": "non-root (starcore)"
+    "container_user": "non-root (starcore)",
+    "metrics_endpoint": "authenticated via X-API-Key, same as /diagnostics"
   },
   "ci_cd": {
     "workflows": ["ci.yml", "docker-publish.yml", "dependabot-auto-merge.yml"],
@@ -163,7 +203,7 @@
   "architecture": {
     "pattern": "modular-monolith",
     "circular_dependencies": "NONE FOUND",
-    "dead_code": "redis/nats stubs (unused)",
+    "dead_code": "NONE (redis/nats stubs removed in C03)",
     "packages": ["ai", "blueprints", "core", "orchestrator", "provider_sdk", "providers/docker", "providers/proxmox"]
   },
   "ai": {
@@ -183,6 +223,15 @@
     "ollama": "NOT ACCESSIBLE",
     "litellm": "NOT ACCESSIBLE"
   },
+  "observability": {
+    "metrics_endpoint": "/metrics (Prometheus text format, authenticated)",
+    "metrics": [
+      "starcore_http_requests_total{method,path,status}",
+      "starcore_http_request_duration_seconds{method,path}",
+      "starcore_blueprint_tasks_total{provider,status}"
+    ],
+    "structured_logging": "STARCORE_LOG_JSON=true for JSON lines via loguru serialize"
+  },
   "failures": [],
   "rollbacks": [],
   "property_based_tests": {
@@ -198,23 +247,17 @@
   },
   "recommendations": [
     {
-      "id": "C01",
-      "title": "Sprint 006: Observability (metrics endpoint, structured logging)",
+      "id": "TD-C05",
+      "title": "Document that the Alembic check requires a local DB",
       "priority": "P4",
-      "effort": "L"
+      "effort": "XS"
     },
     {
-      "id": "C02",
-      "title": "Sprint 007: Snapshot/Rollback full implementation",
+      "id": "TD-C06",
+      "title": "Resolve MkDocs Material v2.0 compatibility warning",
       "priority": "P4",
-      "effort": "L"
-    },
-    {
-      "id": "C03",
-      "title": "Sprint 008: Redis/NATS integration or remove unused deps",
-      "priority": "P4",
-      "effort": "M"
+      "effort": "XS"
     }
   ],
-  "next_actions": ["SCHVÁLIT C01", "SCHVÁLIT C02", "SCHVÁLIT C03", "STOP"]
+  "next_actions": ["SCHVÁLIT TD-C05,TD-C06", "STOP"]
 }
