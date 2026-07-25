@@ -188,3 +188,81 @@ async def test_scheduler_emits_run_completed_event():
     await Scheduler().execute(graph)
 
     assert len(received) == 1
+
+
+async def test_scheduler_stalls_when_dependency_is_never_satisfied():
+    """Lines 37-44: stall detection — task depends on a missing id."""
+    fake = FakeProvider()
+    registry.register(fake)
+
+    graph = TaskGraph()
+    b = Task(id="b", provider="fake", action="create", resource="b", depends_on=["ghost"])
+    graph.add_task(b)
+
+    tasks = await Scheduler().execute(graph)
+
+    assert tasks[0].status == TaskStatus.FAILED
+
+
+async def test_scheduler_marks_task_failed_when_execute_raises():
+    """Lines 98-100: exception in provider.execute() is caught and task marked failed."""
+
+    class _RaisingProvider(BaseProvider):
+        name = "raiser"
+
+        async def connect(self) -> bool:
+            return True
+
+        async def disconnect(self) -> None:
+            pass
+
+        async def health(self) -> dict:
+            return {"status": "ok", "provider": self.name}
+
+        async def list_resources(self) -> list[dict]:
+            return []
+
+        async def execute(self, task) -> None:
+            raise RuntimeError("simulated execute failure")
+
+    registry.register(_RaisingProvider())
+
+    graph = TaskGraph()
+    a = Task(id="a", provider="raiser", action="create", resource="a")
+    graph.add_task(a)
+
+    tasks = await Scheduler().execute(graph)
+
+    assert tasks[0].status == TaskStatus.FAILED
+
+
+async def test_scheduler_marks_task_failed_when_connect_returns_false():
+    """Lines 87-94: connect() returns False → task marked FAILED without calling execute."""
+
+    class _FailingConnectProvider(BaseProvider):
+        name = "failconn"
+
+        async def connect(self) -> bool:
+            return False
+
+        async def disconnect(self) -> None:
+            pass
+
+        async def health(self) -> dict:
+            return {"status": "disconnected", "provider": self.name}
+
+        async def list_resources(self) -> list[dict]:
+            return []
+
+        async def execute(self, task) -> None:
+            raise AssertionError("execute must not be called when connect fails")
+
+    registry.register(_FailingConnectProvider())
+
+    graph = TaskGraph()
+    a = Task(id="a", provider="failconn", action="create", resource="a")
+    graph.add_task(a)
+
+    tasks = await Scheduler().execute(graph)
+
+    assert tasks[0].status == TaskStatus.FAILED
