@@ -77,7 +77,7 @@ pythonpath = [
     ".",
     "packages",
 ]
-addopts = "-ra"
+addopts = "-ra --cov-fail-under=100"
 filterwarnings = [
     "ignore:Using `httpx` with `starlette.testclient`",
 ]

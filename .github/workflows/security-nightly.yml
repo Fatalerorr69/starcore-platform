@@ -34,3 +34,8 @@ jobs:
 
       - name: SAST — Bandit (medium+ severity)
         run: uv run bandit -r packages/ apps/ scripts/ -ll -q
+
+      - name: Secret scanning (gitleaks)
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
