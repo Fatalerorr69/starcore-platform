@@ -707,3 +707,51 @@ def test_diagnose_non_interactive_behaves_same_as_default():
 
     assert result.exit_code == 0
     assert "overall status" in result.stdout.lower()
+
+
+# ---------------------------------------------------------------------------
+# CI-002: Bandit gate included in doctor; standalone SAST smoke test
+# ---------------------------------------------------------------------------
+
+
+def test_doctor_includes_bandit_gate():
+    """Bandit SAST gate must appear in the doctor gate list."""
+    calls: list[list[str]] = []
+
+    def _side(cmd: list, **_: object) -> MagicMock:
+        calls.append(cmd)
+        return _mock_proc(0)
+
+    with patch("apps.cli.main.subprocess.run", side_effect=_side):
+        result = runner.invoke(app, ["doctor", "--fast"])
+
+    assert result.exit_code == 0
+    gate_cmds = [" ".join(c) for c in calls]
+    assert any("bandit" in cmd for cmd in gate_cmds), f"bandit not in gates: {gate_cmds}"
+
+
+def test_doctor_bandit_failure_propagates():
+    """A Bandit finding (non-zero exit) must cause doctor to exit 1."""
+
+    def _side(cmd: list, **_: object) -> MagicMock:
+        if "bandit" in " ".join(cmd):
+            return _mock_proc(1, stderr="Issue: [B101] assert used")
+        return _mock_proc(0)
+
+    with patch("apps.cli.main.subprocess.run", side_effect=_side):
+        result = runner.invoke(app, ["doctor", "--fast"])
+
+    assert result.exit_code == 1
+    assert "gate(s) failed" in result.stdout
+
+
+def test_bandit_sast_passes_on_codebase():
+    """Bandit -ll must exit 0 against the actual codebase (integration gate)."""
+    import subprocess as sp
+
+    proc = sp.run(
+        ["uv", "run", "bandit", "-r", "packages/", "apps/", "scripts/", "-ll", "-q"],
+        capture_output=True,
+        text=True,
+    )  # noqa: S603
+    assert proc.returncode == 0, f"Bandit found MEDIUM+ issues:\n{proc.stderr}"

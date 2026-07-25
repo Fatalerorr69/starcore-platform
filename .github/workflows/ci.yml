@@ -35,6 +35,9 @@ jobs:
       - name: pip-audit (dependency vulnerability scan)
         run: uv run pip-audit
 
+      - name: Bandit SAST (medium+ severity)
+        run: uv run bandit -r packages/ apps/ scripts/ -ll -q
+
       - name: Pytest
         run: uv run pytest -q --cov --cov-report=term-missing --cov-fail-under=80
 

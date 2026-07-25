@@ -82,6 +82,10 @@ def doctor(
         ("Ruff format", ["uv", "run", "ruff", "format", "--check", "."]),
         ("Pyright", ["uv", "run", "pyright"]),
         ("pip-audit", ["uv", "run", "pip-audit"]),
+        (
+            "Bandit SAST",
+            ["uv", "run", "bandit", "-r", "packages/", "apps/", "scripts/", "-ll", "-q"],
+        ),
     ]
     if not fast:
         gates.append(("Tests", ["uv", "run", "pytest", "-q", "--tb=short"]))

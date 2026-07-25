@@ -91,5 +91,6 @@ skip_empty = true
 
 [dependency-groups]
 dev = [
+    "bandit>=1.9.4",
     "pre-commit>=4.6.0",
 ]

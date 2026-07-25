@@ -12,7 +12,8 @@ class Settings(BaseSettings):
     app_name: str = "STARCORE Platform"
     app_version: str = "0.1.0-dev"
 
-    api_host: str = "0.0.0.0"
+    # B104 suppressed: server must bind all interfaces in container (intentional)
+    api_host: str = "0.0.0.0"  # nosec B104
     api_port: int = 8000
 
     debug: bool = False

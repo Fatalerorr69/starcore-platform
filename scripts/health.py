@@ -32,7 +32,8 @@ def main() -> int:
     print(f"Checking {url} ...")
 
     try:
-        with urllib.request.urlopen(url, timeout=5) as resp:
+        # B310 suppressed: url defaults to http://localhost:8000/health; file:// not a valid target
+        with urllib.request.urlopen(url, timeout=5) as resp:  # nosec B310
             body: dict = json.loads(resp.read())
         status = body.get("status", "unknown")
         print(f"Status:   {status}")
