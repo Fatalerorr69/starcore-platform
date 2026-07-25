@@ -11,6 +11,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 from core.config import Settings
+from docker.errors import DockerException, NotFound
 from provider_sdk.base import BaseProvider
 from providers.docker.provider import DockerProvider
 from providers.proxmox.provider import ProxmoxProvider
@@ -593,3 +594,315 @@ async def test_docker_disconnect_is_idempotent_under_concurrent_calls():
 
     fake_client.close.assert_called_once()
     assert provider._client is None
+
+
+# ---------------------------------------------------------------------------
+# DockerProvider — connect() edge cases
+# ---------------------------------------------------------------------------
+
+
+async def test_docker_connect_fails_when_daemon_unavailable():
+    with patch(
+        "providers.docker.provider.docker.from_env",
+        side_effect=DockerException("daemon not running"),
+    ):
+        provider = DockerProvider()
+        result = await provider.connect()
+
+    assert result is False
+    assert provider._client is None
+
+
+async def test_docker_connect_already_connected_skips_construction():
+    """connect() is a no-op when _client is already set."""
+    fake_client = MagicMock()
+    provider = DockerProvider()
+    provider._client = fake_client
+
+    call_count = 0
+
+    def _from_env():
+        nonlocal call_count
+        call_count += 1
+        return MagicMock()
+
+    with patch("providers.docker.provider.docker.from_env", side_effect=_from_env):
+        result = await provider.connect()
+
+    assert result is True
+    assert call_count == 0
+    assert provider._client is fake_client
+
+
+# ---------------------------------------------------------------------------
+# DockerProvider — health()
+# ---------------------------------------------------------------------------
+
+
+async def test_docker_health_disconnected():
+    provider = DockerProvider()
+    result = await provider.health()
+
+    assert result["status"] == "disconnected"
+    assert result["provider"] == "docker"
+
+
+async def test_docker_health_ok_when_connected():
+    fake_client = MagicMock()
+    fake_client.ping.return_value = True
+
+    provider = DockerProvider()
+    provider._client = fake_client
+
+    result = await provider.health()
+
+    assert result["status"] == "ok"
+    assert result["provider"] == "docker"
+
+
+async def test_docker_health_error_when_ping_raises():
+    fake_client = MagicMock()
+    fake_client.ping.side_effect = DockerException("connection refused")
+
+    provider = DockerProvider()
+    provider._client = fake_client
+
+    result = await provider.health()
+
+    assert result["status"] == "error"
+    assert result["provider"] == "docker"
+    assert "connection refused" in result["detail"]
+
+
+# ---------------------------------------------------------------------------
+# DockerProvider — list_resources()
+# ---------------------------------------------------------------------------
+
+
+async def test_docker_list_resources_returns_empty_when_disconnected():
+    provider = DockerProvider()
+    result = await provider.list_resources()
+
+    assert result == []
+
+
+async def test_docker_list_resources_returns_container_list():
+    fake_client = MagicMock()
+    fake_image = MagicMock()
+    fake_image.tags = ["nginx:latest"]
+    fake_image.id = "sha256:aaa"
+    fake_container = MagicMock()
+    fake_container.id = "abc123"
+    fake_container.name = "my-app"
+    fake_container.status = "running"
+    fake_container.image = fake_image
+    fake_client.containers.list.return_value = [fake_container]
+
+    provider = DockerProvider()
+    provider._client = fake_client
+
+    result = await provider.list_resources()
+
+    assert len(result) == 1
+    assert result[0] == {
+        "id": "abc123",
+        "name": "my-app",
+        "status": "running",
+        "image": "nginx:latest",
+    }
+    fake_client.containers.list.assert_called_once_with(all=True)
+
+
+async def test_docker_list_resources_falls_back_to_image_id_when_no_tags():
+    fake_client = MagicMock()
+    fake_image = MagicMock()
+    fake_image.tags = []
+    fake_image.id = "sha256:bbb"
+    fake_container = MagicMock()
+    fake_container.id = "def456"
+    fake_container.name = "tagless"
+    fake_container.status = "stopped"
+    fake_container.image = fake_image
+    fake_client.containers.list.return_value = [fake_container]
+
+    provider = DockerProvider()
+    provider._client = fake_client
+
+    result = await provider.list_resources()
+
+    assert result[0]["image"] == "sha256:bbb"
+
+
+async def test_docker_list_resources_handles_none_image():
+    fake_client = MagicMock()
+    fake_container = MagicMock()
+    fake_container.id = "ghi789"
+    fake_container.name = "no-image"
+    fake_container.status = "created"
+    fake_container.image = None
+    fake_client.containers.list.return_value = [fake_container]
+
+    provider = DockerProvider()
+    provider._client = fake_client
+
+    result = await provider.list_resources()
+
+    assert result[0]["image"] is None
+
+
+# ---------------------------------------------------------------------------
+# DockerProvider — execute() dispatch
+# ---------------------------------------------------------------------------
+
+
+async def test_docker_execute_raises_when_not_connected():
+    from orchestrator.task import Task
+
+    provider = DockerProvider()
+    task = Task(id="1", provider="docker", action="create", resource="web")
+
+    with pytest.raises(RuntimeError, match="not connected"):
+        await provider.execute(task)
+
+
+async def test_docker_execute_create_new_container():
+    from orchestrator.task import Task
+
+    fake_client = MagicMock()
+    fake_client.containers.get.side_effect = NotFound("not found")
+
+    provider = DockerProvider()
+    provider._client = fake_client
+
+    task = Task(
+        id="1",
+        provider="docker",
+        action="create",
+        resource="my-app",
+        payload={"image": "nginx:latest"},
+    )
+    await provider.execute(task)
+
+    fake_client.containers.run.assert_called_once_with(
+        "nginx:latest", name="my-app", volumes=None, detach=True
+    )
+
+
+async def test_docker_execute_create_skips_existing_container():
+    from orchestrator.task import Task
+
+    fake_client = MagicMock()
+    fake_client.containers.get.return_value = MagicMock()
+
+    provider = DockerProvider()
+    provider._client = fake_client
+
+    task = Task(
+        id="1",
+        provider="docker",
+        action="create",
+        resource="already-running",
+        payload={"image": "nginx:latest"},
+    )
+    await provider.execute(task)
+
+    fake_client.containers.run.assert_not_called()
+
+
+async def test_docker_execute_create_raises_without_image():
+    from orchestrator.task import Task
+
+    fake_client = MagicMock()
+    fake_client.containers.get.side_effect = NotFound("not found")
+
+    provider = DockerProvider()
+    provider._client = fake_client
+
+    task = Task(id="1", provider="docker", action="create", resource="my-app", payload={})
+
+    with pytest.raises(ValueError, match="image"):
+        await provider.execute(task)
+
+
+async def test_docker_execute_create_with_volume():
+    from orchestrator.task import Task
+
+    fake_client = MagicMock()
+    fake_client.containers.get.side_effect = NotFound("not found")
+
+    provider = DockerProvider()
+    provider._client = fake_client
+
+    task = Task(
+        id="1",
+        provider="docker",
+        action="create",
+        resource="app",
+        payload={"image": "redis:7", "volume": "app-data"},
+    )
+    await provider.execute(task)
+
+    _, kwargs = fake_client.containers.run.call_args
+    assert kwargs["volumes"] == {"app-data": {"bind": "/data/app-data", "mode": "rw"}}
+
+
+async def test_docker_execute_start():
+    from orchestrator.task import Task
+
+    fake_client = MagicMock()
+    fake_container = MagicMock()
+    fake_client.containers.get.return_value = fake_container
+
+    provider = DockerProvider()
+    provider._client = fake_client
+
+    task = Task(id="1", provider="docker", action="start", resource="my-app")
+    await provider.execute(task)
+
+    fake_client.containers.get.assert_called_with("my-app")
+    fake_container.start.assert_called_once_with()
+
+
+async def test_docker_execute_stop():
+    from orchestrator.task import Task
+
+    fake_client = MagicMock()
+    fake_container = MagicMock()
+    fake_client.containers.get.return_value = fake_container
+
+    provider = DockerProvider()
+    provider._client = fake_client
+
+    task = Task(id="1", provider="docker", action="stop", resource="my-app")
+    await provider.execute(task)
+
+    fake_container.stop.assert_called_once_with()
+
+
+async def test_docker_execute_remove():
+    from orchestrator.task import Task
+
+    fake_client = MagicMock()
+    fake_container = MagicMock()
+    fake_client.containers.get.return_value = fake_container
+
+    provider = DockerProvider()
+    provider._client = fake_client
+
+    task = Task(id="1", provider="docker", action="remove", resource="my-app")
+    await provider.execute(task)
+
+    fake_container.remove.assert_called_once_with(force=True)
+
+
+async def test_docker_execute_unsupported_action_raises():
+    from orchestrator.task import Task
+
+    fake_client = MagicMock()
+    provider = DockerProvider()
+    provider._client = fake_client
+
+    task = Task(id="1", provider="docker", action="destroy", resource="my-app")
+
+    with pytest.raises(ValueError, match="Unsupported Docker action"):
+        await provider.execute(task)
