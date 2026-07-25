@@ -238,6 +238,34 @@ async def test_diagnose_docker_returns_error_when_not_in_registry():
     assert "not registered" in check.detail
 
 
+async def test_diagnose_docker_returns_error_when_connect_fails():
+    """Line 208: connect() returning False triggers the connection-failed branch."""
+    from core.diagnostics import _diagnose_docker
+
+    class _FailingDocker(BaseProvider):
+        name = "docker"
+
+        async def connect(self) -> bool:
+            return False
+
+        async def disconnect(self) -> None:
+            pass
+
+        async def health(self) -> dict:
+            return {}
+
+        async def list_resources(self) -> list[dict]:
+            return []
+
+        async def execute(self, task) -> None:
+            pass
+
+    registry.register(_FailingDocker())
+    check, _ = await _diagnose_docker()
+    assert check.status == "error"
+    assert "Failed to connect" in check.detail
+
+
 async def test_diagnose_docker_happy_path():
     """Lines 213-223, 229-230: successful connect + list_resources returns ok."""
     from core.diagnostics import _diagnose_docker
