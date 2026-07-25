@@ -1,6 +1,6 @@
 # STARCORE CODE EXECUTION REPORT
 
-> Session: 2026-07-25 | Mode: MODE E — CONTROLLED AUTONOMY
+> Session: 2026-07-25 | Mode: MODE 5 — CONTROLLED AUTONOMY
 
 ---
 
@@ -8,7 +8,7 @@
 
 Stav repozitáře po ukončení session: **HEALTHY**.
 
-Všechny CI gates procházejí. **338 testů zelených, 100% coverage.** V průběhu dvou navazujících session provedeno 10 PR (PR #60–#69): dosaženo 100% test coverage a přidáno 90 property-based testů pokrývajících všechny moduly platformy. Žádné selhání, žádné rollbacky.
+Provedeny schválené akce A01 a A02: oprava Python verze v Dockerfile (3.14-slim → 3.12-slim) a přidání pyright hooku do pre-commit konfigurace. Všechny CI gates procházejí. **338 testů zelených, 100% coverage.** Zdravotní skóre: **94/100**.
 
 ---
 
@@ -20,11 +20,12 @@ Všechny CI gates procházejí. **338 testů zelených, 100% coverage.** V průb
 | Agent | Claude Code (claude-sonnet-4-6) |
 | OS | Linux 6.18.5 x86_64 |
 | Repository | Fatalerorr69/starcore-platform |
-| Branch | claude/starcore-system-init-j1935e |
-| Final SHA | a5d7f833caec8debb28e8797f780e0a5d01d0ace |
-| Execution Mode | MODE E — CONTROLLED AUTONOMY |
+| Branch | claude/new-session-s52x55 |
+| Initial SHA | 39964337120afb0b20d071201f0ea8e0c3c2c3bc |
+| Final SHA | d14f5b047a64aeea26ea94f7bbe903e3d08f9334 |
+| Execution Mode | MODE 5 — CONTROLLED AUTONOMY |
 | Python (venv) | 3.12.3 |
-| uv | 0.7.17 |
+| uv | 0.8.17 |
 
 ---
 
@@ -32,42 +33,47 @@ Všechny CI gates procházejí. **338 testů zelených, 100% coverage.** V průb
 
 | Kontrola | Stav |
 |---|---|
-| Git branch | claude/starcore-system-init-j1935e |
-| HEAD SHA | ddd2f42 = origin/main |
-| Working tree | čistý |
-| Tests | 147 passed |
-| Coverage | 83% |
+| Git branch | claude/new-session-s52x55 (= main @ 3996433) |
+| Tests | 338 passed |
+| Coverage | 100% |
 | Ruff format | PASS |
 | Ruff lint | PASS |
 | Pyright | 0 errors |
 | pip-audit | No vulnerabilities |
-| CI (poslední run) | success (2026-07-24) |
+| CI (poslední run) | success |
 | Open PRs | 0 |
 | Open Issues | 0 |
 
 ---
 
-## 4. Provedené práce (PR #60–#69)
+## 4. Provedené práce (tato session)
 
-### Session 1 — 100% Test Coverage (PR #60–#62)
+### A01 — Dockerfile Python verze (EXECUTED, APPROVED)
 
-| PR | Název | Výsledek |
-|---|---|---|
-| #60 | tests: achieve 100% branch coverage on orchestrator and scheduler | MERGED |
-| #61 | tests: achieve 100% coverage on providers (docker + proxmox) | MERGED |
-| #62 | tests: achieve 100% coverage on apps/cli/main.py | MERGED |
+| Položka | Detail |
+|---|---|
+| Soubor | `Dockerfile` |
+| Změna | `FROM python:3.14-slim` → `FROM python:3.12-slim` |
+| Důvod | Nesoulad — pyproject.toml, pyrightconfig.json, ruff.toml a CI cílí na 3.12; Python 3.14 je beta |
+| Riziko | Minimální (oprava konfiguračního nesouladu) |
+| Status | MERGED do commitu `d14f5b0` |
 
-### Session 2 — Property-Based Tests (PR #63–#69)
+### A02 — pyright do pre-commit (EXECUTED, APPROVED)
 
-| PR | Modul | Testů | Výsledek |
-|---|---|---|---|
-| #63 | orchestrator: TaskGraph, Task, Scheduler (základ) | 14 | MERGED |
-| #64 | orchestrator: rozšíření (Scheduler invarianty) | +11 | MERGED |
-| #65 | providers: ProviderRegistry, BaseProvider, Docker, Proxmox | 14 | MERGED |
-| #66 | blueprints: Blueprint, ResourceSpec, ExecutionPlanner, Loader | 13 | MERGED |
-| #67 | core: EventBus, PluginManager, Repository | 15 | MERGED |
-| #68 | ai: `_strip_code_fences`, BlueprintGenerationError | 11 | MERGED |
-| #69 | cli: STATUS_COLORS, count accumulation, snapshot payload | 12 | MERGED |
+| Položka | Detail |
+|---|---|
+| Soubor | `.pre-commit-config.yaml` |
+| Změna | Přidán hook `RobertCraigie/pyright-python` rev `v1.1.400` |
+| Důvod | Pyright se spouštěl pouze v CI; lokální commit mohl projít s type errory |
+| Riziko | Minimální |
+| Status | MERGED do commitu `d14f5b0` |
+
+### B03 — Aktualizace reportů (EXECUTED, APPROVED)
+
+| Soubor | Akce |
+|---|---|
+| `reports/starcore-code-report.md` | Aktualizováno pro tuto session |
+| `reports/starcore-code-report.json` | Aktualizováno pro tuto session |
 
 ---
 
@@ -78,13 +84,15 @@ Všechny CI gates procházejí. **338 testů zelených, 100% coverage.** V průb
 | Ruff format | PASS | PASS | ✅ |
 | Ruff lint | PASS | PASS | ✅ |
 | Pyright | 0 errors | 0 errors | ✅ |
-| pytest | 147 passed | 338 passed | ✅ |
-| Coverage | 83% | **100%** | ✅ |
+| pytest | 338 passed | 338 passed | ✅ |
+| Coverage | 100% | 100% | ✅ |
 | pip-audit | No vulns | No vulns | ✅ |
+| Dockerfile Python | 3.14 (beta) | **3.12** | ✅ FIXED |
+| pre-commit pyright | chybí | **přidán** | ✅ FIXED |
 
 ---
 
-## 6. Property-Based Tests — přehled
+## 6. Property-Based Tests — přehled (kumulativní)
 
 | Soubor | Modul | Testů |
 |---|---|---|
@@ -104,25 +112,56 @@ Všechny CI gates procházejí. **338 testů zelených, 100% coverage.** V průb
 |---|---|
 | Open PRs | 0 |
 | Open Issues | 0 |
-| Remote větve | main, claude/starcore-system-init-j1935e |
+| Remote větve | main, claude/new-session-s52x55 |
 | CI (poslední) | success |
 | Dependabot | aktivní |
 
 ---
 
-## 8. Remaining Problems
+## 8. Zdravotní skóre
 
-Žádné kritické problémy. Dřívější technical debt položky TD-C02, TD-C03, TD-C04 jsou vyřešeny dosažením 100% coverage.
+| Dimenze | Skóre | Poznámka |
+|---|---|---|
+| Code Quality | 100/100 | Ruff, Pyright vše zelené |
+| Testing | 100/100 | 338 testů, 100% coverage, property-based |
+| Security | 98/100 | Dobré (Dockerfile version fix aplikován) |
+| Dependencies | 97/100 | 0 CVE, redis/nats nevyužity |
+| CI/CD | 100/100 | Všechny greeny, pyright pre-commit přidán |
+| GitHub | 100/100 | 0 PR, 0 Issues, CI success |
+| Documentation | 90/100 | ADRs, changelogy ✅, scripts/ chybí |
+| Architecture | 92/100 | Čistá architektura, stub deps |
+| AI Integration | 85/100 | Anthropic integrován, MCP N/A |
+| Observability | 80/100 | Loguru, diagnostics — metriky chybí |
+| Automation | 65/100 | CI/CD OK, automation skripty chybí |
+| **CELKEM** | **94/100** | |
+
+---
+
+## 9. Zbývající Technical Debt
 
 | ID | Problém | Priorita |
 |---|---|---|
+| RISK-NEW-03 | redis/nats-py v závislostech ale nevyužity | P3 |
+| RISK-NEW-04 | `scripts/` direktory chybí (automation skripty) | P3 |
 | TD-C05 | Alembic check vyžaduje lokální DB setup (docs chybí) | P3 |
 | TD-C06 | MkDocs Material v2.0 compatibility warning | P4 |
 
 ---
 
-## 9. Final State
+## 10. Next Development Opportunities
+
+| Priorita | Oblast | Popis |
+|---|---|---|
+| P3 | Automation | Vytvořit `scripts/` s `doctor.py`, `health.py` |
+| P3 | CLI | Přidat `starcore doctor` a `starcore audit` příkazy |
+| P4 | Architecture | Sprint 006: Observability (metrics endpoint, structured logging) |
+| P4 | Architecture | Sprint 007: Snapshot/Rollback full implementation |
+| P4 | Tech Debt | Sprint 008: Redis/NATS integration nebo odstraní nevyužité deps |
+
+---
+
+## 11. Final State
 
 **HEALTHY — 100% test coverage, 338 tests, všechny CI gates zelené.**
 
-Repozitář je v produkční kvalitě. Kompletní property-based test suite pokrývá strukturální invarianty všech modulů platformy.
+Opraveny dva konfigurační nesoulady (Dockerfile Python verze 3.14→3.12, pre-commit pyright hook přidán). Repozitář je ve vynikajícím stavu pro pokračování vývoje.
