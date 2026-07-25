@@ -138,7 +138,7 @@ async def test_resolve_templates_raises_when_provider_not_registered():
 
 
 async def test_resolve_templates_raises_when_proxmox_absent_after_register_defaults():
-    """Line 35: TemplateResolutionError when proxmox is absent even after register_default_providers()."""
+    """Line 35: TemplateResolutionError when proxmox absent after register_default_providers()."""
     from unittest.mock import patch
 
     blueprint = Blueprint(
