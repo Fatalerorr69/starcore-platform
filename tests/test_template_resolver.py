@@ -135,3 +135,18 @@ async def test_resolve_templates_raises_when_provider_not_registered():
     )
     with pytest.raises(TemplateResolutionError):
         await resolve_templates(blueprint)
+
+
+async def test_resolve_templates_raises_when_proxmox_absent_after_register_defaults():
+    """Line 35: TemplateResolutionError when proxmox is absent even after register_default_providers()."""
+    from unittest.mock import patch
+
+    blueprint = Blueprint(
+        name="demo",
+        resources=[
+            ResourceSpec(name="web", provider="proxmox", kind="vm", config={"template": "x"})
+        ],
+    )
+    with patch("blueprints.template_resolver.register_default_providers"):
+        with pytest.raises(TemplateResolutionError, match="not registered"):
+            await resolve_templates(blueprint)

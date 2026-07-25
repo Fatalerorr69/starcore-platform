@@ -78,6 +78,25 @@ async def test_generate_blueprint_yaml_raises_on_empty_response():
             await generate_blueprint_yaml("a simple web app")
 
 
+async def test_generate_blueprint_yaml_raises_on_non_text_block():
+    """Line 99: raises when the first response block is not a TextBlock."""
+    fake_block = MagicMock()  # no spec=TextBlock → isinstance(..., TextBlock) is False
+    fake_response = MagicMock()
+    fake_response.content = [fake_block]
+
+    fake_client = MagicMock()
+    fake_client.messages.create = AsyncMock(return_value=fake_response)
+
+    settings = _settings(anthropic_api_key="sk-test-key")
+
+    with (
+        patch("ai.generator.get_settings", return_value=settings),
+        patch("ai.generator.AsyncAnthropic", return_value=fake_client),
+    ):
+        with pytest.raises(BlueprintGenerationError, match="non-text response block"):
+            await generate_blueprint_yaml("a web app")
+
+
 def test_blueprint_loader_load_from_string_parses_valid_yaml():
     yaml_text = (
         "name: demo\n"

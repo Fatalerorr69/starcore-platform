@@ -209,6 +209,39 @@ def test_planner_create_plan_rejects_self_dependency():
         ExecutionPlanner().create_plan(blueprint)
 
 
+async def test_executor_marks_task_failed_when_execute_raises():
+    """Lines 70-72: exception from provider.execute() is caught and task marked FAILED."""
+
+    class _RaisingProvider(BaseProvider):
+        name = "fake"
+
+        async def connect(self) -> bool:
+            return True
+
+        async def disconnect(self) -> None:
+            pass
+
+        async def health(self) -> dict:
+            return {"status": "ok", "provider": self.name}
+
+        async def list_resources(self) -> list[dict]:
+            return []
+
+        async def execute(self, task) -> None:
+            raise RuntimeError("simulated execute failure")
+
+    registry.register(_RaisingProvider())
+
+    blueprint = Blueprint(
+        name="raise-test",
+        resources=[ResourceSpec(name="thing", provider="fake", kind="svc", config={})],
+    )
+    tasks = await BlueprintExecutor().execute(blueprint)
+
+    assert len(tasks) == 1
+    assert tasks[0].status == TaskStatus.FAILED
+
+
 async def test_executor_emits_run_completed_event():
     from core.events import event_bus
 
