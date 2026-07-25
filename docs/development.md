@@ -54,6 +54,18 @@ Keep ORM models (`packages/core/models_db.py`) and migrations in sync —
 `init_db()` fails fast if a database's recorded revision doesn't match
 the migration head.
 
+`uv run alembic check` (used by CI to catch model/migration drift) needs
+a database that's already at the migration head — it fails with "Target
+database is not up to date" against a fresh or stale one, which is not a
+drift bug, just an unmigrated DB. Point it at a throwaway file rather
+than your dev DB, matching what CI does (`.github/workflows/ci.yml`):
+
+```bash
+STARCORE_DATABASE_URL=sqlite:///./ci-check.db uv run alembic upgrade head
+STARCORE_DATABASE_URL=sqlite:///./ci-check.db uv run alembic check
+rm ci-check.db
+```
+
 ## Documentation
 
 This site is built with MkDocs Material:
@@ -64,3 +76,11 @@ make docs         # uv run mkdocs serve
 
 Sprint changelogs live in `docs/changelog/`; long-term vision documents
 live in `docs/ses/`.
+
+`mkdocs`/`mkdocs-material` are pinned below their next major (`<2.0.0` /
+`<10.0.0`) in `pyproject.toml`. The Material for MkDocs team has flagged
+the upcoming MkDocs 2.0 as a breaking rewrite with no migration path
+(plugin system removed, theming rewritten) and currently unlicensed for
+production use — see the notice printed on every `mkdocs build`/`serve`.
+The cap stops a routine dependency bump from landing on it silently;
+lift it only after evaluating 2.0 deliberately.

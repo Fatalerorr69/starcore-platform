@@ -34,7 +34,9 @@ uv run pytest -q
   `tests/` against Python 3.12.
 - **Schema changes go through Alembic** (`uv run alembic revision`);
   keep `packages/core/models_db.py` and migrations in sync — startup
-  fails fast on drift by design.
+  fails fast on drift by design. `alembic check` needs a DB already at
+  the migration head, not your dev DB — see
+  [docs/development.md](docs/development.md#database-migrations).
 - **No secrets in code, tests, or logs.** Configuration goes through
   Pydantic Settings (`STARCORE_*` env vars) with `.env.example` updated
   in the same PR.
