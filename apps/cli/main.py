@@ -1,4 +1,5 @@
 import asyncio
+import json
 import subprocess
 from pathlib import Path
 
@@ -48,14 +49,23 @@ def version():
 
 
 @app.command()
-def health():
-    print("System OK")
+def health(
+    json_output: bool = typer.Option(False, "--json", help="Output status as JSON."),
+):
+    if json_output:
+        print(json.dumps({"status": "ok"}))
+    else:
+        print("System OK")
 
 
 @app.command()
 def doctor(
     fast: bool = typer.Option(
         False, "--fast", help="Skip tests; check lint, types, and security only."
+    ),
+    json_output: bool = typer.Option(False, "--json", help="Output results as JSON."),
+    quiet: bool = typer.Option(
+        False, "--quiet", "-q", help="No output on success; print failures on error."
     ),
 ):
     """Run all local quality gates: lint, type-check, security scan, tests."""
@@ -65,43 +75,63 @@ def doctor(
         ("Ruff format", ["uv", "run", "ruff", "format", "--check", "."]),
         ("Pyright", ["uv", "run", "pyright"]),
         ("pip-audit", ["uv", "run", "pip-audit"]),
+        (
+            "Bandit",
+            ["uv", "run", "bandit", "-r", "packages/", "apps/", "-c", "pyproject.toml", "-q"],
+        ),
     ]
     if not fast:
         gates.append(("Tests", ["uv", "run", "pytest", "-q", "--tb=short"]))
 
-    table = Table(title="Quality Gates")
-    table.add_column("Gate")
-    table.add_column("Status")
-    table.add_column("Detail")
-
+    gate_results: list[dict] = []
     n_failed = 0
     for name, cmd in gates:
         proc = subprocess.run(cmd, capture_output=True, text=True)  # noqa: S603 — cmd is a hardcoded constant list
-        if proc.returncode == 0:
-            status = "[green]PASS[/green]"
-            detail = ""
-        else:
+        passed = proc.returncode == 0
+        detail = ""
+        if not passed:
             n_failed += 1
-            status = "[red]FAIL[/red]"
             out = (proc.stdout + proc.stderr).strip()
             detail = out[:120] + ("..." if len(out) > 120 else "")
-        table.add_row(name, status, detail)
+        gate_results.append({"name": name, "passed": passed, "detail": detail})
 
-    console.print(table)
+    if json_output:
+        if not quiet or n_failed:
+            print(
+                json.dumps({"gates": gate_results, "n_failed": n_failed, "passed": n_failed == 0})
+            )
+    elif quiet:
+        if n_failed:
+            for r in gate_results:
+                if not r["passed"]:
+                    console.print(f"[red]FAIL[/red] {r['name']}: {r['detail']}")
+    else:
+        table = Table(title="Quality Gates")
+        table.add_column("Gate")
+        table.add_column("Status")
+        table.add_column("Detail")
+        for r in gate_results:
+            status = "[green]PASS[/green]" if r["passed"] else "[red]FAIL[/red]"
+            table.add_row(r["name"], status, r["detail"])
+        console.print(table)
+
+        if n_failed:
+            console.print(f"[red]{n_failed} gate(s) failed[/red]")
+        else:
+            console.print("[green]All gates passed[/green]")
 
     if n_failed:
-        console.print(f"[red]{n_failed} gate(s) failed[/red]")
         raise typer.Exit(code=1)
-
-    console.print("[green]All gates passed[/green]")
 
 
 @app.command()
-def audit():
+def audit(
+    json_output: bool = typer.Option(False, "--json", help="Output state as JSON."),
+):
     """Show a quick local project state summary: git state, file counts."""
 
     def _git(*args: str) -> str:
-        proc = subprocess.run(["git", *args], capture_output=True, text=True)
+        proc = subprocess.run(["git", *args], capture_output=True, text=True)  # noqa: S603
         return proc.stdout.strip() if proc.returncode == 0 else "N/A"
 
     branch = _git("rev-parse", "--abbrev-ref", "HEAD")
@@ -124,6 +154,21 @@ def audit():
         if ".venv" not in f.parts and "__pycache__" not in f.parts
     )
     test_files = [f for f in py_files if f.name.startswith("test_")]
+
+    if json_output:
+        print(
+            json.dumps(
+                {
+                    "branch": branch,
+                    "sha": sha,
+                    "working_tree": tree_label,
+                    "python_files": len(py_files),
+                    "test_files": len(test_files),
+                    "recent_commits": log_lines,
+                }
+            )
+        )
+        return
 
     table = Table(title="Project State")
     table.add_column("Item")
@@ -319,9 +364,17 @@ def plugins_list():
 
 
 @app.command("diagnose")
-def diagnose():
+def diagnose(
+    json_output: bool = typer.Option(False, "--json", help="Output full report as JSON."),
+):
     """Run a deep health/status check of the STARCORE deployment and configured providers."""
     report = asyncio.run(run_diagnostics())
+
+    if json_output:
+        print(json.dumps(report, indent=2, default=str))
+        if report["overall_status"] != "ok":
+            raise typer.Exit(code=1)
+        return
 
     status_colors = {"ok": "green", "warning": "yellow", "error": "red"}
 

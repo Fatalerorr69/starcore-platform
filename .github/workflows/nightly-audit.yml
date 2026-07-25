@@ -1,0 +1,35 @@
+name: Nightly Security & Dependency Audit
+
+on:
+  schedule:
+    - cron: '0 2 * * *'  # 02:00 UTC daily
+  workflow_dispatch:      # allow manual trigger from the Actions tab
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          version: "latest"
+
+      - name: Set up Python
+        run: uv python install 3.12
+
+      - name: Install dependencies
+        run: uv sync --extra dev
+
+      - name: Lockfile consistency check
+        run: uv lock --check
+
+      - name: Dependency vulnerability scan (pip-audit)
+        run: uv run pip-audit
+
+      - name: SAST scan (Bandit)
+        run: uv run bandit -r packages/ apps/ -c pyproject.toml -q
+
+      - name: Ruff lint
+        run: uv run ruff check .

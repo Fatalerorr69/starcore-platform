@@ -2,6 +2,7 @@
 CLI Tests
 """
 
+import json
 from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -515,3 +516,136 @@ def test_audit_git_unavailable():
 
     assert result.exit_code == 0
     assert "N/A" in result.stdout
+
+
+# ---------------------------------------------------------------------------
+# health: --json flag
+# ---------------------------------------------------------------------------
+
+
+def test_health_json_output():
+    result = runner.invoke(app, ["health", "--json"])
+    assert result.exit_code == 0
+    data = json.loads(result.stdout)
+    assert data == {"status": "ok"}
+
+
+# ---------------------------------------------------------------------------
+# doctor: --json, --quiet flags and Bandit gate
+# ---------------------------------------------------------------------------
+
+
+def test_doctor_json_output_all_pass():
+    with patch("apps.cli.main.subprocess.run", return_value=_mock_proc(0)):
+        result = runner.invoke(app, ["doctor", "--json", "--fast"])
+    assert result.exit_code == 0
+    data = json.loads(result.stdout)
+    assert data["passed"] is True
+    assert data["n_failed"] == 0
+    assert isinstance(data["gates"], list)
+
+
+def test_doctor_json_output_with_failure():
+    def _side(cmd: list, **_: object) -> MagicMock:
+        failing = "bandit" in " ".join(cmd)
+        return _mock_proc(1 if failing else 0, stdout="bandit issue found")
+
+    with patch("apps.cli.main.subprocess.run", side_effect=_side):
+        result = runner.invoke(app, ["doctor", "--json", "--fast"])
+    assert result.exit_code == 1
+    data = json.loads(result.stdout)
+    assert data["passed"] is False
+    assert data["n_failed"] == 1
+    failed_gates = [g for g in data["gates"] if not g["passed"]]
+    assert len(failed_gates) == 1
+    assert failed_gates[0]["name"] == "Bandit"
+
+
+def test_doctor_quiet_no_output_on_pass():
+    with patch("apps.cli.main.subprocess.run", return_value=_mock_proc(0)):
+        result = runner.invoke(app, ["doctor", "--quiet", "--fast"])
+    assert result.exit_code == 0
+    assert result.stdout.strip() == ""
+
+
+def test_doctor_quiet_prints_failures():
+    def _side(cmd: list, **_: object) -> MagicMock:
+        failing = "ruff" in " ".join(cmd)
+        return _mock_proc(1 if failing else 0, stdout="E501 line too long")
+
+    with patch("apps.cli.main.subprocess.run", side_effect=_side):
+        result = runner.invoke(app, ["doctor", "--quiet", "--fast"])
+    assert result.exit_code == 1
+    assert "FAIL" in result.stdout
+
+
+def test_doctor_json_quiet_no_output_on_pass():
+    with patch("apps.cli.main.subprocess.run", return_value=_mock_proc(0)):
+        result = runner.invoke(app, ["doctor", "--json", "--quiet", "--fast"])
+    assert result.exit_code == 0
+    assert result.stdout.strip() == ""
+
+
+def test_doctor_includes_bandit_gate():
+    calls: list = []
+
+    def _side(cmd: list, **_: object) -> MagicMock:
+        calls.append(cmd)
+        return _mock_proc(0)
+
+    with patch("apps.cli.main.subprocess.run", side_effect=_side):
+        runner.invoke(app, ["doctor", "--fast"])
+
+    bandit_calls = [c for c in calls if "bandit" in " ".join(c)]
+    assert len(bandit_calls) == 1
+
+
+# ---------------------------------------------------------------------------
+# audit: --json flag
+# ---------------------------------------------------------------------------
+
+
+def test_audit_json_output():
+    mock = _git_mock("main", "abc1234", "", "abc1234 fix: something")
+    with patch("apps.cli.main.subprocess.run", mock):
+        result = runner.invoke(app, ["audit", "--json"])
+    assert result.exit_code == 0
+    data = json.loads(result.stdout)
+    assert data["branch"] == "main"
+    assert data["sha"] == "abc1234"
+    assert data["working_tree"] == "clean"
+    assert "python_files" in data
+    assert "test_files" in data
+    assert isinstance(data["recent_commits"], list)
+
+
+# ---------------------------------------------------------------------------
+# diagnose: --json flag
+# ---------------------------------------------------------------------------
+
+
+def test_diagnose_json_output():
+    report = {
+        "overall_status": "ok",
+        "checks": [{"name": "db", "status": "ok", "detail": "alive"}],
+        "proxmox": {},
+        "docker": {},
+    }
+    with patch("apps.cli.main.run_diagnostics", new=AsyncMock(return_value=report)):
+        result = runner.invoke(app, ["diagnose", "--json"])
+    assert result.exit_code == 0
+    data = json.loads(result.stdout)
+    assert data["overall_status"] == "ok"
+    assert "checks" in data
+
+
+def test_diagnose_json_output_error_exits_one():
+    report = {
+        "overall_status": "error",
+        "checks": [{"name": "db", "status": "error", "detail": "down"}],
+        "proxmox": {},
+        "docker": {},
+    }
+    with patch("apps.cli.main.run_diagnostics", new=AsyncMock(return_value=report)):
+        result = runner.invoke(app, ["diagnose", "--json"])
+    assert result.exit_code == 1
