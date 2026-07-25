@@ -89,3 +89,38 @@ async def test_load_all_twice_does_not_duplicate_event_subscriptions():
     )
 
     assert len(run_logger.completed_runs) == 1
+
+
+def test_load_all_skips_plugin_with_broken_import(tmp_path):
+    """Lines 56-58: ImportError during import_module is caught and the plugin is skipped."""
+    plugin_dir = tmp_path / "bad_import_plugin"
+    plugin_dir.mkdir()
+    (plugin_dir / "__init__.py").write_text("import _this_module_does_not_exist_xyz_starcore\n")
+
+    manager = PluginManager(plugins_dir=str(tmp_path))
+    loaded = manager.load_all()
+
+    assert "bad_import_plugin" not in loaded
+
+
+def test_load_all_skips_plugin_whose_register_raises(tmp_path):
+    """Lines 67-69: Exception raised inside register() is caught and the plugin is skipped."""
+    plugin_dir = tmp_path / "bad_register_plugin"
+    plugin_dir.mkdir()
+    (plugin_dir / "__init__.py").write_text(
+        "def register(context):\n    raise RuntimeError('simulated register failure')\n"
+    )
+
+    manager = PluginManager(plugins_dir=str(tmp_path))
+    loaded = manager.load_all()
+
+    assert "bad_register_plugin" not in loaded
+
+
+def test_get_returns_loaded_plugin_or_none():
+    """Line 80: get() returns the plugin module for a known name, None for an unknown one."""
+    manager = PluginManager(plugins_dir="plugins")
+    manager.load_all()
+
+    assert manager.get("example_provider") is not None
+    assert manager.get("does_not_exist") is None
