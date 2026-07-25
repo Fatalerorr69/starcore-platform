@@ -543,5 +543,5 @@ def snapshot_rollback(
     console.print(f"[green]Rolled back to snapshot '{name}'[/green]")
 
 
-if __name__ == "__main__":
-    app()
+if __name__ == "__main__":  # pragma: no cover
+    app()  # pragma: no cover

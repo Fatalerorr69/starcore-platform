@@ -390,3 +390,12 @@ def test_snapshot_rollback_success():
         result = runner.invoke(app, ["snapshot", "rollback", "pve", "101", "snap1", "--yes"])
     assert result.exit_code == 0
     assert "snap1" in result.stdout
+
+
+def test_snapshot_rollback_reports_failure():
+    """Lines 541-542: failed rollback task prints error and exits with code 1."""
+    task = _make_task("failed", {"error": "rollback failed"})
+    with patch("apps.cli.main.execute_resource_action", new=AsyncMock(return_value=task)):
+        result = runner.invoke(app, ["snapshot", "rollback", "pve", "101", "snap1", "--yes"])
+    assert result.exit_code == 1
+    assert "rollback failed" in result.stdout
