@@ -291,7 +291,7 @@ def test_repository_list_known_provider_vmids_returns_saved_vmids(
     from core.database import get_session
 
     tasks: list[Task] = []
-    for i, vmid in enumerate(vmids):
+    for vmid in vmids:
         t = _make_task(f"vmid-task-{provider}-{vmid}", provider=provider)
         t.result = {"vmid": vmid}
         tasks.append(t)

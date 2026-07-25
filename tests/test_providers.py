@@ -422,7 +422,6 @@ async def test_proxmox_snapshot_delete_calls_correct_endpoint():
     from orchestrator.task import Task
 
     fake_client = MagicMock()
-    fake_client.nodes.return_value.qemu.return_value.snapshot.return_value.delete
     fake_client.nodes.return_value.qemu.return_value.snapshot.return_value.delete.return_value = (
         None
     )
