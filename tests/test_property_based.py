@@ -7,12 +7,18 @@ the specific examples covered by unit tests.
 
 from __future__ import annotations
 
+import asyncio
+from unittest.mock import patch
+
 from blueprints.models import Blueprint, ResourceSpec
 from blueprints.planner import ExecutionPlanner
 from hypothesis import given, settings
 from hypothesis import strategies as st
-from orchestrator.task import Task
+from orchestrator.scheduler import Scheduler
+from orchestrator.task import Task, TaskStatus
 from orchestrator.task_graph import TaskGraph
+from provider_sdk.base import BaseProvider
+from provider_sdk.registry import registry
 
 # ── Strategies ─────────────────────────────────────────────────────────────────
 
@@ -93,9 +99,7 @@ def test_planner_graph_and_plan_have_equal_resource_counts(blueprint: Blueprint)
 )
 def test_planner_no_deps_preserves_declaration_order(names: list[str]) -> None:
     """A blueprint with no depends_on edges preserves the original declaration order."""
-    resources = [
-        ResourceSpec(name=n, provider="fake", kind="svc", config={}) for n in names
-    ]
+    resources = [ResourceSpec(name=n, provider="fake", kind="svc", config={}) for n in names]
     blueprint = Blueprint(name="order-test", resources=resources)
     plan = ExecutionPlanner().create_plan(blueprint)
 
@@ -181,10 +185,7 @@ def test_strip_code_fences_is_noop_on_text_without_backticks(text: str) -> None:
 def test_task_graph_get_returns_same_task_after_add(task_ids: list[str]) -> None:
     """graph.get(id) always returns the exact Task object that was added."""
     graph = TaskGraph()
-    tasks = {
-        tid: Task(id=tid, provider="fake", action="create", resource=tid)
-        for tid in task_ids
-    }
+    tasks = {tid: Task(id=tid, provider="fake", action="create", resource=tid) for tid in task_ids}
     for task in tasks.values():
         graph.add_task(task)
 
@@ -255,3 +256,249 @@ def test_blueprint_resources_default_to_empty_list(name: str, version: str) -> N
     assert bp.resources == []
     assert bp.name == name
     assert bp.version == version
+
+
+# ── Orchestrator: supporting fixtures ─────────────────────────────────────────
+
+_TASK_ID = st.text(
+    alphabet="abcdefghijklmnopqrstuvwxyz",
+    min_size=1,
+    max_size=12,
+)
+
+
+@st.composite
+def valid_dag_task_graph(draw: st.DrawFn, provider: str = "fake") -> TaskGraph:
+    """Generate a TaskGraph whose dependency graph is a valid DAG.
+
+    Same construction as valid_dag_blueprint but produces a TaskGraph directly.
+    """
+    n = draw(st.integers(min_value=1, max_value=8))
+    ids = [f"t{i}" for i in range(n)]
+    graph = TaskGraph()
+    for i, tid in enumerate(ids):
+        earlier = ids[:i]
+        deps = (
+            draw(st.lists(st.sampled_from(earlier), max_size=min(i, 3), unique=True))
+            if earlier
+            else []
+        )
+        graph.add_task(
+            Task(id=tid, provider=provider, action="create", resource=tid, depends_on=deps)
+        )
+    return graph
+
+
+class _SucceedingProvider(BaseProvider):
+    name = "succeeder"
+
+    async def connect(self) -> bool:
+        return True
+
+    async def disconnect(self) -> None:
+        return None
+
+    async def health(self) -> dict:
+        return {"status": "ok", "provider": self.name}
+
+    async def list_resources(self) -> list[dict]:
+        return []
+
+    async def execute(self, task) -> None:
+        return None
+
+
+_TERMINAL_STATUSES = {TaskStatus.SUCCESS, TaskStatus.FAILED, TaskStatus.SKIPPED}
+
+
+# ── Additional TaskGraph properties ───────────────────────────────────────────
+
+
+@given(
+    task_ids=st.lists(_TASK_ID, min_size=1, max_size=12, unique=True),
+)
+def test_task_graph_dependents_of_missing_id_returns_empty_set(
+    task_ids: list[str],
+) -> None:
+    """dependents_of() returns an empty set for an ID that was never added."""
+    graph = TaskGraph()
+    for tid in task_ids:
+        graph.add_task(Task(id=tid, provider="fake", action="create", resource=tid))
+
+    assert graph.dependents_of("__no_such_task__") == set()
+
+
+@given(
+    ids=st.lists(_TASK_ID, min_size=1, max_size=8, unique=True),
+)
+def test_task_graph_duplicate_id_overwrites_previous_task(ids: list[str]) -> None:
+    """Adding a task with an already-registered ID replaces the previous entry."""
+    graph = TaskGraph()
+    for tid in ids:
+        graph.add_task(Task(id=tid, provider="first", action="create", resource=tid))
+
+    new_tasks: dict[str, Task] = {}
+    for tid in ids:
+        replacement = Task(id=tid, provider="second", action="delete", resource=tid)
+        graph.add_task(replacement)
+        new_tasks[tid] = replacement
+
+    for tid in ids:
+        assert graph.get(tid) is new_tasks[tid]
+    assert len(list(graph.all())) == len(ids)
+
+
+@given(n=st.integers(min_value=1, max_value=10))
+def test_task_graph_leaf_node_has_no_dependents(n: int) -> None:
+    """In a linear chain the last (leaf) task has no registered dependents."""
+    ids = [f"t{i}" for i in range(n)]
+    graph = TaskGraph()
+    for i, tid in enumerate(ids):
+        deps = [ids[i - 1]] if i > 0 else []
+        graph.add_task(
+            Task(id=tid, provider="fake", action="create", resource=tid, depends_on=deps)
+        )
+
+    assert graph.dependents_of(ids[-1]) == set()
+
+
+@given(graph=valid_dag_task_graph())
+def test_task_graph_total_edges_equals_total_dependency_declarations(
+    graph: TaskGraph,
+) -> None:
+    """Sum of all edge-set sizes equals the total number of depends_on entries across all tasks."""
+    declared = sum(len(t.depends_on) for t in graph.all())
+    stored = sum(len(s) for s in graph.edges.values())
+    assert stored == declared
+
+
+# ── Task model properties ──────────────────────────────────────────────────────
+
+
+@given(
+    tid=_TASK_ID,
+    provider=st.sampled_from(["docker", "proxmox", "fake"]),
+    action=st.sampled_from(["create", "delete", "start", "stop"]),
+    resource=_TASK_ID,
+)
+def test_task_default_status_is_always_pending(
+    tid: str, provider: str, action: str, resource: str
+) -> None:
+    """A newly created Task always starts with PENDING status regardless of other fields."""
+    task = Task(id=tid, provider=provider, action=action, resource=resource)
+    assert task.status == TaskStatus.PENDING
+
+
+@given(
+    tid=_TASK_ID,
+    provider=st.sampled_from(["docker", "proxmox", "fake"]),
+    action=st.sampled_from(["create", "delete", "start", "stop"]),
+    resource=_TASK_ID,
+)
+def test_task_optional_fields_default_correctly(
+    tid: str, provider: str, action: str, resource: str
+) -> None:
+    """payload, result, depends_on, and kind all default to their zero values."""
+    task = Task(id=tid, provider=provider, action=action, resource=resource)
+    assert task.payload == {}
+    assert task.result == {}
+    assert task.depends_on == []
+    assert task.kind == ""
+
+
+# ── Scheduler properties ───────────────────────────────────────────────────────
+
+
+@given(
+    task_ids=st.lists(_TASK_ID, min_size=1, max_size=6, unique=True),
+)
+def test_scheduler_returns_same_number_of_tasks_as_graph(task_ids: list[str]) -> None:
+    """Scheduler.execute() returns exactly as many Task objects as the graph contains."""
+    graph = TaskGraph()
+    for tid in task_ids:
+        graph.add_task(Task(id=tid, provider="ghost-xyz", action="create", resource=tid))
+
+    registry._providers.clear()
+    try:
+        with patch("orchestrator.scheduler.register_default_providers"):
+            tasks = asyncio.run(Scheduler().execute(graph))
+    finally:
+        registry._providers.clear()
+
+    assert len(tasks) == len(task_ids)
+
+
+@given(
+    task_ids=st.lists(_TASK_ID, min_size=1, max_size=6, unique=True),
+)
+def test_scheduler_unregistered_provider_marks_all_tasks_skipped(
+    task_ids: list[str],
+) -> None:
+    """Tasks whose provider is absent from the registry are marked SKIPPED."""
+    graph = TaskGraph()
+    for tid in task_ids:
+        graph.add_task(Task(id=tid, provider="ghost-xyz", action="create", resource=tid))
+
+    registry._providers.clear()
+    try:
+        with patch("orchestrator.scheduler.register_default_providers"):
+            tasks = asyncio.run(Scheduler().execute(graph))
+    finally:
+        registry._providers.clear()
+
+    for task in tasks:
+        assert task.status == TaskStatus.SKIPPED
+
+
+@given(n=st.integers(min_value=1, max_value=6))
+def test_scheduler_stalled_graph_marks_all_tasks_failed(n: int) -> None:
+    """A graph where every task depends on a non-existent ID stalls: all tasks reach FAILED."""
+    graph = TaskGraph()
+    for i in range(n):
+        graph.add_task(
+            Task(
+                id=f"t{i}",
+                provider="ghost-xyz",
+                action="create",
+                resource=f"r{i}",
+                depends_on=["__phantom__"],
+            )
+        )
+
+    registry._providers.clear()
+    try:
+        with patch("orchestrator.scheduler.register_default_providers"):
+            tasks = asyncio.run(Scheduler().execute(graph))
+    finally:
+        registry._providers.clear()
+
+    assert all(t.status == TaskStatus.FAILED for t in tasks)
+
+
+@given(graph=valid_dag_task_graph(provider="succeeder"))
+def test_scheduler_all_tasks_succeed_with_working_provider(graph: TaskGraph) -> None:
+    """Every task in a valid DAG reaches SUCCESS when the provider connects and executes cleanly."""
+    registry._providers.clear()
+    registry.register(_SucceedingProvider())
+    try:
+        with patch("orchestrator.scheduler.register_default_providers"):
+            tasks = asyncio.run(Scheduler().execute(graph))
+    finally:
+        registry._providers.clear()
+
+    for task in tasks:
+        assert task.status == TaskStatus.SUCCESS
+
+
+@given(graph=valid_dag_task_graph(provider="ghost-xyz"))
+def test_scheduler_all_tasks_reach_terminal_status(graph: TaskGraph) -> None:
+    """After execution no task remains in a non-terminal state (PENDING or RUNNING)."""
+    registry._providers.clear()
+    try:
+        with patch("orchestrator.scheduler.register_default_providers"):
+            tasks = asyncio.run(Scheduler().execute(graph))
+    finally:
+        registry._providers.clear()
+
+    for task in tasks:
+        assert task.status in _TERMINAL_STATUSES
