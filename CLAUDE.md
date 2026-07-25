@@ -8,6 +8,16 @@ STARCORE Platform is an AI-powered infrastructure orchestration platform for hom
 
 The package manager is **uv**. Python 3.12 is required.
 
+## First-Time Setup
+
+Run this once before anything else (tests, lint, type-check):
+
+```bash
+uv sync --extra dev
+```
+
+Cold `pytest` will fail with `ModuleNotFoundError: No module named 'pydantic_settings'` if this step is skipped.
+
 ## Commands
 
 ```bash
