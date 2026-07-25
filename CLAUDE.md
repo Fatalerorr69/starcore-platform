@@ -89,7 +89,7 @@ apps/cli (Typer)           packages/core/main.py (FastAPI)
 
 **`packages/orchestrator`** — Executes already-prepared `TaskGraph` plans. `Scheduler` runs dependency-satisfied tasks concurrently in "waves" via `asyncio.gather` and detects stalls (unresolvable graphs) instead of hanging.
 
-**`packages/core`** — FastAPI app, `pydantic-settings`-based config (all env vars prefixed `STARCORE_`), SQLite persistence via SQLAlchemy + Alembic, an in-process `EventBus`, `PluginManager`, deep diagnostics, and API-wide per-IP rate limiting via `slowapi` (`/health` is exempt).
+**`packages/core`** — FastAPI app, `pydantic-settings`-based config (all env vars prefixed `STARCORE_`), SQLite persistence via SQLAlchemy + Alembic, an in-process `EventBus`, `PluginManager`, deep diagnostics (including `environment.py`'s `detect_runtime_environment()` — `proxmox-host` / `container` / `local`, surfaced via `starcore audit`/`diagnose` and `GET /diagnostics`), and API-wide per-IP rate limiting via `slowapi` (`/health` is exempt).
 
 **`packages/ai`** — Translates natural language into a blueprint YAML via a pluggable `AIProvider` abstract base (`packages/ai/base.py`). `STARCORE_AI_PROVIDER` selects the implementation: `anthropic` (default, requires `STARCORE_ANTHROPIC_API_KEY`) or `openai-compatible` (any `/v1/chat/completions` server — Ollama, LM Studio, vLLM, LocalAI, OpenAI itself — configured via `STARCORE_AI_BASE_URL` / `STARCORE_AI_API_KEY`). `packages/ai/generator.py` builds the configured provider and keeps the public `generate_blueprint_yaml()` API unchanged for callers.
 

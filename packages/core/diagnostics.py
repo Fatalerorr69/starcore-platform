@@ -21,6 +21,7 @@ from core.database import (
     get_migration_head,
     get_session,
 )
+from core.environment import detect_runtime_environment
 from core.repository import list_known_provider_vmids
 
 
@@ -253,6 +254,7 @@ async def run_diagnostics() -> dict[str, Any]:
 
     return {
         "overall_status": overall,
+        "runtime_environment": detect_runtime_environment(),
         "checks": [{"name": c.name, "status": c.status, "detail": c.detail} for c in checks],
         "proxmox": proxmox_details,
         "docker": docker_details,

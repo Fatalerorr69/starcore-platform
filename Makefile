@@ -1,7 +1,7 @@
-.PHONY: install lint format test docs dev clean
+.PHONY: install lint format test security docs dev clean
 
 install:
-	uv sync
+	uv sync --extra dev
 
 lint:
 	uv run ruff check .
@@ -11,6 +11,10 @@ format:
 
 test:
 	uv run pytest -q
+
+security:
+	uv run pip-audit
+	uv run bandit -r packages/ apps/ scripts/ -ll -q
 
 docs:
 	uv run mkdocs serve

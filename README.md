@@ -32,8 +32,9 @@ This README reflects the **actual current state of the codebase**, not the long-
 | Persistence | Done | SQLite (via SQLAlchemy) stores blueprint run history and task results |
 | Config | Done | .env-based settings via pydantic-settings; STARCORE_LOG_JSON for structured JSON logging |
 | Observability | Done | GET /metrics — Prometheus text format, authenticated; structured loguru logging (STARCORE_LOG_JSON) |
+| Environment Detection | Done | starcore audit/diagnose and GET /diagnostics report runtime_environment (proxmox-host / container / local) so operators don't have to infer deployment context |
 | Security | Done | Bandit SAST + gitleaks secret scanning on every PR and nightly; pip-audit dependency vulnerability scan |
-| Tests | 407 passing | ruff, pyright, pytest (100% coverage floor, incl. Hypothesis property tests), pre-commit, CI on every PR |
+| Tests | 414 passing | ruff, pyright, pytest (100% coverage floor, incl. Hypothesis property tests), pre-commit, CI on every PR |
 
 ## What's Planned, Not Built Yet
 
