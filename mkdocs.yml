@@ -29,4 +29,5 @@ nav:
       - ADR-004 Dependency Vulnerability Scanning: adr/ADR-004-dependency-vulnerability-scanning.md
       - ADR-005 Unified Schema Management: adr/ADR-005-unified-schema-management.md
       - ADR-006 Observability: adr/ADR-006-observability.md
+      - ADR-007 AI Provider Abstraction: adr/ADR-007-ai-provider-abstraction.md
   - Vision (SES): ses/SES-0000-MASTER-INDEX.md
