@@ -19,10 +19,6 @@ class Settings(BaseSettings):
 
     postgres_url: str = "postgresql://starcore:starcore@localhost:5432/starcore"
 
-    redis_url: str = "redis://localhost:6379"
-
-    nats_url: str = "nats://localhost:4222"
-
     database_url: str = "sqlite:///./data/starcore.db"
 
     api_key: str | None = None
