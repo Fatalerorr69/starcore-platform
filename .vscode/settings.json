@@ -131,8 +131,7 @@
   "cursorpyright.analysis.include": [
     "packages",
     "apps",
-    "tests",
-    "scripts"
+    "tests"
   ],
   "cursorpyright.analysis.typeCheckingMode": "basic"
 }
