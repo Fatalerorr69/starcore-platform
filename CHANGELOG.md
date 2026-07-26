@@ -8,6 +8,17 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [Unreleased]
 
 ### Added
+- Property-based (Hypothesis) tests for `BlueprintExecutor` (the sequential execution
+  path): 5 new tests mirroring the existing `Scheduler` property tests — task count,
+  terminal-status, all-succeed, unregistered-provider, and dependency-failure-propagation
+  invariants. Hypothesis found that the unregistered-provider invariant needed a
+  dependency-free blueprint to hold cleanly (a dependent task correctly reaches
+  SKIPPED_DEPENDENCY_FAILED rather than SKIPPED).
+- Test matrix corrected: "Event bus", "Plugins", "Persistence", and "Request
+  correlation" already had property-based coverage in `test_property_based_core.py`
+  that was never reflected in `docs/test-matrix.md`.
+
+### Added
 - Property-based (Hypothesis) tests for `core.security`: 6 new tests covering
   `redact_database_url` (never-raises, postgres password masked, SQLite passthrough) and
   `scrub_configured_secrets` (never returns configured secret, idempotent, no-op when no

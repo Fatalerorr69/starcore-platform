@@ -9,7 +9,7 @@ See `reports/starcore-tests-catalog.md` for the full per-test listing.
 |---|:---:|:---:|:---:|:---:|:---:|---|
 | Blueprint loader | ✓ | ✓ | | | ✓ | `test_blueprints.py`, `test_template_resolver.py`, `test_property_based_blueprints.py` |
 | Planner (dependency ordering) | ✓ | ✓ | | | ✓ | `test_blueprints.py`, `test_property_based_blueprints.py`, `test_property_based.py` |
-| Sequential executor | ✓ | ✓ | | | | `test_blueprints.py` |
+| Sequential executor | ✓ | ✓ | | | ✓ | `test_blueprints.py`, `test_property_based_blueprints.py` |
 | Scheduler (concurrent) | ✓ | ✓ | | | ✓ | `test_scheduler.py`, `test_graph_execution.py`, `test_property_based.py` |
 | Dependency failure semantics (ADR-010) | ✓ | ✓ | | | | `test_blueprints.py`, `test_scheduler.py`, `test_persistence.py` |
 | Provider SDK (registry, base, lock) | ✓ | ✓ | | | ✓ | `test_providers.py`, `test_property_based_providers.py` |
@@ -20,15 +20,15 @@ See `reports/starcore-tests-catalog.md` for the full per-test listing.
 | API (FastAPI routes) | | ✓ | ✓ | ✓ | | `test_api.py`, `test_health.py`, `test_rate_limiting.py` |
 | CLI | ✓ | ✓ | ✓ | | ✓ | `test_cli.py`, `test_property_based_cli.py` |
 | Authentication | | ✓ | | ✓ | | `test_auth.py` |
-| Request correlation | ✓ | ✓ | | | | `test_correlation.py`, `test_request_id_middleware.py`, `test_request_id.py` |
+| Request correlation | ✓ | ✓ | | | ✓ | `test_correlation.py`, `test_request_id_middleware.py`, `test_request_id.py`, `test_property_based_core.py` |
 | Secret redaction | ✓ | ✓ | | ✓ | ✓ | `test_security.py`, `test_property_based_security.py` |
-| Plugins | ✓ | ✓ | | | | `test_plugin_manager.py` |
-| Persistence | ✓ | ✓ | | | | `test_persistence.py` |
+| Plugins | ✓ | ✓ | | | ✓ | `test_plugin_manager.py`, `test_property_based_core.py` |
+| Persistence | ✓ | ✓ | | | ✓ | `test_persistence.py`, `test_property_based_core.py` |
 | Migrations / schema management | | ✓ | | | | `test_migrations.py`, `test_schema_management.py` |
 | Environment detection | ✓ | ✓ | | | ✓ | `test_environment.py`, `test_property_based_environment.py` |
 | Diagnostics | ✓ | ✓ | ✓ | | | `test_diagnostics.py` |
 | Metrics | ✓ | ✓ | | | ✓ | `test_metrics.py`, `test_property_based_metrics.py` |
-| Event bus | ✓ | ✓ | | | | `test_events.py` |
+| Event bus | ✓ | ✓ | | | ✓ | `test_events.py`, `test_property_based_core.py` |
 | Discovery (Proxmox environment audit) | ✓ | ✓ | | | | `test_discovery.py` |
 | Logger configuration | ✓ | | | | | `test_logger.py` |
 | AI blueprint generation | ✓ | ✓ | | | ✓ | `test_ai_generator.py`, `test_ai_providers.py`, `test_property_based_ai.py` |

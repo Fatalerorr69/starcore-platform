@@ -8,13 +8,20 @@ that must hold for all valid (and selected invalid) inputs.
 
 from __future__ import annotations
 
+import asyncio
+from unittest.mock import patch
+
 import pytest
 import yaml
+from blueprints.executor import BlueprintExecutor
 from blueprints.loader import BlueprintLoader
 from blueprints.models import Blueprint, ResourceSpec
 from blueprints.planner import ExecutionPlanner
 from hypothesis import given
 from hypothesis import strategies as st
+from orchestrator.task import TaskStatus
+from provider_sdk.base import BaseProvider
+from provider_sdk.registry import registry
 
 # ── Shared strategies ──────────────────────────────────────────────────────────
 
@@ -29,8 +36,12 @@ _VERSION = st.text(alphabet="0123456789.", min_size=1, max_size=10)
 
 
 @st.composite
-def valid_dag_blueprint(draw: st.DrawFn) -> Blueprint:
-    """Generate a Blueprint whose dependency graph is a valid DAG."""
+def valid_dag_blueprint(draw: st.DrawFn, provider: str | None = None) -> Blueprint:
+    """Generate a Blueprint whose dependency graph is a valid DAG.
+
+    If *provider* is given, every resource uses it; otherwise each resource
+    draws an independent provider from _PROVIDER.
+    """
     n = draw(st.integers(min_value=1, max_value=8))
     names = [f"r{i}" for i in range(n)]
     resources: list[ResourceSpec] = []
@@ -41,13 +52,42 @@ def valid_dag_blueprint(draw: st.DrawFn) -> Blueprint:
             if earlier
             else []
         )
-        provider = draw(_PROVIDER)
+        resource_provider = provider if provider is not None else draw(_PROVIDER)
         kind = draw(_KIND)
         resources.append(
-            ResourceSpec(name=name, provider=provider, kind=kind, config={}, depends_on=deps)
+            ResourceSpec(
+                name=name, provider=resource_provider, kind=kind, config={}, depends_on=deps
+            )
         )
     shuffled = draw(st.permutations(resources))
     return Blueprint(name="prop-test", resources=list(shuffled))
+
+
+class _SucceedingProvider(BaseProvider):
+    name = "succeeder"
+
+    async def connect(self) -> bool:
+        return True
+
+    async def disconnect(self) -> None:
+        return None
+
+    async def health(self) -> dict:
+        return {"status": "ok", "provider": self.name}
+
+    async def list_resources(self) -> list[dict]:
+        return []
+
+    async def execute(self, task) -> None:
+        return None
+
+
+_TERMINAL_STATUSES = {
+    TaskStatus.SUCCESS,
+    TaskStatus.FAILED,
+    TaskStatus.SKIPPED,
+    TaskStatus.SKIPPED_DEPENDENCY_FAILED,
+}
 
 
 @st.composite
@@ -268,3 +308,111 @@ def test_loader_preserves_name_and_version(name: str, version: str) -> None:
     loaded = BlueprintLoader.load_from_string(yaml_text)
     assert loaded.name == name
     assert loaded.version == version
+
+
+# ── BlueprintExecutor (sequential path) properties ─────────────────────────────
+
+
+@given(blueprint=valid_dag_blueprint(provider="ghost-xyz"))
+def test_executor_returns_one_task_per_resource(blueprint: Blueprint) -> None:
+    """BlueprintExecutor.execute() returns exactly one Task per blueprint resource."""
+    registry._providers.clear()
+    try:
+        with patch("blueprints.executor.register_default_providers"):
+            tasks = asyncio.run(BlueprintExecutor().execute(blueprint))
+    finally:
+        registry._providers.clear()
+
+    assert len(tasks) == len(blueprint.resources)
+
+
+@given(blueprint=valid_dag_blueprint(provider="ghost-xyz"))
+def test_executor_all_tasks_reach_terminal_status(blueprint: Blueprint) -> None:
+    """After execution no task remains in a non-terminal state (PENDING or RUNNING)."""
+    registry._providers.clear()
+    try:
+        with patch("blueprints.executor.register_default_providers"):
+            tasks = asyncio.run(BlueprintExecutor().execute(blueprint))
+    finally:
+        registry._providers.clear()
+
+    for task in tasks:
+        assert task.status in _TERMINAL_STATUSES
+
+
+@given(blueprint=valid_dag_blueprint(provider="succeeder"))
+def test_executor_all_tasks_succeed_with_working_provider(blueprint: Blueprint) -> None:
+    """Every task reaches SUCCESS when the provider connects and executes cleanly."""
+    registry._providers.clear()
+    registry.register(_SucceedingProvider())
+    try:
+        with patch("blueprints.executor.register_default_providers"):
+            tasks = asyncio.run(BlueprintExecutor().execute(blueprint))
+    finally:
+        registry._providers.clear()
+
+    for task in tasks:
+        assert task.status == TaskStatus.SUCCESS
+
+
+@given(
+    names=st.lists(
+        st.text(min_size=1, max_size=8, alphabet="abcdefghijklmnopqrstuvwxyz"),
+        min_size=1,
+        max_size=6,
+        unique=True,
+    )
+)
+def test_executor_unregistered_provider_marks_tasks_skipped(names: list[str]) -> None:
+    """Independent (no depends_on) tasks whose provider is absent from the registry
+    are marked SKIPPED, never SKIPPED_DEPENDENCY_FAILED or FAILED."""
+    blueprint = Blueprint(
+        name="unregistered",
+        resources=[
+            ResourceSpec(name=name, provider="ghost-xyz", kind="svc", config={}, depends_on=[])
+            for name in names
+        ],
+    )
+
+    registry._providers.clear()
+    try:
+        with patch("blueprints.executor.register_default_providers"):
+            tasks = asyncio.run(BlueprintExecutor().execute(blueprint))
+    finally:
+        registry._providers.clear()
+
+    for task in tasks:
+        assert task.status == TaskStatus.SKIPPED
+
+
+@given(
+    name_a=st.text(min_size=1, max_size=8, alphabet="abcdefghijklmnopqrstuvwxyz"),
+    name_b=st.text(min_size=1, max_size=8, alphabet="abcdefghijklmnopqrstuvwxyz"),
+)
+def test_executor_dependency_failure_propagates(name_a: str, name_b: str) -> None:
+    """A resource with an unresolvable dependency skips, and anything depending on it
+    is marked SKIPPED_DEPENDENCY_FAILED without ever reaching provider.execute()."""
+    if name_a == name_b:
+        name_b = name_b + "x"
+
+    blueprint = Blueprint(
+        name="dep-failure",
+        resources=[
+            ResourceSpec(name=name_a, provider="ghost-xyz", kind="svc", config={}, depends_on=[]),
+            ResourceSpec(
+                name=name_b, provider="succeeder", kind="svc", config={}, depends_on=[name_a]
+            ),
+        ],
+    )
+
+    registry._providers.clear()
+    registry.register(_SucceedingProvider())
+    try:
+        with patch("blueprints.executor.register_default_providers"):
+            tasks = asyncio.run(BlueprintExecutor().execute(blueprint))
+    finally:
+        registry._providers.clear()
+
+    by_resource = {t.resource: t for t in tasks}
+    assert by_resource[name_a].status == TaskStatus.SKIPPED
+    assert by_resource[name_b].status == TaskStatus.SKIPPED_DEPENDENCY_FAILED
