@@ -1,5 +1,12 @@
 # ADR-014: Task Timeout Support
 
+> **Note (2026-07-26):** The environment variables `STARCORE_TASK_TIMEOUT_SECONDS` and
+> `STARCORE_TASK_TIMEOUT_STRATEGY` described in this document are **not wired into
+> `Settings` or the scheduler**. `execute_with_timeout` exists in
+> `orchestrator/timeout.py` but is not called by `Scheduler` or `BlueprintExecutor`.
+> The deliberate deferral of this integration is documented in
+> [ADR-016](ADR-016-task-timeout-integration.md).
+
 **Status**: Accepted  
 **Date**: 2026-07-26  
 **Deciders**: STARCORE Development Team

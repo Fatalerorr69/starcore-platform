@@ -1,4 +1,4 @@
-# ADR-014 — Task Timeout Integration: Deliberate Deferral
+# ADR-016 — Task Timeout Integration: Deliberate Deferral
 
 **Status:** Accepted
 **Date:** 2026-07-26

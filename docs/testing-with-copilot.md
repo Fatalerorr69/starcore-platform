@@ -354,7 +354,7 @@ When Copilot-generated tests fail:
 - [Hypothesis Documentation](https://hypothesis.readthedocs.io/)
 - [pytest Documentation](https://docs.pytest.org/)
 - [Copilot Testing Tips](https://github.blog/2023-02-codespaces-google-cloud-marketplace/)
-- [STARCORE Testing Standards](../CONTRIBUTING.md)
+- [STARCORE Development Guide](development.md)
 
 ---
 

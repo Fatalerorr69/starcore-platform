@@ -395,10 +395,9 @@ app.add_middleware(RequestIdMiddleware)
 
 ## Related Documentation
 
-- [CLAUDE.md](.claude/instructions.md) – Copilot coding guidelines
-- [Testing with Copilot](./docs/testing-with-copilot.md) – Testing strategies
-- [Contributing](./CONTRIBUTING.md) – Development workflow
-- [ADRs](./docs/adr/) – Architectural decisions
+- [Testing with Copilot](./testing-with-copilot.md) – Testing strategies
+- [Development](./development.md) – Development workflow
+- [ADRs](./adr/ADR-001-blueprint-dependency-execution.md) – Architectural decisions
 
 ---
 

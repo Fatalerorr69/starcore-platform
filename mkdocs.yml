@@ -56,5 +56,9 @@ nav:
       - ADR-011 Plugin Trust Boundary: adr/ADR-011-plugin-trust-boundary.md
       - ADR-012 API Authentication Model: adr/ADR-012-api-authentication-model.md
       - ADR-013 Provider Concurrency Policy: adr/ADR-013-provider-concurrency-policy.md
-      - ADR-014 Task Timeout Integration: adr/ADR-014-task-timeout-integration.md
+      - ADR-014 Task Timeout Support: adr/ADR-014-task-timeout.md
+      - ADR-015 Request Correlation: adr/ADR-015-request-correlation.md
+      - ADR-016 Task Timeout Integration (Deferral): adr/ADR-016-task-timeout-integration.md
+  - Enhancements: ENHANCEMENTS.md
+  - Testing with Copilot: testing-with-copilot.md
   - Vision (SES): ses/SES-0000-MASTER-INDEX.md
