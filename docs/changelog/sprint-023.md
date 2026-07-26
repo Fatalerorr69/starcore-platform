@@ -48,6 +48,23 @@ Persistence, Request correlation.
 - `mkdocs.yml`: Sprint 023 nav entry.
 - `CHANGELOG.md`: [Unreleased] entry.
 
+### D — Fix `mkdocs build --strict` CI failure (pre-existing from PR #103)
+
+PR #103 added four files that were never wired into `mkdocs.yml` and contained
+broken internal links, causing `mkdocs build --strict` to abort on 4 warnings:
+
+- `docs/adr/ADR-014-task-timeout.md` and `docs/adr/ADR-015-request-correlation.md`
+  were orphaned from nav; now wired under the ADRs section.
+- `docs/ENHANCEMENTS.md` and `docs/testing-with-copilot.md` were orphaned with broken
+  links (`.claude/instructions.md`, `./docs/testing-with-copilot.md`,
+  `./CONTRIBUTING.md`, `../CONTRIBUTING.md`); links corrected, both wired into nav.
+- `docs/adr/ADR-014-task-timeout-integration.md` (sprint-022) renamed to
+  `docs/adr/ADR-016-task-timeout-integration.md` to resolve the numbering collision
+  introduced by PR #103's `ADR-014-task-timeout.md`.
+- Correction note added to `ADR-014-task-timeout.md`: the env vars
+  `STARCORE_TASK_TIMEOUT_SECONDS`/`STARCORE_TASK_TIMEOUT_STRATEGY` described there
+  are not implemented; the deliberate deferral is documented in ADR-016.
+
 ## Test counts
 
 | Before | After |

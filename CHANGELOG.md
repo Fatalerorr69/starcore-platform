@@ -18,6 +18,16 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   correlation" already had property-based coverage in `test_property_based_core.py`
   that was never reflected in `docs/test-matrix.md`.
 
+### Fixed
+- **`mkdocs build --strict` CI failure** (pre-existing from PR #103): four files were
+  orphaned from `mkdocs.yml` nav and two contained broken internal links. Wired
+  `ADR-014-task-timeout.md`, `ADR-015-request-correlation.md`, `ENHANCEMENTS.md`, and
+  `testing-with-copilot.md` into nav; fixed broken links; renamed
+  `ADR-014-task-timeout-integration.md` → `ADR-016-task-timeout-integration.md` to
+  resolve the numbering collision. Added correction note to `ADR-014-task-timeout.md`
+  flagging that `STARCORE_TASK_TIMEOUT_SECONDS`/`STARCORE_TASK_TIMEOUT_STRATEGY` are
+  not wired (see ADR-016 for the deliberate deferral).
+
 ### Added
 - Property-based (Hypothesis) tests for `core.security`: 6 new tests covering
   `redact_database_url` (never-raises, postgres password masked, SQLite passthrough) and
