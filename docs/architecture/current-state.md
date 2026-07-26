@@ -48,7 +48,7 @@ The planner builds two representations from the same blueprint:
 
 Providers are registered in a process-wide registry and may be shared by concurrent tasks. Provider connection setup is guarded by a per-instance asynchronous connection lock. Docker and Proxmox providers use blocking SDK calls through `asyncio.to_thread`.
 
-This design is concurrency-aware but remains a stabilization target: future work must verify provider operation safety, disconnect semantics, failure isolation, and idempotency under concurrent execution.
+`execute()` calls against a shared provider instance are deliberately unbounded — no per-provider concurrency limit exists. This was a checked decision, not an oversight: ADR-013 traced both providers' request paths (`requests.Session` subclasses, token-auth, no per-call session-state mutation) and found no shared-mutable-state hazard for STARCORE's actual configuration, but explicitly did not perform real load-testing under a large concurrent wave. Three concrete trigger conditions are defined there for adding a bounded `asyncio.Semaphore` later. Provider disconnect semantics, failure isolation, and idempotency under concurrent execution remain unverified by load and are still a stabilization target.
 
 ## Persistence
 
@@ -60,6 +60,9 @@ SQLite and SQLAlchemy provide run-history persistence. Alembic tracks schema mig
 - Optional JSON logging through `STARCORE_LOG_JSON`.
 - Prometheus-compatible `/metrics` endpoint.
 - CLI/API diagnostics and environment detection.
+- Every HTTP response carries an `X-Request-ID` correlation ID (caller-supplied
+  if present and well-formed, generated otherwise), bound to every log line
+  emitted while handling that request.
 
 ## Security boundaries
 
