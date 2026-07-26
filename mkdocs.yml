@@ -25,6 +25,7 @@ nav:
       - Sprint 012: changelog/sprint-012.md
       - Sprint 013: changelog/sprint-013.md
       - Sprint 014: changelog/sprint-014.md
+      - Sprint 015: changelog/sprint-015.md
   - ADRs:
       - ADR-001 Blueprint Dependency Execution: adr/ADR-001-blueprint-dependency-execution.md
       - ADR-002 Provider Lifecycle: adr/ADR-002-provider-lifecycle.md
@@ -34,4 +35,5 @@ nav:
       - ADR-006 Observability: adr/ADR-006-observability.md
       - ADR-007 AI Provider Abstraction: adr/ADR-007-ai-provider-abstraction.md
       - ADR-008 CI Security Gates: adr/ADR-008-ci-security-gates.md
+      - ADR-009 Environment Detection: adr/ADR-009-environment-detection.md
   - Vision (SES): ses/SES-0000-MASTER-INDEX.md

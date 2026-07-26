@@ -65,6 +65,19 @@ middleware, blueprint task outcomes via an event-bus subscription), and
 structured logging (`core/logger.py`; set `STARCORE_LOG_JSON=true` for
 one JSON object per log line, suited for log aggregators).
 
+**Environment Detection** (`packages/core/environment.py`, ADR-009) — four
+independent checks answering "where and how is this actually running?",
+surfaced via `starcore audit`/`doctor`/`diagnose` and `GET /diagnostics`:
+`detect_runtime_environment()` (`proxmox-host`/`container`/`local`, fast,
+local-only filesystem heuristics), `detect_os_platform()` (OS family,
+release, WSL detection, fast, local-only), `detect_cloud_provider()`
+(bounded-timeout AWS/GCP/Azure metadata probe — the one check that makes
+network calls, so it's wired only into the already-network-calling
+`run_diagnostics()`, never into the instant `audit`/`doctor` commands), and
+`classify_client_platform()` (User-Agent-based classification of whichever
+client is calling `GET /diagnostics` right now — a per-request concern,
+not a server property).
+
 **AI Blueprint Generation** (`packages/ai`) — translates a natural-language
 description into a blueprint YAML via a pluggable `AIProvider` abstract base
 (`packages/ai/base.py`, ADR-007). `STARCORE_AI_PROVIDER` selects the

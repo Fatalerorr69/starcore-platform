@@ -34,6 +34,23 @@ Bandit) wrap the same commands. Pre-commit hooks are available via
   injected test API key, event-bus reset, rate-limiter counter reset) —
   see `tests/conftest.py`. Coverage is enforced at 100%.
 
+## Standalone scripts
+
+`scripts/` holds two operator-facing scripts, independent of the CLI:
+
+- `scripts/doctor.py` — runs the same quality gates as `starcore doctor`
+  (lockfile, ruff, pyright, pip-audit, Bandit, tests) with plain-text
+  PASS/FAIL output and no `typer`/`rich` dependency. Useful in contexts
+  where the full `starcore` CLI isn't installed. Run with
+  `uv run python scripts/doctor.py`.
+- `scripts/health.py` — pings a *running* STARCORE API instance's
+  `GET /health` endpoint over HTTP and reports its status; exits 1 if
+  unreachable or unhealthy. This is distinct from `starcore health` (which
+  checks the local process's own database connectivity directly, no HTTP
+  round trip) — use `scripts/health.py` for external monitoring of a
+  deployed instance, e.g. `uv run python scripts/health.py --url
+  http://myserver:8000`.
+
 ## Development workflow
 
 Work happens on feature branches merged to `main` via pull request;

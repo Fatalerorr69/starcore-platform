@@ -10,7 +10,7 @@ from blueprints.executor import BlueprintExecutor
 from blueprints.loader import BlueprintLoader
 from blueprints.planner import ExecutionPlanner
 from core.database import get_session
-from core.diagnostics import run_diagnostics
+from core.diagnostics import check_database_connectivity, run_diagnostics
 from core.discovery import discover_proxmox_environment
 from core.environment import detect_os_platform, detect_runtime_environment
 from core.repository import get_run, list_runs, save_run
@@ -51,7 +51,16 @@ def version():
 
 @app.command()
 def health():
-    print("System OK")
+    """Check local dependencies, mirroring GET /health.
+
+    Exit codes: 0 = healthy, 1 = unhealthy.
+    """
+    db_check = check_database_connectivity()
+    if db_check.status == "ok":
+        print(f"System OK ({db_check.detail})")
+    else:
+        print(f"System UNHEALTHY: {db_check.detail}")
+        raise typer.Exit(code=1)
 
 
 @app.command()

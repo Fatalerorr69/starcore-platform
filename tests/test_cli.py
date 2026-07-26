@@ -28,6 +28,18 @@ def test_health_command():
     assert "System OK" in result.stdout
 
 
+def test_health_command_reports_unhealthy_on_database_failure():
+    from core.diagnostics import CheckResult
+
+    bad_check = CheckResult("config.database", "error", "Cannot connect to database: boom")
+    with patch("apps.cli.main.check_database_connectivity", return_value=bad_check):
+        result = runner.invoke(app, ["health"])
+
+    assert result.exit_code == 1
+    assert "UNHEALTHY" in result.stdout
+    assert "boom" in result.stdout
+
+
 def test_blueprint_plan_command():
     result = runner.invoke(app, ["blueprint", "plan", EXAMPLE_PATH])
     assert result.exit_code == 0

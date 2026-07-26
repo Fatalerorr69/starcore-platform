@@ -23,6 +23,10 @@ GATES: list[tuple[str, list[str]]] = [
     ("Ruff format", ["uv", "run", "ruff", "format", "--check", "."]),
     ("Pyright", ["uv", "run", "pyright"]),
     ("pip-audit", ["uv", "run", "pip-audit"]),
+    (
+        "Bandit SAST",
+        ["uv", "run", "bandit", "-r", "packages/", "apps/", "scripts/", "-ll", "-q"],
+    ),
     ("Tests", ["uv", "run", "pytest", "-q", "--tb=short"]),
 ]
 
