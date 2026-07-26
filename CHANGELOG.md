@@ -7,6 +7,19 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+- Property-based (Hypothesis) tests for `provider_sdk.retry` and `orchestrator.timeout`:
+  17 new tests covering `calculate_delay` bounds/monotonicity/determinism,
+  `RetryableError` attribute preservation, `attempt_with_retry` single-attempt and
+  non-retryable-propagation invariants, `TimeoutConfig.is_enabled` for all `float | None`
+  inputs, `TaskTimeoutError` attribute and str invariants, and the disabled-path
+  pass-through of `execute_with_timeout`.
+- Test matrix (`docs/test-matrix.md`) updated with rows for retry, timeout, and request
+  correlation; test catalog (`reports/starcore-tests-catalog.md`) brought current with all
+  52 tests added since sprint-019.
+
+
+
 ### Fixed
 - **Broken `provider_sdk` import** (`ProviderException` → `ProviderError`): the wrong
   class name caused every test to fail at collection time with `ImportError`; corrected
