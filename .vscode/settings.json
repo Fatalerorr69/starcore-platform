@@ -120,5 +120,19 @@
   "// Run: code --install-extension github.copilot": "",
   "// Run: code --install-extension charliermarsh.ruff": "",
   "// Run: code --install-extension ms-python.python": "",
-  "// Run: code --install-extension ms-python.vscode-pylance": ""
+  "// Run: code --install-extension ms-python.vscode-pylance": "",
+  "cursorpyright.analysis.diagnosticSeverityOverrides": {
+    "reportUnusedVariable": "warning",
+    "reportUnusedImport": "error",
+    "reportGeneralTypeIssues": "error",
+    "reportOptionalMemberAccess": "error",
+    "reportOptionalSubscript": "error"
+  },
+  "cursorpyright.analysis.include": [
+    "packages",
+    "apps",
+    "tests",
+    "scripts"
+  ],
+  "cursorpyright.analysis.typeCheckingMode": "basic"
 }
