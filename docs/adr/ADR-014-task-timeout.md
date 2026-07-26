@@ -1,0 +1,150 @@
+# ADR-014: Task Timeout Support
+
+**Status**: Accepted  
+**Date**: 2026-07-26  
+**Deciders**: STARCORE Development Team
+
+## Context
+
+STARCORE Platform executes infrastructure blueprints against Proxmox and Docker providers. Some provider operations may hang indefinitely due to:
+- Network connectivity issues
+- Provider API bugs
+- Resource constraints
+- Incorrect provider configuration
+
+With `--parallel` execution, a single hung task blocks an entire "wave" of concurrent tasks, potentially stalling the entire orchestration run indefinitely.
+
+## Problem
+
+Currently, there is no timeout mechanism for task execution. A hung provider operation will hang the orchestrator.
+
+### Example
+```bash
+uv run starcore blueprint run blueprint.yaml --parallel
+# Stuck forever if any provider.execute() hangs
+```
+
+## Decision
+
+Implement task timeout support with three configurable strategies:
+
+### 1. **CANCEL** (Default)
+- Immediately cancel the task if it exceeds timeout
+- Mark task as `FAILED` with timeout error
+- Continue with next wave
+- **Use case**: Strict deadline requirements, invalid blueprints
+
+### 2. **WAIT_AND_MARK** 
+- Wait a bit longer for graceful completion
+- If still not done, mark as timed out (don't cancel)
+- Task state may be partially updated on provider
+- **Use case**: Flaky providers that need grace period
+
+### 3. **IGNORE**
+- Log warning but continue waiting
+- No enforced timeout (fire-and-forget)
+- **Use case**: Future use, monitoring-only scenarios
+
+## Implementation
+
+```python
+from orchestrator.timeout import TimeoutConfig, TimeoutStrategy, execute_with_timeout
+
+# Configuration
+config = TimeoutConfig(
+    timeout_seconds=300.0,          # 5 minutes
+    strategy=TimeoutStrategy.CANCEL,  # or WAIT_AND_MARK, IGNORE
+)
+
+# Usage
+await execute_with_timeout(
+    coro=provider.execute(task),
+    config=config,
+    task_id=task.id,
+    resource=task.resource,
+)
+```
+
+## Environment Variables
+
+```bash
+STARCORE_TASK_TIMEOUT_SECONDS=300
+STARCORE_TASK_TIMEOUT_STRATEGY=cancel  # cancel|wait_and_mark|ignore
+```
+
+## Rationale
+
+1. **asyncio.wait_for()** is the right primitive
+   - Lightweight, no thread overhead
+   - Standard library, well-tested
+   - Works with async context propagation
+
+2. **Multiple strategies** provide flexibility
+   - CANCEL: Strict, prevents hangs
+   - WAIT_AND_MARK: Graceful degradation for flaky providers
+   - IGNORE: Future extensibility
+
+3. **Configuration-driven** vs. hardcoded
+   - Different environments need different timeouts
+   - Homelabs may have slow I/O, enterprise datacenters are fast
+   - Users should control timeout behavior
+
+4. **Backward compatible**
+   - Timeout disabled by default (timeout_seconds=None)
+   - Existing code requires no changes
+   - Gradual adoption
+
+## Consequences
+
+### Positive
+- ✅ Prevents orchestrator hangs
+- ✅ Better error diagnostics (timeout vs. silence)
+- ✅ Enables SLA compliance (strict timeouts)
+- ✅ Works seamlessly with parallel execution
+- ✅ Observable in logs and metrics
+
+### Negative
+- ❌ Need to tune timeouts per environment
+- ❌ May incorrectly timeout slow-but-valid operations
+- ❌ Adds complexity to provider implementations
+
+### Neutral
+- Requires environment-specific configuration
+- Adds observability/debugging capability
+
+## Alternatives Considered
+
+### 1. Thread-based timeout (Rejected)
+- Complex, hard to cancel safely
+- Resource overhead
+- Doesn't work well with async/await
+
+### 2. Process-level timeout (Rejected)
+- Too coarse-grained (affects entire process)
+- Hard to recover from
+- Not suitable for orchestration
+
+### 3. Fixed global timeout (Rejected)
+- Different providers have different characteristics
+- Blueprint complexity varies
+- Environment-specific (homelab vs. enterprise)
+
+## Testing
+
+```bash
+# Unit test
+uv run pytest tests/test_timeout.py -v
+
+# Integration test
+uv run pytest tests/integration/test_scheduler_timeout.py -v
+
+# Manual test
+export STARCORE_TASK_TIMEOUT_SECONDS=5
+uv run starcore blueprint run slow-blueprint.yaml --parallel
+```
+
+## References
+
+- [asyncio.wait_for()](https://docs.python.org/3/library/asyncio-task.html#asyncio.wait_for)
+- [Task Timeout Pattern](https://en.wikipedia.org/wiki/Timeout_(computing))
+- ADR-010: Dependency Success Gates
