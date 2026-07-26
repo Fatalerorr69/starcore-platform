@@ -52,11 +52,16 @@ uv run starcore blueprint run <path.yaml>
 uv run starcore blueprint run <path.yaml> --parallel
 uv run starcore health
 uv run starcore diagnose
+uv run starcore doctor [--fast]
+uv run starcore audit
 uv run starcore proxmox discover
 uv run starcore ai generate "<description>"
 uv run starcore snapshot create|list|delete|rollback
 uv run starcore resource action <provider> <action> <resource>
 ```
+
+`doctor`, `audit`, and `diagnose` each accept `--json` (machine-readable output) and
+`--quiet` (suppress output, rely on exit code) for scripting/CI use.
 
 ## Architecture
 
@@ -84,9 +89,9 @@ apps/cli (Typer)           packages/core/main.py (FastAPI)
 
 **`packages/orchestrator`** — Executes already-prepared `TaskGraph` plans. `Scheduler` runs dependency-satisfied tasks concurrently in "waves" via `asyncio.gather` and detects stalls (unresolvable graphs) instead of hanging.
 
-**`packages/core`** — FastAPI app, `pydantic-settings`-based config (all env vars prefixed `STARCORE_`), SQLite persistence via SQLAlchemy + Alembic, an in-process `EventBus`, `PluginManager`, deep diagnostics, and API-wide per-IP rate limiting via `slowapi` (`/health` is exempt).
+**`packages/core`** — FastAPI app, `pydantic-settings`-based config (all env vars prefixed `STARCORE_`), SQLite persistence via SQLAlchemy + Alembic, an in-process `EventBus`, `PluginManager`, deep diagnostics, and API-wide per-IP rate limiting via `slowapi` (`/health` is exempt). `environment.py` provides four independent checks surfaced via `starcore audit`/`doctor`/`diagnose` and `GET /diagnostics`: `detect_runtime_environment()` (`proxmox-host`/`container`/`local`, fast/local-only), `detect_os_platform()` (OS family, release, WSL detection, fast/local-only), `detect_cloud_provider()` (bounded-timeout AWS/GCP/Azure metadata probe, async, `run_diagnostics()`-only since it's the one network-calling check), and `classify_client_platform()` (User-Agent-based classification of the *calling* client, wired into `GET /diagnostics`'s `client` field).
 
-**`packages/ai`** — Calls the Anthropic API to translate natural language into a blueprint YAML. Requires `STARCORE_ANTHROPIC_API_KEY`.
+**`packages/ai`** — Translates natural language into a blueprint YAML via a pluggable `AIProvider` abstract base (`packages/ai/base.py`). `STARCORE_AI_PROVIDER` selects the implementation: `anthropic` (default, requires `STARCORE_ANTHROPIC_API_KEY`) or `openai-compatible` (any `/v1/chat/completions` server — Ollama, LM Studio, vLLM, LocalAI, OpenAI itself — configured via `STARCORE_AI_BASE_URL` / `STARCORE_AI_API_KEY`). `packages/ai/generator.py` builds the configured provider and keeps the public `generate_blueprint_yaml()` API unchanged for callers.
 
 **`packages/providers/docker`** and **`packages/providers/proxmox`** — Concrete `BaseProvider` implementations using `docker-py` and `proxmoxer` respectively.
 
@@ -117,7 +122,7 @@ Plugins are directories in `plugins/<name>/` with an `__init__.py` that exports 
 
 All settings are read from environment variables with the `STARCORE_` prefix (or a `.env` file, which is gitignored). The `Settings` object is a singleton behind `get_settings()` (LRU-cached). Tests must call `get_settings.cache_clear()` around any `monkeypatch.setenv`/`delenv` calls — `conftest.py` already handles this globally.
 
-Key variables: `STARCORE_API_KEY`, `STARCORE_DATABASE_URL` (default: `sqlite:///./data/starcore.db`), `STARCORE_PROXMOX_*`, `STARCORE_ANTHROPIC_API_KEY`, `STARCORE_RATE_LIMIT_PER_MINUTE` (0 disables rate limiting).
+Key variables: `STARCORE_API_KEY`, `STARCORE_DATABASE_URL` (default: `sqlite:///./data/starcore.db`), `STARCORE_PROXMOX_*`, `STARCORE_AI_PROVIDER` (`anthropic` or `openai-compatible`), `STARCORE_ANTHROPIC_API_KEY`, `STARCORE_AI_BASE_URL` / `STARCORE_AI_API_KEY` (openai-compatible provider), `STARCORE_LOG_JSON`, `STARCORE_RATE_LIMIT_PER_MINUTE` (0 disables rate limiting).
 
 ## Test Isolation
 
@@ -131,17 +136,21 @@ When writing tests that hit the FastAPI app, use `httpx.AsyncClient` with `app=a
 
 ## Linting and Type Checking
 
-- **Ruff** (`ruff.toml`): line length 100, Python 3.12, rules `E`, `F`, `I` (isort), `UP`. Single source of truth for lint/format config.
+- **Ruff** (`ruff.toml`): line length 100, Python 3.12, rules `E`, `F`, `I` (isort), `UP`, `B` (bugbear), `PERF`, `N` (naming), `FAST` (FastAPI-specific). Single source of truth for lint/format config.
 - **Pyright** (`pyrightconfig.json`): `basic` mode, checks `packages/`, `apps/`, `tests/`. The `packages/` directory is on `pythonpath` (see `pyproject.toml`), so imports like `from core.config import ...` are valid without package-relative paths.
 
 ## CI Gates (all must pass)
 
 ```
-uv run ruff format --check .
+uv lock --check
 uv run ruff check .
 uv run pyright
 uv run pip-audit
-uv run pytest -q
+uv run bandit -r packages/ apps/ scripts/ -ll -q
+# gitleaks secret scanning (via gitleaks/gitleaks-action, not a local uv command)
+uv run pytest -q --cov --cov-report=term-missing --cov-fail-under=100
+uv run alembic upgrade head && uv run alembic check   # against a throwaway DB, see docs/development.md
 ```
 
-CI also builds the Docker image and smoke-tests `GET /health`.
+CI also builds the Docker image and smoke-tests `GET /health`. A nightly workflow
+(`security-nightly.yml`) reruns pip-audit, Bandit, and gitleaks independent of any PR.

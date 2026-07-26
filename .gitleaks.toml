@@ -1,0 +1,17 @@
+title = "STARCORE Platform — gitleaks configuration"
+
+[extend]
+# Inherit the full default ruleset (generic API keys, secrets, tokens, etc.)
+useDefault = true
+
+[allowlist]
+description = "Test fixtures and .env.example placeholder values are not real credentials"
+regexTarget = "line"
+stopWords = [
+    # conftest.py / test_auth.py / test_api.py: deliberate test-only values
+    "test-api-key",
+    # tests/test_ai_generator.py: obviously-fake Anthropic key prefix used in mocks
+    "sk-test-key",
+    # .env.example: template placeholder, not a real secret
+    "change-me-to-a-random-secret",
+]

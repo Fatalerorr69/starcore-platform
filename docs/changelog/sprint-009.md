@@ -1,51 +1,45 @@
 # Sprint 009 — MkDocs Nav, README Update, Sprint-008 Changelog & Planner Property Tests
 
 **Date:** 2026-07-25
-**Branch:** `claude/starcore-discovery-audit-ojgwdo` → merged as PR #77
+**Branch:** `claude/new-session-k19m37` → merged as PR #77
 **Mode:** MODE 5 — CONTROLLED AUTONOMY
 
 ## Changes
 
-### A01 — `mkdocs.yml` nav completed
+### A01 — MkDocs nav repair and extension
+`mkdocs.yml` nav was missing sprint-006, sprint-007, sprint-008 changelogs and
+ADR-006 Observability. All six previously-orphaned pages are now reachable from
+the site index. `mkdocs serve` / `mkdocs build` no longer silently omits them.
 
-Sprint-006, sprint-007, sprint-008 changelog entries and ADR-006 Observability
-were added to the MkDocs nav. All documentation files are now reachable from
-the site index.
-
-### B01 — README "What Works Today" test count
-
-Updated test count from 114 → 361 to reflect actual suite size. Added
-Observability row (`GET /metrics`, `STARCORE_LOG_JSON`) and updated CLI row to
-include `doctor`/`audit` commands.
+### B01 — README "What Works Today" table
+Updated test count 114 → 361; added **Observability** row covering
+`GET /metrics` (Prometheus) and `STARCORE_LOG_JSON` structured logging; updated
+CLI row to include the `doctor` and `audit` commands added in sprint-006.
 
 ### C01 — `docs/changelog/sprint-008.md`
+Changelog for sprint-008 (PR #76): `.env.example` `STARCORE_LOG_JSON` entry,
+sprint-007 changelog created, and 6 Hypothesis property tests for
+`core/metrics.py`.
 
-Created the missing changelog for sprint-008 (PR #76), covering `.env.example`
-`STARCORE_LOG_JSON` addition, sprint-007 changelog, and metrics property tests.
-
-### C02 — `create_plan()` topological ordering property tests
-
-Five new Hypothesis tests added to `tests/test_property_based_blueprints.py`:
+### D01 — `create_plan()` topological ordering property tests
+Added 5 Hypothesis property tests to `tests/test_property_based_blueprints.py`:
 
 | Test | Invariant |
 |------|-----------|
 | `test_plan_length_equals_resource_count` | Plan length == number of resources |
-| `test_plan_contains_all_resource_names` | All resource names appear in plan |
-| `test_plan_respects_dependency_ordering` | Every dependency precedes its dependent |
-| `test_plan_with_no_dependencies_any_order` | Any order valid when no deps declared |
-| `test_plan_is_deterministic` | Same blueprint always produces same plan |
+| `test_plan_resource_name_set_equals_input_set` | Every resource appears exactly once |
+| `test_plan_order_respects_depends_on` | Dependency always precedes dependant |
+| `test_plan_provider_agreement_with_create_graph` | Sequential and parallel plans agree on provider assignments |
+| `test_plan_contains_no_duplicate_names` | No resource appears twice |
 
-### D01 — Pre-commit `pyright` hook fixed
+### E01 — Pre-commit `pyright` hook fixed
+Replaced the `pyright-python` remote hook (which runs in an isolated environment
+and cannot resolve project packages, producing ~296 false-positive errors) with a
+local hook using `uv run pyright`. Aligns pre-commit with the CI gate and the
+documented `uv run pyright` developer workflow.
 
-Replaced the `pyright-python` remote hook (which runs in an isolated
-environment and cannot resolve project packages, producing ~296 false-positive
-errors) with a local hook using `uv run pyright`. This aligns pre-commit with
-the CI gate and the documented `uv run pyright` developer workflow.
-
-### D02 — README test count updated to 366
-
-Corrected README "What Works Today" table from 361 → 366 to match the
-verified test suite output.
+### E02 — MkDocs nav: Sprint 009 entry added
+Sprint 009 changelog entry added to `mkdocs.yml` nav (PR #85).
 
 ## Test counts
 

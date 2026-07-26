@@ -12,7 +12,8 @@ class Settings(BaseSettings):
     app_name: str = "STARCORE Platform"
     app_version: str = "0.1.0-dev"
 
-    api_host: str = "0.0.0.0"
+    # B104 suppressed: server must bind all interfaces in container (intentional)
+    api_host: str = "0.0.0.0"  # nosec B104
     api_port: int = 8000
 
     debug: bool = False
@@ -34,6 +35,14 @@ class Settings(BaseSettings):
 
     anthropic_api_key: str | None = None
     anthropic_model: str = "claude-sonnet-5"
+
+    # AI provider selection — "anthropic" (default) or "openai-compatible"
+    # (Ollama, LM Studio, vLLM, LocalAI, OpenAI, or any /v1/chat/completions server).
+    ai_provider: str = "anthropic"
+    # Required when ai_provider = "openai-compatible", e.g. http://localhost:11434/v1
+    ai_base_url: str | None = None
+    # Optional API key for the openai-compatible provider; many local servers don't need one.
+    ai_api_key: str | None = None
 
     # Requests per minute allowed per client IP, applied globally to all
     # endpoints except /health (see core/main.py). 0 disables rate limiting

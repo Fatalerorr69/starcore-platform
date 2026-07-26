@@ -14,10 +14,11 @@ apps/cli (Typer)          packages/core/main.py (FastAPI)
    packages/blueprints    packages/core (config, DB, events,
    (loader, planner,       diagnostics, discovery, plugins,
     executor, templates)   repository, resource actions)
-                |
-                v
-      packages/orchestrator
-      (Task, TaskGraph, Scheduler)
+                |                |
+                v                v
+      packages/orchestrator    packages/ai (AIProvider ABC,
+      (Task, TaskGraph,         Anthropic / OpenAI-compatible)
+       Scheduler)
                 |
                 v
       packages/provider_sdk        <- the port (BaseProvider ABC,
@@ -63,6 +64,16 @@ rate limiting (`slowapi`, `/health` exempt), Prometheus metrics
 middleware, blueprint task outcomes via an event-bus subscription), and
 structured logging (`core/logger.py`; set `STARCORE_LOG_JSON=true` for
 one JSON object per log line, suited for log aggregators).
+
+**AI Blueprint Generation** (`packages/ai`) — translates a natural-language
+description into a blueprint YAML via a pluggable `AIProvider` abstract base
+(`packages/ai/base.py`, ADR-007). `STARCORE_AI_PROVIDER` selects the
+implementation at runtime: `anthropic` (default, wraps the Anthropic Messages
+API) or `openai-compatible` (any `/v1/chat/completions` server — Ollama, LM
+Studio, vLLM, LocalAI, OpenAI itself). `packages/ai/generator.py`'s
+`_build_provider()` factory is the only place that knows about concrete
+provider classes; callers (CLI, `POST /ai/generate-blueprint`) depend only on
+the stable `generate_blueprint_yaml()` function.
 
 **Security model** — a single static shared API key (`X-API-Key` header,
 compared in constant time) protects all endpoints except `/`, `/health`,

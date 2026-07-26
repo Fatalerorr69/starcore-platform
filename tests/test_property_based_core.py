@@ -225,6 +225,7 @@ def test_plugin_manager_get_returns_none_for_unregistered_name(name: str) -> Non
     parallel=st.booleans(),
     task_ids=st.lists(_SHORT_ID, min_size=0, max_size=5, unique=True),
 )
+@settings(suppress_health_check=[HealthCheck.function_scoped_fixture])
 def test_repository_save_and_get_run_round_trips_blueprint_fields(
     bp_name: str, version: str, parallel: bool, task_ids: list[str]
 ) -> None:
@@ -248,6 +249,7 @@ def test_repository_save_and_get_run_round_trips_blueprint_fields(
     bp_name=_NAME,
     task_ids=st.lists(_SHORT_ID, min_size=1, max_size=4, unique=True),
 )
+@settings(suppress_health_check=[HealthCheck.function_scoped_fixture])
 def test_repository_save_run_persists_all_task_records(bp_name: str, task_ids: list[str]) -> None:
     """The saved run contains exactly as many task records as tasks passed to save_run()."""
     from core.database import get_session
@@ -267,6 +269,7 @@ def test_repository_save_run_persists_all_task_records(bp_name: str, task_ids: l
     bp_name=_NAME,
     limit=st.integers(min_value=0, max_value=10),
 )
+@settings(suppress_health_check=[HealthCheck.function_scoped_fixture])
 def test_repository_list_runs_limit_returns_at_most_k_records(bp_name: str, limit: int) -> None:
     """list_runs(limit=k) returns at most k records regardless of total DB state."""
     from core.database import get_session

@@ -2,6 +2,7 @@
 CLI Tests
 """
 
+import json
 from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -172,6 +173,11 @@ def test_plugins_list_no_plugins_found():
 def test_diagnose_renders_proxmox_and_docker_sections():
     report = {
         "overall_status": "ok",
+        "runtime_environment": "local",
+        "environment_details": {
+            "os_platform": {"system": "Linux", "release": "6.1", "is_wsl": False},
+            "cloud_provider": None,
+        },
         "checks": [{"name": "db", "status": "ok", "detail": "alive"}],
         "proxmox": {
             "nodes": [
@@ -515,3 +521,275 @@ def test_audit_git_unavailable():
 
     assert result.exit_code == 0
     assert "N/A" in result.stdout
+
+
+def test_audit_shows_wsl_suffix_when_detected():
+    mock = _git_mock("main", "abc1234", "", "")
+    wsl_platform = {"system": "Linux", "release": "5.15.0-microsoft-standard", "is_wsl": True}
+    with (
+        patch("apps.cli.main.subprocess.run", mock),
+        patch("apps.cli.main.detect_os_platform", return_value=wsl_platform),
+    ):
+        result = runner.invoke(app, ["audit"])
+
+    assert result.exit_code == 0
+    assert "WSL" in result.stdout
+
+
+# ---------------------------------------------------------------------------
+# CI-001: doctor --json / --quiet / --non-interactive
+# ---------------------------------------------------------------------------
+
+
+def test_doctor_json_output_all_pass():
+    with patch("apps.cli.main.subprocess.run", return_value=_mock_proc(0)):
+        result = runner.invoke(app, ["doctor", "--fast", "--json"])
+
+    assert result.exit_code == 0
+    data = json.loads(result.stdout)
+    assert data["failed"] == 0
+    assert data["passed"] > 0
+    assert all(g["status"] == "pass" for g in data["gates"])
+    assert all("name" in g and "detail" in g for g in data["gates"])
+
+
+def test_doctor_json_output_with_failure():
+    def _side(cmd: list, **_: object) -> MagicMock:
+        failing = "ruff" in " ".join(cmd)
+        return _mock_proc(1 if failing else 0, stdout="ruff: E501 line too long")
+
+    with patch("apps.cli.main.subprocess.run", side_effect=_side):
+        result = runner.invoke(app, ["doctor", "--fast", "--json"])
+
+    assert result.exit_code == 1
+    data = json.loads(result.stdout)
+    assert data["failed"] >= 1
+    failed_gates = [g for g in data["gates"] if g["status"] == "fail"]
+    assert failed_gates
+    assert failed_gates[0]["detail"] != ""
+
+
+def test_doctor_json_no_rich_markup():
+    with patch("apps.cli.main.subprocess.run", return_value=_mock_proc(0)):
+        result = runner.invoke(app, ["doctor", "--fast", "--json"])
+
+    assert "[green]" not in result.stdout
+    assert "[red]" not in result.stdout
+
+
+def test_doctor_quiet_suppresses_output_on_pass():
+    with patch("apps.cli.main.subprocess.run", return_value=_mock_proc(0)):
+        result = runner.invoke(app, ["doctor", "--fast", "--quiet"])
+
+    assert result.exit_code == 0
+    assert result.stdout.strip() == ""
+
+
+def test_doctor_quiet_suppresses_output_on_fail():
+    with patch("apps.cli.main.subprocess.run", return_value=_mock_proc(1, stdout="err")):
+        result = runner.invoke(app, ["doctor", "--fast", "--quiet"])
+
+    assert result.exit_code == 1
+    assert result.stdout.strip() == ""
+
+
+def test_doctor_non_interactive_behaves_same_as_default():
+    with patch("apps.cli.main.subprocess.run", return_value=_mock_proc(0)):
+        result = runner.invoke(app, ["doctor", "--fast", "--non-interactive"])
+
+    assert result.exit_code == 0
+    assert "All gates passed" in result.stdout
+
+
+# ---------------------------------------------------------------------------
+# CI-001: audit --json / --quiet / --non-interactive
+# ---------------------------------------------------------------------------
+
+
+def test_audit_json_output():
+    mock = _git_mock("main", "abc1234", "", "abc1234 fix: something")
+    with patch("apps.cli.main.subprocess.run", mock):
+        result = runner.invoke(app, ["audit", "--json"])
+
+    assert result.exit_code == 0
+    data = json.loads(result.stdout)
+    assert data["branch"] == "main"
+    assert data["sha"] == "abc1234"
+    assert data["working_tree"] == "clean"
+    assert isinstance(data["python_files"], int)
+    assert isinstance(data["test_files"], int)
+    assert isinstance(data["recent_commits"], list)
+
+
+def test_audit_json_dirty_tree():
+    mock = _git_mock("feature/x", "def5678", "M readme.md", "")
+    with patch("apps.cli.main.subprocess.run", mock):
+        result = runner.invoke(app, ["audit", "--json"])
+
+    assert result.exit_code == 0
+    data = json.loads(result.stdout)
+    assert data["working_tree"] == "dirty"
+
+
+def test_audit_quiet_suppresses_output():
+    mock = _git_mock("main", "abc1234", "", "")
+    with patch("apps.cli.main.subprocess.run", mock):
+        result = runner.invoke(app, ["audit", "--quiet"])
+
+    assert result.exit_code == 0
+    assert result.stdout.strip() == ""
+
+
+def test_audit_non_interactive_behaves_same_as_default():
+    mock = _git_mock("main", "abc1234", "", "abc1234 feat: init")
+    with patch("apps.cli.main.subprocess.run", mock):
+        result = runner.invoke(app, ["audit", "--non-interactive"])
+
+    assert result.exit_code == 0
+    assert "main" in result.stdout
+
+
+# ---------------------------------------------------------------------------
+# CI-001: diagnose --json / --quiet / --non-interactive
+# ---------------------------------------------------------------------------
+
+
+def test_diagnose_json_output_ok():
+    report = {
+        "overall_status": "ok",
+        "checks": [{"name": "db", "status": "ok", "detail": "alive"}],
+        "proxmox": {},
+        "docker": {},
+    }
+    with patch("apps.cli.main.run_diagnostics", new=AsyncMock(return_value=report)):
+        result = runner.invoke(app, ["diagnose", "--json"])
+
+    assert result.exit_code == 0
+    data = json.loads(result.stdout)
+    assert data["overall_status"] == "ok"
+    assert "checks" in data
+
+
+def test_diagnose_json_output_error_exits_one():
+    report = {
+        "overall_status": "error",
+        "checks": [{"name": "db", "status": "error", "detail": "down"}],
+        "proxmox": {},
+        "docker": {},
+    }
+    with patch("apps.cli.main.run_diagnostics", new=AsyncMock(return_value=report)):
+        result = runner.invoke(app, ["diagnose", "--json"])
+
+    assert result.exit_code == 1
+    data = json.loads(result.stdout)
+    assert data["overall_status"] == "error"
+
+
+def test_diagnose_quiet_suppresses_output():
+    report = {
+        "overall_status": "ok",
+        "checks": [],
+        "proxmox": {},
+        "docker": {},
+    }
+    with patch("apps.cli.main.run_diagnostics", new=AsyncMock(return_value=report)):
+        result = runner.invoke(app, ["diagnose", "--quiet"])
+
+    assert result.exit_code == 0
+    assert result.stdout.strip() == ""
+
+
+def test_diagnose_quiet_error_exits_one_no_output():
+    report = {
+        "overall_status": "error",
+        "checks": [],
+        "proxmox": {},
+        "docker": {},
+    }
+    with patch("apps.cli.main.run_diagnostics", new=AsyncMock(return_value=report)):
+        result = runner.invoke(app, ["diagnose", "--quiet"])
+
+    assert result.exit_code == 1
+    assert result.stdout.strip() == ""
+
+
+def test_diagnose_non_interactive_behaves_same_as_default():
+    report = {
+        "overall_status": "ok",
+        "runtime_environment": "local",
+        "checks": [{"name": "db", "status": "ok", "detail": "alive"}],
+        "proxmox": {},
+        "docker": {},
+    }
+    with patch("apps.cli.main.run_diagnostics", new=AsyncMock(return_value=report)):
+        result = runner.invoke(app, ["diagnose", "--non-interactive"])
+
+    assert result.exit_code == 0
+    assert "overall status" in result.stdout.lower()
+
+
+def test_diagnose_shows_cloud_provider_when_detected():
+    report = {
+        "overall_status": "ok",
+        "runtime_environment": "container",
+        "environment_details": {
+            "os_platform": {"system": "Linux", "release": "6.1", "is_wsl": False},
+            "cloud_provider": "aws",
+        },
+        "checks": [{"name": "db", "status": "ok", "detail": "alive"}],
+        "proxmox": {},
+        "docker": {},
+    }
+    with patch("apps.cli.main.run_diagnostics", new=AsyncMock(return_value=report)):
+        result = runner.invoke(app, ["diagnose"])
+
+    assert result.exit_code == 0
+    assert "container (aws)" in result.stdout
+
+
+# ---------------------------------------------------------------------------
+# CI-002: Bandit gate included in doctor; standalone SAST smoke test
+# ---------------------------------------------------------------------------
+
+
+def test_doctor_includes_bandit_gate():
+    """Bandit SAST gate must appear in the doctor gate list."""
+    calls: list[list[str]] = []
+
+    def _side(cmd: list, **_: object) -> MagicMock:
+        calls.append(cmd)
+        return _mock_proc(0)
+
+    with patch("apps.cli.main.subprocess.run", side_effect=_side):
+        result = runner.invoke(app, ["doctor", "--fast"])
+
+    assert result.exit_code == 0
+    gate_cmds = [" ".join(c) for c in calls]
+    assert any("bandit" in cmd for cmd in gate_cmds), f"bandit not in gates: {gate_cmds}"
+
+
+def test_doctor_bandit_failure_propagates():
+    """A Bandit finding (non-zero exit) must cause doctor to exit 1."""
+
+    def _side(cmd: list, **_: object) -> MagicMock:
+        if "bandit" in " ".join(cmd):
+            return _mock_proc(1, stderr="Issue: [B101] assert used")
+        return _mock_proc(0)
+
+    with patch("apps.cli.main.subprocess.run", side_effect=_side):
+        result = runner.invoke(app, ["doctor", "--fast"])
+
+    assert result.exit_code == 1
+    assert "gate(s) failed" in result.stdout
+
+
+def test_bandit_sast_passes_on_codebase():
+    """Bandit -ll must exit 0 against the actual codebase (integration gate)."""
+    import subprocess as sp
+
+    proc = sp.run(
+        ["uv", "run", "bandit", "-r", "packages/", "apps/", "scripts/", "-ll", "-q"],
+        capture_output=True,
+        text=True,
+    )  # noqa: S603
+    assert proc.returncode == 0, f"Bandit found MEDIUM+ issues:\n{proc.stderr}"

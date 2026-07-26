@@ -11,6 +11,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
 
       - name: Install uv
         uses: astral-sh/setup-uv@v7
@@ -35,8 +37,16 @@ jobs:
       - name: pip-audit (dependency vulnerability scan)
         run: uv run pip-audit
 
+      - name: Bandit SAST (medium+ severity)
+        run: uv run bandit -r packages/ apps/ scripts/ -ll -q
+
+      - name: Secret scanning (gitleaks)
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Pytest
-        run: uv run pytest -q --cov --cov-report=term-missing --cov-fail-under=80
+        run: uv run pytest -q --cov --cov-report=term-missing --cov-fail-under=100
 
       - name: Alembic check (detect un-migrated model changes)
         run: |

@@ -1,261 +1,179 @@
 {
-  "schema_version": "1.4",
+  "schema_version": "1.5",
   "timestamp": "2026-07-25",
   "repository": "Fatalerorr69/starcore-platform",
-  "branch": "claude/new-session-s52x55",
-  "initial_sha": "39964337120afb0b20d071201f0ea8e0c3c2c3bc",
-  "final_sha": "09dcf2290a12e6211c2a578830ca28704950a8e7",
-  "execution_mode": "MODE 5 — CONTROLLED AUTONOMY",
-  "overall_status": "HEALTHY",
-  "health_score": 100,
-  "facts": [
-    "355 tests passing, 0 failures",
-    "Coverage 100%",
-    "Ruff format: PASS",
-    "Ruff lint: PASS",
-    "Pyright: 0 errors, 0 warnings",
-    "pip-audit: no vulnerabilities",
-    "uv lock: consistent",
-    "0 open PRs",
-    "0 open issues",
-    "CI: all recent runs SUCCESS",
-    "Dockerfile Python version fixed: 3.14-slim -> 3.12-slim (A01)",
-    "pyright added to pre-commit hooks (A02)",
-    "90 property-based tests across 6 modules",
-    "scripts/doctor.py created: standalone quality gate runner (B01)",
-    "scripts/health.py created: runtime API health probe (B01)",
-    "starcore doctor CLI command added with --fast flag (B02)",
-    "starcore audit CLI command added (B02)",
-    "redis and nats-py unused dependencies removed (C03)",
-    "GET /metrics Prometheus endpoint added, authenticated (C01)",
-    "structured JSON logging wired via STARCORE_LOG_JSON (C01)",
-    "Snapshot/Rollback (C02) found already fully implemented during discovery -- corrected stale recommendation, no action needed",
-    "alembic check runbook documented in docs/development.md with throwaway-DB pattern (TD-C05)",
-    "CONTRIBUTING.md cross-references docs/development.md#database-migrations (TD-C05)",
-    "mkdocs<2.0.0 and mkdocs-material<10.0.0 caps added to pyproject.toml (TD-C06)",
-    "mkdocs cap rationale documented in docs/development.md (TD-C06)"
-  ],
-  "observations": [
-    "Docker daemon not accessible in sandbox environment"
-  ],
-  "assumptions": [],
-  "unverified": [
-    "Proxmox connectivity (NOT ACCESSIBLE in sandbox)",
-    "Anthropic API key runtime validity",
-    "GitHub branch protection rules (gh CLI not available)",
-    "Docker container build (daemon not accessible)"
-  ],
-  "risks": [],
-  "actions": [
+  "branch": "claude/new-session-zkezqt",
+  "head_sha": "3de655e55badc7e671ed56df15cb1a4a7cba0e46",
+  "mode": "MODE_5_CONTROLLED_AUTONOMY",
+  "session_commits": [
     {
-      "id": "A01",
-      "title": "Fix Dockerfile Python version 3.14-slim -> 3.12-slim",
-      "priority": "P2",
-      "status": "EXECUTED",
-      "commit": "d14f5b047a64aeea26ea94f7bbe903e3d08f9334",
-      "file": "Dockerfile"
+      "sha": "df0d491",
+      "message": "feat(cli): add --json, --quiet, --non-interactive to doctor/audit/diagnose (CI-001)",
+      "bundle": "CI-001"
     },
     {
-      "id": "A02",
-      "title": "Add pyright hook to .pre-commit-config.yaml",
-      "priority": "P3",
-      "status": "EXECUTED",
-      "commit": "d14f5b047a64aeea26ea94f7bbe903e3d08f9334",
-      "file": ".pre-commit-config.yaml"
+      "sha": "40204c9",
+      "message": "security(sast): integrate Bandit SAST as a local and CI quality gate (CI-002)",
+      "bundle": "CI-002"
     },
     {
-      "id": "B01",
-      "title": "Create scripts/ with doctor.py and health.py",
-      "priority": "P3",
-      "status": "EXECUTED",
-      "commit": "0b0b72d",
-      "files": ["scripts/doctor.py", "scripts/health.py"]
-    },
-    {
-      "id": "B02",
-      "title": "Add starcore doctor and starcore audit CLI commands",
-      "priority": "P3",
-      "status": "EXECUTED",
-      "commit": "0b0b72d",
-      "files": ["apps/cli/main.py", "tests/test_cli.py"]
-    },
-    {
-      "id": "B03",
-      "title": "Update reports for this session",
-      "priority": "P3",
-      "status": "EXECUTED",
-      "files": [
-        "reports/starcore-code-report.md",
-        "reports/starcore-code-report.json"
-      ]
-    },
-    {
-      "id": "C03",
-      "title": "Remove unused redis and nats-py dependencies",
-      "priority": "P4",
-      "status": "EXECUTED",
-      "commit": "4f337f7",
-      "files": ["pyproject.toml", "uv.lock", "packages/core/config.py"]
-    },
-    {
-      "id": "C01",
-      "title": "Sprint 006: Observability (metrics endpoint, structured logging)",
-      "priority": "P4",
-      "status": "EXECUTED",
-      "commit": "af4edc9",
-      "files": [
-        "packages/core/metrics.py",
-        "packages/core/logger.py",
-        "packages/core/main.py",
-        "packages/core/config.py",
-        "apps/cli/main.py",
-        "tests/test_metrics.py",
-        "tests/test_logger.py",
-        "docs/architecture.md"
-      ]
-    },
-    {
-      "id": "C02",
-      "title": "Sprint 007: Snapshot/Rollback -- VERIFIED already fully implemented, no code change made",
-      "priority": "P4",
-      "status": "NOT_NEEDED",
-      "note": "Discovery found starcore snapshot create/list/delete/rollback (apps/cli/main.py) already wired end-to-end through core/resource_actions.py into packages/providers/proxmox/provider.py's _snapshot_create/_snapshot_list/_snapshot_delete/_snapshot_rollback, which call the real Proxmox API via proxmoxer. 16+ pre-existing tests cover it across test_cli.py, test_providers.py, and test_property_based_cli.py. The prior session's report recommendation was stale/incorrect; no implementation work was performed for this item."
-    },
-    {
-      "id": "TD-C05",
-      "title": "Document alembic check workflow (throwaway DB pattern)",
-      "priority": "P4",
-      "status": "EXECUTED",
-      "commit": "09dcf2290a12e6211c2a578830ca28704950a8e7",
-      "files": ["docs/development.md", "CONTRIBUTING.md"]
-    },
-    {
-      "id": "TD-C06",
-      "title": "Pin mkdocs<2.0.0 and mkdocs-material<10.0.0 + document rationale",
-      "priority": "P4",
-      "status": "EXECUTED",
-      "commit": "09dcf2290a12e6211c2a578830ca28704950a8e7",
-      "files": ["pyproject.toml", "uv.lock", "docs/development.md"]
+      "sha": "3de655e",
+      "message": "ci(auto): add nightly scheduled security audit workflow (AUTO-001)",
+      "bundle": "AUTO-001"
     }
   ],
-  "approvals": [
-    {
-      "bundle": "A01,A02,B03",
-      "approved_by": "user",
-      "timestamp": "2026-07-25"
+  "health": {
+    "static": {
+      "score": 96,
+      "max": 100,
+      "breakdown": {
+        "ruff_lint_format": {"score": 10, "max": 10, "status": "PASS"},
+        "pyright_type_check": {"score": 10, "max": 10, "status": "PASS", "errors": 0, "warnings": 0},
+        "test_pass_rate": {"score": 20, "max": 20, "status": "PASS", "passed": 384, "total": 384},
+        "coverage_threshold": {"score": 10, "max": 10, "status": "PASS", "threshold": 80},
+        "pip_audit": {"score": 10, "max": 10, "status": "PASS", "cves_found": 0},
+        "bandit_sast": {"score": 8, "max": 10, "status": "PASS", "suppressions": 2},
+        "cicd_gate_presence": {"score": 10, "max": 10, "status": "PASS"},
+        "nightly_security_scan": {"score": 8, "max": 10, "status": "ADDED_NOT_YET_RUN"},
+        "alembic_consistency": {"score": 10, "max": 10, "status": "PASS"}
+      }
     },
-    {
-      "bundle": "B01,B02",
-      "approved_by": "user",
-      "timestamp": "2026-07-25"
-    },
-    {
-      "bundle": "C03",
-      "approved_by": "user",
-      "timestamp": "2026-07-25"
-    },
-    {
-      "bundle": "C01,C02,C03",
-      "approved_by": "user",
-      "timestamp": "2026-07-25",
-      "note": "C03 already executed from prior approval; C02 required no code change (see actions[].note); C01 executed."
-    },
-    {
-      "bundle": "TD-C05,TD-C06",
-      "approved_by": "user",
-      "timestamp": "2026-07-25"
+    "runtime": {
+      "score": null,
+      "reason": "NOT_ACCESSIBLE — no live instance in CI environment",
+      "endpoints_checked": []
     }
-  ],
-  "validation": {
-    "ruff_format": "PASS",
-    "ruff_lint": "PASS",
-    "pyright": "PASS (0 errors, 0 warnings)",
-    "pytest": "PASS (355 passed)",
-    "coverage": "100%",
-    "pip_audit": "PASS (no vulnerabilities)",
-    "uv_lock": "PASS (consistent)"
   },
-  "github": {
-    "open_prs": 0,
-    "open_issues": 0,
-    "dependabot": "active",
-    "ci_status": "ALL SUCCESS",
-    "remote_branches": ["main", "claude/new-session-s52x55"]
+  "bundles": {
+    "PRE_BUNDLE": {
+      "status": "SKIPPED",
+      "classification": "VERIFIED_NOT_NEEDED",
+      "reason": "enumerate() fix on s52x55 branch was a no-op; unique=True already present in Hypothesis strategy",
+      "commits": 0
+    },
+    "CI_001": {
+      "status": "COMPLETE",
+      "classification": "VERIFIED",
+      "files_changed": [
+        "apps/cli/main.py",
+        "tests/test_cli.py"
+      ],
+      "tests_added": 15,
+      "description": "Added --json, --quiet, --non-interactive flags to doctor/audit/diagnose CLI commands"
+    },
+    "CI_002": {
+      "status": "COMPLETE",
+      "classification": "VERIFIED",
+      "files_changed": [
+        "apps/cli/main.py",
+        "packages/core/config.py",
+        "scripts/health.py",
+        ".github/workflows/ci.yml",
+        "pyproject.toml",
+        "uv.lock"
+      ],
+      "tests_added": 3,
+      "nosec_suppressions": [
+        {"rule": "B104", "location": "packages/core/config.py", "rationale": "Intentional 0.0.0.0 bind in container"},
+        {"rule": "B310", "location": "scripts/health.py", "rationale": "Health-check URL defaults to localhost; file:// not reachable"}
+      ],
+      "description": "Integrated Bandit SAST as CI quality gate and local doctor check"
+    },
+    "AUTO_001": {
+      "status": "COMPLETE",
+      "classification": "VERIFIED",
+      "files_changed": [
+        ".github/workflows/security-nightly.yml"
+      ],
+      "tests_added": 0,
+      "schedule": "0 2 * * *",
+      "description": "Added nightly security audit workflow (pip-audit + bandit, daily 02:00 UTC)"
+    }
+  },
+  "quality_gates": {
+    "ruff_check": {"status": "PASS", "violations": 0},
+    "ruff_format": {"status": "PASS", "reformats_needed": 0},
+    "pyright": {"status": "PASS", "errors": 0, "warnings": 0, "informations": 0},
+    "pip_audit": {"status": "PASS", "cves": 0, "notes": "starcore-platform itself not on PyPI — expected skip"},
+    "bandit": {"status": "PASS", "severity_threshold": "MEDIUM", "flag": "-ll", "suppressions": 2},
+    "pytest": {"status": "PASS", "passed": 384, "failed": 0, "total": 384},
+    "coverage": {"status": "PASS", "threshold": 80},
+    "alembic_check": {"status": "PASS"},
+    "uv_lock_check": {"status": "PASS"}
+  },
+  "tests": {
+    "baseline": 366,
+    "final": 384,
+    "delta": 18,
+    "ci_001_new": 15,
+    "ci_002_new": 3
+  },
+  "git_state": {
+    "branch": "claude/new-session-zkezqt",
+    "head_sha": "3de655e55badc7e671ed56df15cb1a4a7cba0e46",
+    "working_tree": "CLEAN",
+    "pushed": true,
+    "commits_ahead_of_main": 3
   },
   "security": {
-    "env_file_in_repo": false,
-    "hardcoded_secrets": "NONE FOUND",
-    "pip_audit": "CLEAN",
-    "gitignore": "CORRECT",
-    "api_key_comparison": "hmac.compare_digest (constant-time)",
-    "container_user": "non-root (starcore)",
-    "metrics_endpoint": "authenticated via X-API-Key, same as /diagnostics"
+    "bandit_gate": "ACTIVE",
+    "severity_threshold": "MEDIUM_AND_ABOVE",
+    "nosec_suppressions": 2,
+    "nightly_workflow": "CREATED",
+    "pip_audit_cves": 0,
+    "secrets_in_commits": false
   },
-  "ci_cd": {
-    "workflows": ["ci.yml", "docker-publish.yml", "dependabot-auto-merge.yml"],
-    "status": "HEALTHY",
-    "last_runs": "ALL SUCCESS"
-  },
-  "docker": {
-    "base_image": "python:3.12-slim",
-    "non_root_user": true,
-    "healthcheck": true,
-    "multi_stage": false,
-    "dockerignore": true
-  },
-  "documentation": {
-    "readme": "PRESENT",
-    "contributing": "PRESENT",
-    "security_md": "PRESENT",
-    "adrs": 5,
-    "changelogs": 5,
-    "mkdocs_build": "PASS"
-  },
-  "architecture": {
-    "pattern": "modular-monolith",
-    "circular_dependencies": "NONE FOUND",
-    "dead_code": "NONE (redis/nats stubs removed in C03)",
-    "packages": ["ai", "blueprints", "core", "orchestrator", "provider_sdk", "providers/docker", "providers/proxmox"]
-  },
-  "ai": {
-    "provider": "Anthropic",
-    "sdk": "anthropic",
-    "model_config": "claude-sonnet-5",
-    "integration": "packages/ai/generator.py",
-    "status": "CONFIGURED (runtime not verified)"
-  },
-  "mcp": {
-    "servers": "NONE CONFIGURED",
-    "pre_commit_hook": "ruff format on Write/Edit, pyright on Write/Edit"
-  },
-  "infrastructure": {
-    "proxmox": "NOT ACCESSIBLE",
-    "docker_daemon": "NOT ACCESSIBLE (sandbox)",
-    "ollama": "NOT ACCESSIBLE",
-    "litellm": "NOT ACCESSIBLE"
-  },
-  "observability": {
-    "metrics_endpoint": "/metrics (Prometheus text format, authenticated)",
-    "metrics": [
-      "starcore_http_requests_total{method,path,status}",
-      "starcore_http_request_duration_seconds{method,path}",
-      "starcore_blueprint_tasks_total{provider,status}"
-    ],
-    "structured_logging": "STARCORE_LOG_JSON=true for JSON lines via loguru serialize"
-  },
-  "failures": [],
-  "rollbacks": [],
-  "property_based_tests": {
-    "total": 90,
-    "files": [
-      {"file": "test_property_based.py", "module": "orchestrator", "tests": 25},
-      {"file": "test_property_based_providers.py", "module": "providers", "tests": 14},
-      {"file": "test_property_based_blueprints.py", "module": "blueprints", "tests": 13},
-      {"file": "test_property_based_core.py", "module": "core", "tests": 15},
-      {"file": "test_property_based_ai.py", "module": "ai", "tests": 11},
-      {"file": "test_property_based_cli.py", "module": "cli", "tests": 12}
-    ]
-  },
-  "recommendations": [],
-  "next_actions": ["STOP"]
+  "blocked": [
+    {
+      "id": "BLOCKED-001",
+      "title": "PR creation requires explicit user approval",
+      "action": "Approve PR: claude/new-session-zkezqt → main",
+      "impact": "CI verification blocked until PR is opened"
+    },
+    {
+      "id": "BLOCKED-002",
+      "title": "GitHub Actions CI not yet triggered on this branch",
+      "action": "Depends on BLOCKED-001",
+      "impact": "All gate results are local-only; not GitHub Actions verified"
+    }
+  ],
+  "technical_debt": [
+    {"id": "TD-001", "area": "CI", "description": "No PR opened — CI cannot verify until PR created", "priority": "HIGH"},
+    {"id": "TD-002", "area": "Runtime", "description": "No live instance for provider integration testing", "priority": "MEDIUM"},
+    {"id": "TD-003", "area": "Security", "description": "security-nightly.yml has not yet executed", "priority": "LOW"},
+    {"id": "TD-004", "area": "AI", "description": "STARCORE_ANTHROPIC_API_KEY required for ai generate; not tested in CI", "priority": "MEDIUM"},
+    {"id": "TD-005", "area": "Coverage", "description": "Exact coverage % not captured; at 80% threshold", "priority": "LOW"}
+  ],
+  "recommended_next_bundles": [
+    {
+      "id": "PR-001",
+      "title": "Open Pull Request",
+      "priority": "HIGH",
+      "description": "Create PR from claude/new-session-zkezqt to main to trigger GitHub Actions CI"
+    },
+    {
+      "id": "CLI-003",
+      "title": "Structured Logging for Blueprint Run",
+      "priority": "MEDIUM",
+      "description": "Extend starcore blueprint run with --json for structured event stream output"
+    },
+    {
+      "id": "SEC-001",
+      "title": "Secrets Scanning in CI",
+      "priority": "MEDIUM",
+      "description": "Add gitleaks or truffleHog as CI step to catch accidental secret commits"
+    },
+    {
+      "id": "COV-001",
+      "title": "Coverage Ratchet",
+      "priority": "LOW",
+      "description": "Enforce specific coverage floor (e.g. 85%) and add coverage badge to README"
+    }
+  ],
+  "contradictions_vs_prior_reports": [
+    {
+      "prior_report": "reports/starcore-code-report.json (branch claude/new-session-s52x55, SHA 09dcf22)",
+      "contradiction": "Stale — different branch and SHA. Superseded by this report."
+    }
+  ]
 }

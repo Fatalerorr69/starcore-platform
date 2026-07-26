@@ -6,15 +6,19 @@ Every pull request must pass the same checks CI runs:
 
 ```bash
 uv sync --extra dev
+uv lock --check
 uv run ruff format --check .
 uv run ruff check .
 uv run pyright
 uv run pip-audit
-uv run pytest -q
+uv run bandit -r packages/ apps/ scripts/ -ll -q
+# gitleaks secret scanning runs via gitleaks/gitleaks-action in CI, not a local uv command
+uv run pytest -q --cov --cov-report=term-missing --cov-fail-under=100
 ```
 
-`make lint`, `make format`, and `make test` wrap the same commands.
-Pre-commit hooks are available via `uv run pre-commit run --all-files`.
+`make lint`, `make format`, `make test`, and `make security` (pip-audit +
+Bandit) wrap the same commands. Pre-commit hooks are available via
+`uv run pre-commit run --all-files`.
 
 - **Ruff** is configured in `ruff.toml` (the single source of truth for
   lint/format settings).
@@ -22,9 +26,13 @@ Pre-commit hooks are available via `uv run pre-commit run --all-files`.
   and `tests/` against Python 3.12.
 - **pip-audit** scans the locked dependency set (`uv.lock`) for known
   CVEs and blocks CI on findings.
+- **Bandit** (medium+ severity, `-ll`) statically scans for insecure code
+  patterns; low-severity findings (e.g. `assert` usage) don't fail CI.
+- **gitleaks** scans the full commit history for secrets on every PR and
+  push to `main`; `.gitleaks.toml` allowlists known-safe test fixtures.
 - **pytest** runs with per-test isolation fixtures (fresh SQLite database,
   injected test API key, event-bus reset, rate-limiter counter reset) —
-  see `tests/conftest.py`.
+  see `tests/conftest.py`. Coverage is enforced at 100%.
 
 ## Development workflow
 

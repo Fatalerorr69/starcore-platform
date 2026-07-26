@@ -32,7 +32,9 @@ This README reflects the **actual current state of the codebase**, not the long-
 | Persistence | Done | SQLite (via SQLAlchemy) stores blueprint run history and task results |
 | Config | Done | .env-based settings via pydantic-settings; STARCORE_LOG_JSON for structured JSON logging |
 | Observability | Done | GET /metrics — Prometheus text format, authenticated; structured loguru logging (STARCORE_LOG_JSON) |
-| Tests | 366 passing | ruff, pyright, pytest (incl. Hypothesis property tests), pre-commit, CI on every PR |
+| Environment Detection | Done | starcore audit/doctor/diagnose and GET /diagnostics report runtime_environment (proxmox-host / container / local), OS platform (incl. WSL), cloud provider (AWS/GCP/Azure, diagnose only), and calling-client platform (browser/mobile/CLI, GET /diagnostics only) |
+| Security | Done | Bandit SAST + gitleaks secret scanning on every PR and nightly; pip-audit dependency vulnerability scan |
+| Tests | 442 passing | ruff, pyright, pytest (100% coverage floor, incl. Hypothesis property tests), pre-commit, CI on every PR |
 
 ## What's Planned, Not Built Yet
 
@@ -46,7 +48,7 @@ This README reflects the **actual current state of the codebase**, not the long-
 | Proxmox Template Aliases | Done | Blueprints can use 'config: {template: "ubuntu-24.04"}' instead of a raw template_vmid; resolved automatically before plan/run via Proxmox's template list, with a clear error if the name is missing or ambiguous |
 | Resource Lifecycle Actions | Done | 'starcore resource action <provider> <action> <resource>' and POST /resources/action run a single action (start/stop/shutdown/destroy for Proxmox, start/stop/remove for Docker) against one resource, independent of any blueprint |
 | Proxmox Environment Discovery | Done | 'starcore proxmox discover' and GET /proxmox/discover catalog node capacity, storage, available VM/LXC templates, and network bridges, used to tailor deployments before they run |
-| AI Blueprint Generation | Done (requires API key) | 'starcore ai generate "<description>"' and POST /ai/generate-blueprint use Anthropic's API to translate natural language into a validated blueprint YAML. Requires STARCORE_ANTHROPIC_API_KEY |
+| AI Blueprint Generation | Done (requires API key/endpoint) | 'starcore ai generate "<description>"' and POST /ai/generate-blueprint translate natural language into a validated blueprint YAML via a pluggable provider: Anthropic (STARCORE_ANTHROPIC_API_KEY) or any OpenAI-compatible /v1/chat/completions server — Ollama, LM Studio, vLLM, LocalAI, OpenAI itself (STARCORE_AI_PROVIDER=openai-compatible, STARCORE_AI_BASE_URL) |
 | Installer Studio | Vision | Not started |
 | Dashboard (Web UI) | Vision | Not started |
 | AI Brain | Vision | Not started |
