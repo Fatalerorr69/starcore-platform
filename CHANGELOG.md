@@ -5,6 +5,28 @@ All notable changes to STARCORE Platform are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+- **Dependency failure semantics now enforced, not just documented** (ADR-010): a task whose dependency finished `FAILED`, `SKIPPED`, or `SKIPPED_DEPENDENCY_FAILED` is itself marked `SKIPPED_DEPENDENCY_FAILED` and never reaches `provider.execute()`, transitively across scheduler waves — in both the sequential (`BlueprintExecutor`) and parallel (`Scheduler`) paths. Previously `depends_on` only gated on the prerequisite having *finished*, not succeeded (flagged as an open question in the 0.1.0 audit, now resolved as a deliberate semantics fix).
+- `docker compose config` (and `docker compose up -d --build api`, the documented non-scaffold workflow) no longer fails when `STARCORE_POSTGRES_PASSWORD` is unset — Compose interpolates every service's environment block at parse time regardless of active profile; switched to a default-to-empty interpolation, with the official postgres image still refusing to start on an empty password if the scaffold profile is actually enabled.
+- `release.yml` quality gate brought to parity with `ci.yml`: was only `ruff check` + `pyright` + `pytest --cov-fail-under=80`, now also runs `uv lock --check`, `pip-audit`, Bandit, gitleaks, `alembic check`, and `mkdocs build --strict`, at the same 100% coverage floor as every other gate.
+
+### Added
+- Request correlation: every HTTP response carries `X-Request-ID` (caller-supplied if present and well-formed, generated otherwise), bound to every log line emitted while handling that request.
+- `starcore snapshot rollback` shows a dry-run diff of what will change before prompting for confirmation (unless `--yes`), matching the existing `snapshot delete` confirmation pattern.
+- Centralized secret redaction (`packages/core/security.py`): `redact_database_url()` masks credentials in `STARCORE_DATABASE_URL` before `/health`/`/diagnostics` can echo them back; `scrub_configured_secrets()` strips any configured secret found verbatim in provider exception text.
+- ADR-010 (Dependency Failure Semantics), ADR-011 (Plugin Trust Boundary — plugins are **not sandboxed**), ADR-012 (API Authentication Model), ADR-013 (Provider Concurrency Policy — no rate limit for now, by deliberate decision with stated trigger conditions for revisiting).
+- CodeQL static analysis workflow, running alongside Bandit/gitleaks/pip-audit.
+- Docker: multi-stage build; final image drops dev dependencies and the runtime PyPI dependency.
+- New reference documentation, all wired into the MkDocs nav: CLI Reference, API Reference, Security, Plugins, Test Matrix, Current Architecture State, Test Strategy, Operations Runbook.
+- `uv run mkdocs build --strict` added as a CI gate, catching orphaned/unreachable doc pages.
+
+### Changed
+- README's "What's Planned, Not Built Yet" section (which had drifted — several listed items were already implemented) replaced with "Production Limitations" (the actual security-relevant caveats, cross-referenced to ADR-011/012/013) and a shorter, accurate "Roadmap / Vision" section.
+
+Test count: 449 → 493 (100% coverage maintained throughout).
+
 ## [0.1.0] — 2026-07-26
 
 First numbered release. Covers sprints 001–015.

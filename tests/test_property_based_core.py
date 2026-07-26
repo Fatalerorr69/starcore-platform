@@ -8,9 +8,11 @@ run-history repository that must hold for all valid inputs.
 from __future__ import annotations
 
 import asyncio
+import uuid
 from typing import Any
 
 from core.events import EventBus
+from core.main import _resolve_request_id
 from core.plugin_manager import PluginManager
 from core.repository import get_run, list_known_provider_vmids, list_runs, save_run
 from hypothesis import HealthCheck, given, settings
@@ -307,3 +309,40 @@ def test_repository_list_known_provider_vmids_returns_saved_vmids(
             assert vmid in found
     finally:
         session.close()
+
+
+# ── _resolve_request_id properties ──────────────────────────────────────────
+
+_REQUEST_ID_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-"
+
+
+def _is_valid_request_id_token(s: str) -> bool:
+    return bool(s) and 1 <= len(s) <= 128 and all(c in _REQUEST_ID_ALPHABET for c in s)
+
+
+@given(token=st.text(alphabet=_REQUEST_ID_ALPHABET, min_size=1, max_size=128))
+def test_resolve_request_id_echoes_valid_token_unchanged(token: str) -> None:
+    """A caller-supplied token matching the allowed pattern is returned unchanged."""
+    assert _resolve_request_id(token) == token
+
+
+@given(
+    token=st.one_of(
+        st.none(),
+        st.text(max_size=30).filter(lambda s: not _is_valid_request_id_token(s)),
+    )
+)
+def test_resolve_request_id_generates_valid_uuid4_for_invalid_input(token: str | None) -> None:
+    """Any input not matching the allowed pattern (including None) falls back to a UUID4."""
+    result = _resolve_request_id(token)
+    parsed = uuid.UUID(result)
+    assert str(parsed) == result
+    assert parsed.version == 4
+
+
+@given(token=st.text(alphabet=_REQUEST_ID_ALPHABET, min_size=129, max_size=200))
+def test_resolve_request_id_rejects_tokens_over_128_chars(token: str) -> None:
+    """A token longer than 128 characters is rejected even though every character is valid."""
+    result = _resolve_request_id(token)
+    assert result != token
+    uuid.UUID(result)
