@@ -13,11 +13,14 @@ See `reports/starcore-tests-catalog.md` for the full per-test listing.
 | Scheduler (concurrent) | ✓ | ✓ | | | ✓ | `test_scheduler.py`, `test_graph_execution.py`, `test_property_based.py` |
 | Dependency failure semantics (ADR-010) | ✓ | ✓ | | | | `test_blueprints.py`, `test_scheduler.py`, `test_persistence.py` |
 | Provider SDK (registry, base, lock) | ✓ | ✓ | | | ✓ | `test_providers.py`, `test_property_based_providers.py` |
+| Retry logic (exponential backoff) | ✓ | | | | ✓ | `test_retry.py`, `test_property_based_retry.py` |
+| Task timeout | ✓ | | | | ✓ | `test_timeout.py`, `test_property_based_timeout.py` |
 | Proxmox provider | ✓ | ✓ | | | | `test_providers.py`, `test_resource_actions.py` |
 | Docker provider | ✓ | ✓ | | | | `test_providers.py` |
 | API (FastAPI routes) | | ✓ | ✓ | ✓ | | `test_api.py`, `test_health.py`, `test_rate_limiting.py` |
 | CLI | ✓ | ✓ | ✓ | | ✓ | `test_cli.py`, `test_property_based_cli.py` |
 | Authentication | | ✓ | | ✓ | | `test_auth.py` |
+| Request correlation | ✓ | ✓ | | | | `test_correlation.py`, `test_request_id_middleware.py`, `test_request_id.py` |
 | Secret redaction | ✓ | ✓ | | ✓ | | `test_security.py` |
 | Plugins | ✓ | ✓ | | | | `test_plugin_manager.py` |
 | Persistence | ✓ | ✓ | | | | `test_persistence.py` |

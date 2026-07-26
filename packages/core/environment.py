@@ -166,12 +166,12 @@ def classify_client_platform(user_agent: str | None) -> str:
     if any(marker in ua for marker in mobile_markers):
         return "browser-mobile"
 
-    browser_markers = ("mozilla", "chrome", "safari", "firefox", "edge")
-    if any(marker in ua for marker in browser_markers):
-        return "browser-desktop"
-
     script_markers = ("curl", "python-httpx", "python-requests", "okhttp", "go-http-client")
     if any(marker in ua for marker in script_markers):
         return "cli-or-script"
+
+    browser_markers = ("mozilla", "chrome", "safari", "firefox", "edge")
+    if any(marker in ua for marker in browser_markers):
+        return "browser-desktop"
 
     return "unknown"

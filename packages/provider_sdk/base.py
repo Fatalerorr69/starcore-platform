@@ -9,7 +9,7 @@ import asyncio
 from abc import ABC, abstractmethod
 from typing import Any
 
-from .retry import RetryConfig, attempt_with_retry
+from .retry import RetryConfig
 
 
 class BaseProvider(ABC):

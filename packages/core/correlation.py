@@ -12,12 +12,11 @@ from __future__ import annotations
 import contextvars
 import re
 import uuid
-from typing import Optional
 
 from loguru import logger
 
 # ContextVar for request ID propagation
-_request_id_context: contextvars.ContextVar[Optional[str]] = contextvars.ContextVar(
+_request_id_context: contextvars.ContextVar[str | None] = contextvars.ContextVar(
     "request_id", default=None
 )
 

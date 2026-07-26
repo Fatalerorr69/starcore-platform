@@ -9,14 +9,14 @@ Public API:
 """
 
 from .base import BaseProvider
-from .exceptions import ProviderException
+from .exceptions import ProviderError
 from .registry import ProviderRegistry, register_default_providers, registry
-from .retry import RetryConfig, RetryableError, attempt_with_retry
+from .retry import RetryableError, RetryConfig, attempt_with_retry
 
 __all__ = [
     "BaseProvider",
     "ProviderRegistry",
-    "ProviderException",
+    "ProviderError",
     "RetryConfig",
     "RetryableError",
     "attempt_with_retry",

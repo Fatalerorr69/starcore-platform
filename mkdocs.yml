@@ -38,6 +38,8 @@ nav:
       - Sprint 017: changelog/sprint-017.md
       - Sprint 018: changelog/sprint-018.md
       - Sprint 019: changelog/sprint-019.md
+      - Sprint 020: changelog/sprint-020.md
+      - Sprint 021: changelog/sprint-021.md
   - ADRs:
       - ADR-001 Blueprint Dependency Execution: adr/ADR-001-blueprint-dependency-execution.md
       - ADR-002 Provider Lifecycle: adr/ADR-002-provider-lifecycle.md
