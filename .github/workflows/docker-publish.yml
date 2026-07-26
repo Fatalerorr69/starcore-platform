@@ -3,6 +3,8 @@ name: Docker Publish
 on:
   push:
     branches: [main]
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
 
 jobs:
   build-and-push:
@@ -24,11 +26,33 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Compute image tags
+        id: tags
+        run: |
+          IMAGE="ghcr.io/${{ steps.image.outputs.name }}"
+          if [[ "${{ github.ref_type }}" == "tag" ]]; then
+            # Version tag push: publish as X.Y.Z only.
+            # latest stays tied to the main branch so it always reflects HEAD.
+            VERSION="${{ github.ref_name }}"
+            VERSION="${VERSION#v}"
+            {
+              echo "value<<EOF"
+              echo "${IMAGE}:${VERSION}"
+              echo "EOF"
+            } >> "$GITHUB_OUTPUT"
+          else
+            # Branch push: publish as latest + commit SHA.
+            {
+              echo "value<<EOF"
+              echo "${IMAGE}:latest"
+              echo "${IMAGE}:${{ github.sha }}"
+              echo "EOF"
+            } >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Build and push
         uses: docker/build-push-action@v7
         with:
           context: .
           push: true
-          tags: |
-            ghcr.io/${{ steps.image.outputs.name }}:latest
-            ghcr.io/${{ steps.image.outputs.name }}:${{ github.sha }}
+          tags: ${{ steps.tags.outputs.value }}

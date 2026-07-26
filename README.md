@@ -2,7 +2,7 @@
 
 **AI-Powered Infrastructure Operating Platform**
 
-![Version](https://img.shields.io/badge/version-0.1.0--dev-blue)
+![Version](https://img.shields.io/badge/version-0.1.0-blue)
 ![License](https://img.shields.io/badge/license-Apache--2.0-green)
 ![Status](https://img.shields.io/badge/status-active--development-orange)
 
