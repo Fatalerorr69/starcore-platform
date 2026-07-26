@@ -8,6 +8,7 @@ docs_dir: docs
 nav:
   - Home: index.md
   - Architecture: architecture.md
+  - Current State: architecture/current-state.md
   - Installation: installation.md
   - Development: development.md
   - CLI Reference: cli.md
@@ -15,6 +16,8 @@ nav:
   - Security: security.md
   - Plugins: plugins.md
   - Test Matrix: test-matrix.md
+  - Test Strategy: testing/test-strategy.md
+  - Operations Runbook: operations/repository-stabilization.md
   - Changelog:
       - Sprint 001: changelog/sprint-001.md
       - Sprint 002: changelog/sprint-002.md
@@ -32,6 +35,7 @@ nav:
       - Sprint 014: changelog/sprint-014.md
       - Sprint 015: changelog/sprint-015.md
       - Sprint 016: changelog/sprint-016.md
+      - Sprint 017: changelog/sprint-017.md
   - ADRs:
       - ADR-001 Blueprint Dependency Execution: adr/ADR-001-blueprint-dependency-execution.md
       - ADR-002 Provider Lifecycle: adr/ADR-002-provider-lifecycle.md

@@ -104,6 +104,8 @@ packages/blueprints/    Blueprint models, loader, planner, executor
 packages/orchestrator/  Task, TaskGraph, Scheduler
 packages/provider_sdk/  BaseProvider, registry, exceptions
 packages/providers/     Docker and Proxmox implementations
+packages/ai/            Pluggable AI blueprint generation (Anthropic, OpenAI-compatible)
+scripts/                Standalone doctor/health scripts (no CLI dependency)
 tests/                  pytest test suite
 docs/ses/               Long-term engineering specification and vision docs
 ```

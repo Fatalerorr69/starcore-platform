@@ -25,11 +25,36 @@ jobs:
       - name: Install dependencies
         run: uv sync --extra dev
 
-      - name: Quality gates
+      - name: Lockfile consistency check
+        run: uv lock --check
+
+      - name: Ruff check
+        run: uv run ruff check .
+
+      - name: Pyright
+        run: uv run pyright
+
+      - name: pip-audit (dependency vulnerability scan)
+        run: uv run pip-audit
+
+      - name: Bandit SAST (medium+ severity)
+        run: uv run bandit -r packages/ apps/ scripts/ -ll -q
+
+      - name: Secret scanning (gitleaks)
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Pytest
+        run: uv run pytest -q --tb=short --cov --cov-report=term-missing --cov-fail-under=100
+
+      - name: Alembic check (detect un-migrated model changes)
         run: |
-          uv run ruff check .
-          uv run pyright
-          uv run pytest -q --tb=short --cov --cov-fail-under=80
+          STARCORE_DATABASE_URL=sqlite:///./ci-check.db uv run alembic upgrade head
+          STARCORE_DATABASE_URL=sqlite:///./ci-check.db uv run alembic check
+
+      - name: Documentation build (mkdocs --strict)
+        run: uv run mkdocs build --strict
 
       - name: Verify tag matches pyproject.toml version
         run: |
