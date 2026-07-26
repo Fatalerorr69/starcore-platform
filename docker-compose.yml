@@ -38,7 +38,21 @@ services:
     profiles: ["scaffold"]
     environment:
       POSTGRES_USER: starcore
-      POSTGRES_PASSWORD: ${STARCORE_POSTGRES_PASSWORD:?set STARCORE_POSTGRES_PASSWORD in .env before enabling the postgres scaffold service}
+      # `:-` (default to empty), not `:?` (hard-fail at interpolation
+      # time): Compose interpolates every service's environment block
+      # unconditionally, even for a profile that isn't active, so a
+      # `:?required` here previously made bare `docker compose config`
+      # and even `docker compose up -d --build api` (the actual
+      # documented, non-scaffold workflow) fail with "STARCORE_POSTGRES_PASSWORD
+      # is missing a value" despite never touching this service. The
+      # safety net doesn't need to live here: the official postgres image
+      # itself refuses to start with an empty POSTGRES_PASSWORD ("Database
+      # is uninitialized and superuser password is not specified..."),
+      # verified directly (`docker run -e POSTGRES_PASSWORD= postgres:17-alpine`)
+      # -- so accidentally enabling the scaffold profile without setting
+      # STARCORE_POSTGRES_PASSWORD still fails loudly, just at container
+      # startup instead of at compose-file parse time.
+      POSTGRES_PASSWORD: ${STARCORE_POSTGRES_PASSWORD:-}
       POSTGRES_DB: starcore
     ports:
       - "5432:5432"
