@@ -21,7 +21,7 @@ See `reports/starcore-tests-catalog.md` for the full per-test listing.
 | CLI | ✓ | ✓ | ✓ | | ✓ | `test_cli.py`, `test_property_based_cli.py` |
 | Authentication | | ✓ | | ✓ | | `test_auth.py` |
 | Request correlation | ✓ | ✓ | | | | `test_correlation.py`, `test_request_id_middleware.py`, `test_request_id.py` |
-| Secret redaction | ✓ | ✓ | | ✓ | | `test_security.py` |
+| Secret redaction | ✓ | ✓ | | ✓ | ✓ | `test_security.py`, `test_property_based_security.py` |
 | Plugins | ✓ | ✓ | | | | `test_plugin_manager.py` |
 | Persistence | ✓ | ✓ | | | | `test_persistence.py` |
 | Migrations / schema management | | ✓ | | | | `test_migrations.py`, `test_schema_management.py` |

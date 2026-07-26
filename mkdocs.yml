@@ -40,6 +40,7 @@ nav:
       - Sprint 019: changelog/sprint-019.md
       - Sprint 020: changelog/sprint-020.md
       - Sprint 021: changelog/sprint-021.md
+      - Sprint 022: changelog/sprint-022.md
   - ADRs:
       - ADR-001 Blueprint Dependency Execution: adr/ADR-001-blueprint-dependency-execution.md
       - ADR-002 Provider Lifecycle: adr/ADR-002-provider-lifecycle.md
@@ -54,4 +55,5 @@ nav:
       - ADR-011 Plugin Trust Boundary: adr/ADR-011-plugin-trust-boundary.md
       - ADR-012 API Authentication Model: adr/ADR-012-api-authentication-model.md
       - ADR-013 Provider Concurrency Policy: adr/ADR-013-provider-concurrency-policy.md
+      - ADR-014 Task Timeout Integration: adr/ADR-014-task-timeout-integration.md
   - Vision (SES): ses/SES-0000-MASTER-INDEX.md

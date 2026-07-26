@@ -8,6 +8,18 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [Unreleased]
 
 ### Added
+- Property-based (Hypothesis) tests for `core.security`: 6 new tests covering
+  `redact_database_url` (never-raises, postgres password masked, SQLite passthrough) and
+  `scrub_configured_secrets` (never returns configured secret, idempotent, no-op when no
+  secrets). Hypothesis found and fixed a subtle test-invariant bug: `password not in result`
+  was too broad (password chars can appear in the hostname); corrected to
+  `f":{password}@" not in result`.
+- ADR-014 (Task Timeout Integration — Deliberate Deferral): documents that
+  `execute_with_timeout` in `orchestrator/timeout.py` is intentionally not wired into
+  `Scheduler` or `BlueprintExecutor`, with trigger conditions for revisiting.
+- Test matrix updated: "Secret redaction" row gains property-based checkmark.
+
+### Added
 - Property-based (Hypothesis) tests for `provider_sdk.retry` and `orchestrator.timeout`:
   17 new tests covering `calculate_delay` bounds/monotonicity/determinism,
   `RetryableError` attribute preservation, `attempt_with_retry` single-attempt and
