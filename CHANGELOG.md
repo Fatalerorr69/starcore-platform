@@ -8,6 +8,18 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [Unreleased]
 
 ### Added
+- Property-based (Hypothesis) tests for ADR-010 (Dependency Failure Semantics): 8 new
+  tests in `test_property_based_dependency_semantics.py` covering the success-gate
+  invariant across both execution paths (Scheduler and BlueprintExecutor) — SKIPPED
+  dependency propagates, FAILED dependency propagates, transitive chain propagation for
+  any length (2–6), independent tasks unaffected by sibling failure, and
+  `provider.execute()` never called for SKIPPED_DEPENDENCY_FAILED tasks.
+- Test catalog (`reports/starcore-tests-catalog.md`) regenerated: 43 test files,
+  558 AST functions (567 pytest-collected), up from the stale sprint-019 snapshot.
+- Test matrix: "Dependency failure semantics (ADR-010)" row gains property-based
+  checkmark and `test_property_based_dependency_semantics.py` reference.
+
+### Added
 - Property-based (Hypothesis) tests for `BlueprintExecutor` (the sequential execution
   path): 5 new tests mirroring the existing `Scheduler` property tests — task count,
   terminal-status, all-succeed, unregistered-provider, and dependency-failure-propagation

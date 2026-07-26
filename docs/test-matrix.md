@@ -11,7 +11,7 @@ See `reports/starcore-tests-catalog.md` for the full per-test listing.
 | Planner (dependency ordering) | ✓ | ✓ | | | ✓ | `test_blueprints.py`, `test_property_based_blueprints.py`, `test_property_based.py` |
 | Sequential executor | ✓ | ✓ | | | ✓ | `test_blueprints.py`, `test_property_based_blueprints.py` |
 | Scheduler (concurrent) | ✓ | ✓ | | | ✓ | `test_scheduler.py`, `test_graph_execution.py`, `test_property_based.py` |
-| Dependency failure semantics (ADR-010) | ✓ | ✓ | | | | `test_blueprints.py`, `test_scheduler.py`, `test_persistence.py` |
+| Dependency failure semantics (ADR-010) | ✓ | ✓ | | | ✓ | `test_blueprints.py`, `test_scheduler.py`, `test_persistence.py`, `test_property_based_dependency_semantics.py` |
 | Provider SDK (registry, base, lock) | ✓ | ✓ | | | ✓ | `test_providers.py`, `test_property_based_providers.py` |
 | Retry logic (exponential backoff) | ✓ | | | | ✓ | `test_retry.py`, `test_property_based_retry.py` |
 | Task timeout | ✓ | | | | ✓ | `test_timeout.py`, `test_property_based_timeout.py` |
