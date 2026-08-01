@@ -1,7 +1,29 @@
 # Completed Work — STARCORE Platform
 
 > Chronologický záznam dokončené práce po sezeních.
-> **Poslední aktualizace:** 2026-08-01
+> **Poslední aktualizace:** 2026-08-01 (correlation ID verification)
+
+---
+
+## Sezení: starcore-autonomous-engineering-4p3tlj (pokračování, 2026-08-01, correlation ID)
+
+### P2 #1 — Correlation ID propagation verification
+
+**Cíl:** Ověřit, že `request_id` z HTTP middleware skutečně prostupuje do provider log lines.
+
+**Výsledek:** COMPLETED — 2 testy přidány, 582/582, 100% coverage (commit `1e9c6c5`)
+
+#### Zjištění
+
+- Propagace fungovala **od začátku** — žádné změny kódu nebyly potřeba
+- `logger.contextualize()` v `_request_id_middleware` (core/main.py) používá Python `contextvars`
+- `asyncio.to_thread()` (Python 3.10+) kopíruje aktuální `contextvars.Context` do nového threadu
+- Tedy: HTTP → middleware → orchestrator → provider.execute() → asyncio.to_thread() → vše nese request_id
+
+#### Přidané testy (`tests/test_request_id.py`)
+
+1. `test_loguru_context_propagates_through_asyncio_to_thread` — unit test, čistá asyncio/loguru propagace bez HTTP
+2. `test_request_id_propagates_to_provider_execute_log` — integration test: X-Request-ID → BlueprintExecutor → _LoggingProvider.execute() → INFO log v async i thread kontextu
 
 ---
 

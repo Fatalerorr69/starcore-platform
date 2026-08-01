@@ -36,10 +36,10 @@
 
 Tyto položky byly navrženy v předchozím auditu a záměrně odloženy na P2:
 
-### 1. Request-scoped correlation ID logging rozšíření
-- **Stav:** `packages/core/correlation.py` a `packages/core/request_id_middleware.py` existují (ADR-015)
-- **Co zbývá:** Ověřit, že correlation ID skutečně prostupuje do provider log lines (nejen HTTP middleware)
-- **Odhad:** 2-4 hodiny
+### ~~1. Request-scoped correlation ID logging rozšíření~~ — CLOSED (2026-08-01)
+- Ověřeno: loguru `contextualize()` prostupuje přes `await` i `asyncio.to_thread()` (Python contextvars)
+- Přidány 2 testy: `test_loguru_context_propagates_through_asyncio_to_thread` + `test_request_id_propagates_to_provider_execute_log`
+- 582 testů, 100% coverage (commit `1e9c6c5`)
 
 ### ~~2. Snapshot rollback dry-run diff~~ — CLOSED (v0.2.0)
 - `_show_rollback_preview()` + `_snapshot_rollback_preview()` implementovány a otestovány (11 testů).
