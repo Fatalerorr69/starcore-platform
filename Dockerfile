@@ -1,4 +1,4 @@
-FROM python:3.12-slim AS builder
+FROM python:3.14-slim AS builder
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl ca-certificates \
@@ -29,7 +29,7 @@ COPY plugins ./plugins
 RUN uv sync --frozen --no-dev
 
 
-FROM python:3.12-slim AS runtime
+FROM python:3.14-slim AS runtime
 
 # ca-certificates is a genuine runtime dependency (outbound HTTPS to the
 # Proxmox API, Anthropic API, cloud metadata probes); curl itself is not
