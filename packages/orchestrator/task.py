@@ -31,3 +31,4 @@ class Task:
     status: TaskStatus = TaskStatus.PENDING
     result: dict[str, Any] = field(default_factory=dict)
     kind: str = ""
+    timeout_seconds: float | None = None

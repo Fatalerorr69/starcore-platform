@@ -14,6 +14,7 @@ import uuid
 from core.events import event_bus
 from loguru import logger
 from orchestrator.task import Task, TaskStatus
+from orchestrator.timeout import TaskTimeoutError, TimeoutConfig, execute_with_timeout
 from provider_sdk.registry import register_default_providers, registry
 
 from .models import Blueprint
@@ -40,6 +41,7 @@ class BlueprintExecutor:
                 payload=step["config"],
                 kind=step["kind"],
                 depends_on=list(step.get("depends_on", [])),
+                timeout_seconds=step.get("timeout_seconds"),
             )
             tasks.append(task)
 
@@ -88,8 +90,18 @@ class BlueprintExecutor:
                     continue
 
                 used_providers.add(step["provider"])
-                await provider.execute(task)
+                timeout_config = TimeoutConfig(timeout_seconds=task.timeout_seconds)
+                await execute_with_timeout(
+                    provider.execute(task), timeout_config, task.id, task.resource
+                )
                 task.status = TaskStatus.SUCCESS
+            except TaskTimeoutError as exc:
+                logger.warning(
+                    "Task '{}' timed out after {}s, marking as failed",
+                    task.resource,
+                    exc.timeout,
+                )
+                task.status = TaskStatus.FAILED
             except Exception:
                 logger.exception("Failed to execute task for resource '{}'", step["resource"])
                 task.status = TaskStatus.FAILED

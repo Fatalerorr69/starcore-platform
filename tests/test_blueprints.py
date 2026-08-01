@@ -4,6 +4,7 @@ Blueprint Engine Tests
 
 from __future__ import annotations
 
+import asyncio
 from pathlib import Path
 
 import pytest
@@ -373,6 +374,89 @@ async def test_executor_marks_task_failed_when_execute_raises():
     tasks = await BlueprintExecutor().execute(blueprint)
 
     assert len(tasks) == 1
+    assert tasks[0].status == TaskStatus.FAILED
+
+
+# ---------------------------------------------------------------------------
+# timeout_seconds — schema, planner, executor
+# ---------------------------------------------------------------------------
+
+
+def test_resource_spec_stores_timeout_seconds():
+    spec = ResourceSpec(name="r", provider="p", kind="k", timeout_seconds=30)
+    assert spec.timeout_seconds == 30.0
+
+
+def test_resource_spec_timeout_seconds_defaults_to_none():
+    spec = ResourceSpec(name="r", provider="p", kind="k")
+    assert spec.timeout_seconds is None
+
+
+def test_planner_create_plan_carries_timeout_seconds():
+    blueprint = Blueprint(
+        name="t",
+        resources=[ResourceSpec(name="r", provider="p", kind="k", timeout_seconds=60)],
+    )
+    step = ExecutionPlanner().create_plan(blueprint)[0]
+    assert step["timeout_seconds"] == 60.0
+
+
+def test_planner_create_plan_carries_none_timeout():
+    blueprint = Blueprint(
+        name="t",
+        resources=[ResourceSpec(name="r", provider="p", kind="k")],
+    )
+    step = ExecutionPlanner().create_plan(blueprint)[0]
+    assert step["timeout_seconds"] is None
+
+
+def test_planner_create_graph_carries_timeout_seconds():
+    blueprint = Blueprint(
+        name="t",
+        resources=[ResourceSpec(name="r", provider="p", kind="k", timeout_seconds=45)],
+    )
+    tasks = list(ExecutionPlanner().create_graph(blueprint).all())
+    assert tasks[0].timeout_seconds == 45.0
+
+
+async def test_executor_succeeds_when_task_completes_before_timeout():
+    fake = FakeProvider(connect_result=True)
+    registry.register(fake)
+
+    blueprint = Blueprint(
+        name="timeout-ok",
+        resources=[ResourceSpec(name="r", provider="fake", kind="k", timeout_seconds=10.0)],
+    )
+    tasks = await BlueprintExecutor().execute(blueprint)
+    assert tasks[0].status == TaskStatus.SUCCESS
+
+
+async def test_executor_marks_failed_when_timeout_exceeded():
+    class _SlowProvider(BaseProvider):
+        name = "slow"
+
+        async def connect(self) -> bool:
+            return True
+
+        async def disconnect(self) -> None:
+            return None
+
+        async def health(self) -> dict:
+            return {"status": "ok"}
+
+        async def list_resources(self) -> list[dict]:
+            return []
+
+        async def execute(self, task) -> None:
+            await asyncio.sleep(10)
+
+    registry.register(_SlowProvider())
+
+    blueprint = Blueprint(
+        name="timeout-fail",
+        resources=[ResourceSpec(name="r", provider="slow", kind="k", timeout_seconds=0.01)],
+    )
+    tasks = await BlueprintExecutor().execute(blueprint)
     assert tasks[0].status == TaskStatus.FAILED
 
 

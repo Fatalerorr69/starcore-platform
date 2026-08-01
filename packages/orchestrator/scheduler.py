@@ -24,6 +24,7 @@ from provider_sdk.registry import register_default_providers, registry
 
 from .task import Task, TaskStatus
 from .task_graph import TaskGraph
+from .timeout import TaskTimeoutError, TimeoutConfig, execute_with_timeout
 
 
 class Scheduler:
@@ -119,8 +120,18 @@ class Scheduler:
                 await self._emit_task_completed(task)
                 return
             used_providers.add(task.provider)
-            await provider.execute(task)
+            timeout_config = TimeoutConfig(timeout_seconds=task.timeout_seconds)
+            await execute_with_timeout(
+                provider.execute(task), timeout_config, task.id, task.resource
+            )
             task.status = TaskStatus.SUCCESS
+        except TaskTimeoutError as exc:
+            logger.warning(
+                "Task '{}' timed out after {}s, marking as failed",
+                task.resource,
+                exc.timeout,
+            )
+            task.status = TaskStatus.FAILED
         except Exception:
             logger.exception("Failed to execute task for resource '{}'", task.resource)
             task.status = TaskStatus.FAILED

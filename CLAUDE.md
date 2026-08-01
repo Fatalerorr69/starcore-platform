@@ -110,7 +110,7 @@ apps/cli (Typer)           packages/core/main.py (FastAPI)
 
 **`packages/blueprints`** — Loads YAML blueprints into Pydantic models, resolves Proxmox template aliases (friendly name → `template_vmid`), and produces execution plans. `ExecutionPlanner.create_plan()` returns a flat topologically-sorted list for the sequential executor, carrying each step's `depends_on` through so the executor can enforce success (not just order); `create_plan()` / `create_graph()` both honor `depends_on` as a binding constraint — unknown or circular dependencies raise `ValueError`, never produce a silently wrong order.
 
-**`packages/orchestrator`** — Executes already-prepared `TaskGraph` plans. `Scheduler` runs dependency-satisfied tasks concurrently in "waves" via `asyncio.gather` and detects stalls (unresolvable graphs) instead of hanging. `depends_on` is a success gate, not just ordering (ADR-010): a task whose dependency finished `FAILED`/`SKIPPED`/`SKIPPED_DEPENDENCY_FAILED` is itself marked `TaskStatus.SKIPPED_DEPENDENCY_FAILED` without ever reaching `provider.execute()`, and this propagates transitively across waves. `BlueprintExecutor` (the sequential path, `packages/blueprints/executor.py`) enforces the identical rule. `timeout.py` provides `TimeoutConfig` / `TimeoutStrategy` / `execute_with_timeout` — implemented and tested but **not yet wired into `Scheduler` or `BlueprintExecutor`** (see ADR-016 for the deliberate deferral).
+**`packages/orchestrator`** — Executes already-prepared `TaskGraph` plans. `Scheduler` runs dependency-satisfied tasks concurrently in "waves" via `asyncio.gather` and detects stalls (unresolvable graphs) instead of hanging. `depends_on` is a success gate, not just ordering (ADR-010): a task whose dependency finished `FAILED`/`SKIPPED`/`SKIPPED_DEPENDENCY_FAILED` is itself marked `TaskStatus.SKIPPED_DEPENDENCY_FAILED` without ever reaching `provider.execute()`, and this propagates transitively across waves. `BlueprintExecutor` (the sequential path, `packages/blueprints/executor.py`) enforces the identical rule. `timeout.py` provides `TimeoutConfig` / `TimeoutStrategy` / `execute_with_timeout` — wired into both `Scheduler._run_task()` and `BlueprintExecutor`. `ResourceSpec` carries an optional `timeout_seconds: float | None` field; when set, a task whose `provider.execute()` exceeds the deadline is cancelled and marked `FAILED` (ADR-016).
 
 **`packages/core`** — FastAPI app and all supporting infrastructure:
 - `config.py`: `pydantic-settings`-based `Settings` singleton (all env vars prefixed `STARCORE_`), LRU-cached via `get_settings()`.
@@ -270,11 +270,11 @@ CI also builds the Docker image and smoke-tests `GET /health`. A nightly workflo
 | ADR-013 | Provider Concurrency Policy (no semaphore now; trigger conditions defined) | Accepted |
 | ADR-014 | Task Timeout Support | Accepted |
 | ADR-015 | Request Correlation via Context Variables | Accepted |
-| ADR-016 | Task Timeout Integration: Deliberate Deferral | Accepted |
+| ADR-016 | Task Timeout Integration | Implemented |
 
-### Notable deferral: task timeouts (ADR-016)
+### Task timeouts (ADR-016)
 
-`orchestrator/timeout.py` implements `TimeoutConfig`, `TimeoutStrategy` (`CANCEL` / `WAIT_AND_MARK` / `IGNORE`), `TaskTimeoutError`, and `execute_with_timeout`. The module is fully tested but **is not called by `Scheduler._run_task()` or `BlueprintExecutor`** at runtime. Wiring it in requires per-task timeout configuration that does not yet exist in the blueprint schema. Do not add a global `STARCORE_TASK_TIMEOUT_SECONDS` shortcut — ADR-016 explicitly rejected it as too coarse for mixed workloads (slow Proxmox clone vs. fast container start). Revisit when blueprints gain per-task `timeout_seconds` fields.
+`ResourceSpec` carries `timeout_seconds: float | None = None`. When set, both `BlueprintExecutor` and `Scheduler._run_task()` wrap `provider.execute()` in `execute_with_timeout()` using `TimeoutStrategy.CANCEL`; a task that exceeds its deadline is marked `FAILED`, which propagates to dependents via the `depends_on` success-gate. Omitting `timeout_seconds` (or setting it to `null`) preserves the previous no-timeout behavior exactly. Do not add a global `STARCORE_TASK_TIMEOUT_SECONDS` shortcut — ADR-016 explicitly rejected it as too coarse for mixed workloads (slow Proxmox clone vs. fast container start).
 
 ### Provider concurrency (ADR-013)
 

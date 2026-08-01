@@ -11,6 +11,7 @@ class ResourceSpec(BaseModel):
     kind: str
     config: dict = Field(default_factory=dict)
     depends_on: list[str] = Field(default_factory=list)
+    timeout_seconds: float | None = None
 
 
 class Blueprint(BaseModel):

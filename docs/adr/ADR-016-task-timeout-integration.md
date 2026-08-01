@@ -1,7 +1,8 @@
-# ADR-016 — Task Timeout Integration: Deliberate Deferral
+# ADR-016 — Task Timeout Integration
 
-**Status:** Accepted
+**Status:** Implemented
 **Date:** 2026-07-26
+**Implemented:** 2026-08-01
 **Supersedes:** —
 **Superseded by:** —
 
@@ -15,64 +16,65 @@ PR #100 (sprint-019) introduced `orchestrator/timeout.py`, which exposes:
 - `execute_with_timeout(coro, config)` — async wrapper that applies the configured
   strategy via `asyncio.wait_for`.
 
-Neither `Scheduler._run_task()` (the parallel execution path) nor `BlueprintExecutor`
-(the sequential path) currently calls `execute_with_timeout`. The module is tested
-(12 unit tests, 8 property-based tests) but is dead at runtime.
+ADR-016 (original) deliberately deferred wiring this module into the executors,
+pending a per-task configuration mechanism in the blueprint schema.
 
-## Decision
+## Decision (2026-08-01 — implemented)
 
-Do **not** wire `execute_with_timeout` into `Scheduler._run_task()` or
-`BlueprintExecutor` at this time.
+Add `timeout_seconds: float | None = None` to `ResourceSpec` (blueprint model) and
+`Task` (orchestrator model), then wire `execute_with_timeout` into both execution paths:
 
-Connecting it requires per-task timeout configuration that does not yet exist:
-blueprints carry no `timeout_seconds` field, `Task` has no `timeout` attribute,
-and there is no universal default that would be correct across both a
-"clone a Proxmox template" task (which may legitimately take minutes) and a
-"start a container" task (which should take seconds). Choosing an arbitrary global
-default would silently break workloads that currently succeed; requiring per-task
-configuration in the blueprint schema would be a breaking change.
+- `BlueprintExecutor.execute()` — sequential path
+- `Scheduler._run_task()` — parallel path
 
-The module is retained because its contracts are verified by tests and it will be
-needed once per-task timeouts are introduced.
+When `timeout_seconds` is `None` (the default), `execute_with_timeout` short-circuits
+immediately (`TimeoutConfig.is_enabled()` returns `False`) — no behavioral change for
+existing blueprints. When set, the default strategy is `CANCEL`: the task is cancelled
+and marked `FAILED` if `provider.execute()` does not return within the deadline.
+`TaskTimeoutError` is caught before the broad `except Exception` handler so it produces
+a clean WARNING log instead of a full traceback.
+
+Do **not** add a global `STARCORE_TASK_TIMEOUT_SECONDS` environment variable — this
+ADR explicitly rejected it as too coarse for mixed workloads (slow Proxmox clone vs.
+fast container start). Per-task `timeout_seconds` in the blueprint YAML is the
+correct granularity.
+
+## Blueprint schema
+
+```yaml
+resources:
+  - name: web-vm
+    provider: proxmox
+    kind: vm
+    timeout_seconds: 300   # optional; null / omitted = no timeout
+    config:
+      template: debian-12
+```
+
+## Alternatives Considered (original deferral, 2026-07-26)
+
+1. **Wire a global configurable timeout now** (`STARCORE_TASK_TIMEOUT_SECONDS`) —
+   rejected. A single knob is too coarse.
+
+2. **Delete the module until it is needed** — rejected. The code and tests already
+   existed and were correct.
+
+3. **Add an optional `timeout_seconds` field to `ResourceSpec` now** — deferred
+   until it could be done with a proper ADR and migration story. That point is now.
+
+## Consequences
+
+- Blueprint authors can set `timeout_seconds` per resource; omitting it preserves
+  previous behavior exactly.
+- A timed-out task is marked `FAILED`, which causes any dependent resources to be
+  marked `SKIPPED_DEPENDENCY_FAILED` via the existing `depends_on` success-gate logic.
+- `TimeoutStrategy.WAIT_AND_MARK` and `TimeoutStrategy.IGNORE` remain available via
+  `TimeoutConfig` directly but are not yet exposed in the blueprint schema — `CANCEL`
+  is the only strategy applied at the executor level today. This can be extended with
+  a per-resource `timeout_strategy` field if the need arises.
 
 > **Defect fixed (2026-07-27):** The original implementation re-awaited the coroutine
 > object after `asyncio.wait_for` had already cancelled it, raising
 > `RuntimeError: cannot reuse already awaited coroutine`. The fix wraps the coroutine
 > in `asyncio.create_task` and protects it with `asyncio.shield` so the inner task
-> keeps running after the first deadline fires. Tests were updated from
-> `monkeypatch.setattr(asyncio, "wait_for", ...)` to real async timing, which now
-> exercise the actual coroutine lifecycle. All three strategies (CANCEL, WAIT_AND_MARK,
-> IGNORE) are verified correct.
-
-## Alternatives Considered
-
-1. **Wire a global configurable timeout now** (`STARCORE_TASK_TIMEOUT_SECONDS`) —
-   rejected. A single knob is too coarse: it must be large enough for slow Proxmox
-   operations (which conceals genuinely hung tasks) or small enough to cancel fast
-   operations (which breaks long-running legitimate work).
-
-2. **Delete the module until it is needed** — rejected. The code and tests already
-   exist and are correct. Deleting and re-introducing them later is pure churn with
-   no safety benefit.
-
-3. **Add an optional `timeout_seconds` field to `ResourceSpec` now** — deferred.
-   This is the correct long-term shape but involves a blueprint schema change that
-   warrants its own ADR and a migration story for existing blueprint files.
-
-## Trigger Conditions
-
-Revisit when any of the following occur:
-
-1. A provider operation is observed hanging in production and a per-task deadline
-   would have bounded the damage.
-2. The blueprint schema gains a formal versioning mechanism that makes
-   additive breaking changes safe to deploy.
-3. A third `BaseProvider` implementation is added that has meaningfully different
-   timing characteristics, making a global fallback impossible to justify.
-
-## Consequences
-
-- `execute_with_timeout`, `TimeoutConfig`, and `TaskTimeoutError` remain tested
-  but inactive at runtime until a future ADR closes this gap.
-- Blueprint authors cannot specify per-task timeouts until then.
-- No existing workloads are affected.
+> keeps running after the first deadline fires.

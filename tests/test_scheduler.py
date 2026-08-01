@@ -470,3 +470,51 @@ async def test_scheduler_marks_task_failed_when_connect_returns_false():
     tasks = await Scheduler().execute(graph)
 
     assert tasks[0].status == TaskStatus.FAILED
+
+
+# ---------------------------------------------------------------------------
+# timeout_seconds — scheduler integration
+# ---------------------------------------------------------------------------
+
+
+async def test_scheduler_succeeds_when_task_completes_before_timeout():
+    fake = FakeProvider()
+    registry.register(fake)
+
+    graph = TaskGraph()
+    graph.add_task(
+        Task(id="a", provider="fake", action="create", resource="a", timeout_seconds=10.0)
+    )
+
+    tasks = await Scheduler().execute(graph)
+    assert tasks[0].status == TaskStatus.SUCCESS
+
+
+async def test_scheduler_marks_failed_when_timeout_exceeded():
+    class _SlowProvider(BaseProvider):
+        name = "slow-sched"
+
+        async def connect(self) -> bool:
+            return True
+
+        async def disconnect(self) -> None:
+            return None
+
+        async def health(self) -> dict:
+            return {"status": "ok"}
+
+        async def list_resources(self) -> list[dict]:
+            return []
+
+        async def execute(self, task) -> None:
+            await asyncio.sleep(10)
+
+    registry.register(_SlowProvider())
+
+    graph = TaskGraph()
+    graph.add_task(
+        Task(id="a", provider="slow-sched", action="create", resource="a", timeout_seconds=0.01)
+    )
+
+    tasks = await Scheduler().execute(graph)
+    assert tasks[0].status == TaskStatus.FAILED
