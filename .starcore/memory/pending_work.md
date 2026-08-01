@@ -41,11 +41,9 @@ Tyto položky byly navrženy v předchozím auditu a záměrně odloženy na P2:
 - **Co zbývá:** Ověřit, že correlation ID skutečně prostupuje do provider log lines (nejen HTTP middleware)
 - **Odhad:** 2-4 hodiny
 
-### 2. Snapshot rollback dry-run diff
-- **Popis:** Před `starcore snapshot rollback` vypsat diff (aktuální stav VM vs. stav ve snapshotu)
-- **Entry points:** `apps/cli/main.py` → `snapshot_rollback()`, `_run_snapshot_action()`
-- **Pozor:** Ověřit co Proxmox API skutečně vrací před slibováním diffu
-- **Odhad:** půl dne
+### ~~2. Snapshot rollback dry-run diff~~ — CLOSED (v0.2.0)
+- `_show_rollback_preview()` + `_snapshot_rollback_preview()` implementovány a otestovány (11 testů).
+  `--yes` přeskočí preview. CHANGELOG [0.2.0] → Added.
 
 ### 3. Provider concurrency policy ADR dokument
 - **Stav:** ADR-013 existuje (no semaphore; trigger conditions defined)
