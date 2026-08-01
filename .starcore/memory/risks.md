@@ -120,7 +120,7 @@
 ## DEFERRED (záměrně odloženo)
 
 ### R-004 — Task timeout integrace do Scheduler/BlueprintExecutor
-- **Stav:** DEFERRED
-- **Dokumentace:** ADR-016
-- **Důvod:** Per-task timeout konfigurace neexistuje v blueprint schema; global timeout by byl příliš hrubý pro smíšené workloady (Proxmox clone vs. container start)
-- **Podmínky pro revisit:** Blueprint schema dostane `timeout_seconds` field; nebo production incident způsobený hung taskiem
+- **Stav:** CLOSED
+- **Uzavřeno:** 2026-08-01
+- **Dokumentace:** ADR-016 (status: Implemented)
+- **Oprava:** `ResourceSpec.timeout_seconds: float | None = None` přidán do blueprint schema; drátováno do `BlueprintExecutor` a `Scheduler._run_task()` přes `execute_with_timeout()` s `TimeoutStrategy.CANCEL`; 591 testů, 100% coverage (commit `53ad3dc`, PR #119, v0.3.0)

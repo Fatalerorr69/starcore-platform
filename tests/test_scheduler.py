@@ -10,6 +10,7 @@ import pytest
 from orchestrator.scheduler import Scheduler
 from orchestrator.task import Task, TaskStatus
 from orchestrator.task_graph import TaskGraph
+from orchestrator.timeout import TimeoutStrategy
 from provider_sdk.base import BaseProvider
 from provider_sdk.registry import registry
 
@@ -518,3 +519,48 @@ async def test_scheduler_marks_failed_when_timeout_exceeded():
 
     tasks = await Scheduler().execute(graph)
     assert tasks[0].status == TaskStatus.FAILED
+
+
+# ---------------------------------------------------------------------------
+# timeout_strategy — scheduler integration
+# ---------------------------------------------------------------------------
+
+
+async def test_scheduler_wait_and_mark_succeeds_when_task_completes_in_time():
+    fake = FakeProvider()
+    registry.register(fake)
+
+    graph = TaskGraph()
+    graph.add_task(
+        Task(
+            id="a",
+            provider="fake",
+            action="create",
+            resource="a",
+            timeout_seconds=10.0,
+            timeout_strategy=TimeoutStrategy.WAIT_AND_MARK,
+        )
+    )
+
+    tasks = await Scheduler().execute(graph)
+    assert tasks[0].status == TaskStatus.SUCCESS
+
+
+async def test_scheduler_ignore_strategy_succeeds_when_task_completes_in_time():
+    fake = FakeProvider()
+    registry.register(fake)
+
+    graph = TaskGraph()
+    graph.add_task(
+        Task(
+            id="a",
+            provider="fake",
+            action="create",
+            resource="a",
+            timeout_seconds=10.0,
+            timeout_strategy=TimeoutStrategy.IGNORE,
+        )
+    )
+
+    tasks = await Scheduler().execute(graph)
+    assert tasks[0].status == TaskStatus.SUCCESS

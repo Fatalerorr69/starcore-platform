@@ -2,6 +2,7 @@
 Blueprint Models
 """
 
+from orchestrator.timeout import TimeoutStrategy
 from pydantic import BaseModel, Field
 
 
@@ -12,6 +13,7 @@ class ResourceSpec(BaseModel):
     config: dict = Field(default_factory=dict)
     depends_on: list[str] = Field(default_factory=list)
     timeout_seconds: float | None = None
+    timeout_strategy: TimeoutStrategy | None = None
 
 
 class Blueprint(BaseModel):

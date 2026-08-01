@@ -8,6 +8,8 @@ from dataclasses import dataclass, field
 from enum import StrEnum
 from typing import Any
 
+from .timeout import TimeoutStrategy
+
 
 class TaskStatus(StrEnum):
     PENDING = "pending"
@@ -32,3 +34,4 @@ class Task:
     result: dict[str, Any] = field(default_factory=dict)
     kind: str = ""
     timeout_seconds: float | None = None
+    timeout_strategy: TimeoutStrategy | None = None

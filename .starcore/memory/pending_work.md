@@ -1,7 +1,7 @@
 # Pending Work — STARCORE Platform
 
 > Zbývající práce seřazená podle priority. Aktualizovat při každé změně scope.
-> **Poslední aktualizace:** 2026-07-27 (po Phase 10 — Startup Protocol)
+> **Poslední aktualizace:** 2026-08-01 (po v0.3.0 — timeout_strategy implementace)
 
 ---
 
@@ -67,6 +67,11 @@ Tyto položky byly navrženy v předchozím auditu a záměrně odloženy na P2:
 - `timeout_seconds: float | None` přidán do `ResourceSpec` a `Task`
 - Wired do `BlueprintExecutor` i `Scheduler._run_task()` — commit `53ad3dc`
 - 591 testů, 100% coverage
+
+### Per-task timeout_strategy (ADR-016 rozšíření) — IN PROGRESS
+- `timeout_strategy: TimeoutStrategy | None` přidat do `ResourceSpec` a `Task`
+- Aktuálně hardcoded `CANCEL`; umožnit `wait_and_mark` / `ignore` per resource
+- Odhad: ~8 nových testů
 
 ---
 

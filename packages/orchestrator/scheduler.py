@@ -24,7 +24,7 @@ from provider_sdk.registry import register_default_providers, registry
 
 from .task import Task, TaskStatus
 from .task_graph import TaskGraph
-from .timeout import TaskTimeoutError, TimeoutConfig, execute_with_timeout
+from .timeout import TaskTimeoutError, TimeoutConfig, TimeoutStrategy, execute_with_timeout
 
 
 class Scheduler:
@@ -120,7 +120,10 @@ class Scheduler:
                 await self._emit_task_completed(task)
                 return
             used_providers.add(task.provider)
-            timeout_config = TimeoutConfig(timeout_seconds=task.timeout_seconds)
+            timeout_config = TimeoutConfig(
+                timeout_seconds=task.timeout_seconds,
+                strategy=task.timeout_strategy or TimeoutStrategy.CANCEL,
+            )
             await execute_with_timeout(
                 provider.execute(task), timeout_config, task.id, task.resource
             )

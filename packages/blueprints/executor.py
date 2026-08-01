@@ -14,7 +14,12 @@ import uuid
 from core.events import event_bus
 from loguru import logger
 from orchestrator.task import Task, TaskStatus
-from orchestrator.timeout import TaskTimeoutError, TimeoutConfig, execute_with_timeout
+from orchestrator.timeout import (
+    TaskTimeoutError,
+    TimeoutConfig,
+    TimeoutStrategy,
+    execute_with_timeout,
+)
 from provider_sdk.registry import register_default_providers, registry
 
 from .models import Blueprint
@@ -42,6 +47,7 @@ class BlueprintExecutor:
                 kind=step["kind"],
                 depends_on=list(step.get("depends_on", [])),
                 timeout_seconds=step.get("timeout_seconds"),
+                timeout_strategy=step.get("timeout_strategy"),
             )
             tasks.append(task)
 
@@ -90,7 +96,10 @@ class BlueprintExecutor:
                     continue
 
                 used_providers.add(step["provider"])
-                timeout_config = TimeoutConfig(timeout_seconds=task.timeout_seconds)
+                timeout_config = TimeoutConfig(
+                    timeout_seconds=task.timeout_seconds,
+                    strategy=task.timeout_strategy or TimeoutStrategy.CANCEL,
+                )
                 await execute_with_timeout(
                     provider.execute(task), timeout_config, task.id, task.resource
                 )

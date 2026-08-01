@@ -66,6 +66,7 @@ class ExecutionPlanner:
                 "config": resource.config,
                 "depends_on": list(resource.depends_on),
                 "timeout_seconds": resource.timeout_seconds,
+                "timeout_strategy": resource.timeout_strategy,
             }
             for resource in ordered_resources
         ]
@@ -102,6 +103,7 @@ class ExecutionPlanner:
                 depends_on=list(resource.depends_on),
                 kind=resource.kind,
                 timeout_seconds=resource.timeout_seconds,
+                timeout_strategy=resource.timeout_strategy,
             )
             graph.add_task(task)
         return graph

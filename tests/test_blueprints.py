@@ -13,6 +13,7 @@ from blueprints.loader import BlueprintLoader
 from blueprints.models import Blueprint, ResourceSpec
 from blueprints.planner import ExecutionPlanner
 from orchestrator.task import TaskStatus
+from orchestrator.timeout import TimeoutStrategy
 from provider_sdk.base import BaseProvider
 from provider_sdk.registry import registry
 
@@ -482,3 +483,116 @@ async def test_executor_emits_run_completed_event():
 
     assert len(received) == 1
     assert received[0]["blueprint_name"] == "event-test"
+
+
+# ---------------------------------------------------------------------------
+# timeout_strategy — schema, planner, executor
+# ---------------------------------------------------------------------------
+
+
+def test_resource_spec_stores_timeout_strategy():
+    spec = ResourceSpec(
+        name="r",
+        provider="p",
+        kind="k",
+        timeout_seconds=10,
+        timeout_strategy=TimeoutStrategy.WAIT_AND_MARK,
+    )
+    assert spec.timeout_strategy == TimeoutStrategy.WAIT_AND_MARK
+
+
+def test_resource_spec_timeout_strategy_defaults_to_none():
+    spec = ResourceSpec(name="r", provider="p", kind="k")
+    assert spec.timeout_strategy is None
+
+
+def test_resource_spec_timeout_strategy_accepts_string_value():
+    # Pydantic coerces "ignore" → TimeoutStrategy.IGNORE at validation time
+    # (as YAML loading would produce); model_validate is the typed API for this.
+    spec = ResourceSpec.model_validate(
+        {"name": "r", "provider": "p", "kind": "k", "timeout_strategy": "ignore"}
+    )
+    assert spec.timeout_strategy == TimeoutStrategy.IGNORE
+
+
+def test_planner_create_plan_carries_timeout_strategy():
+    blueprint = Blueprint(
+        name="t",
+        resources=[
+            ResourceSpec(
+                name="r",
+                provider="p",
+                kind="k",
+                timeout_seconds=30,
+                timeout_strategy=TimeoutStrategy.WAIT_AND_MARK,
+            )
+        ],
+    )
+    step = ExecutionPlanner().create_plan(blueprint)[0]
+    assert step["timeout_strategy"] == TimeoutStrategy.WAIT_AND_MARK
+
+
+def test_planner_create_plan_carries_none_timeout_strategy():
+    blueprint = Blueprint(
+        name="t",
+        resources=[ResourceSpec(name="r", provider="p", kind="k")],
+    )
+    step = ExecutionPlanner().create_plan(blueprint)[0]
+    assert step["timeout_strategy"] is None
+
+
+def test_planner_create_graph_carries_timeout_strategy():
+    blueprint = Blueprint(
+        name="t",
+        resources=[
+            ResourceSpec(
+                name="r",
+                provider="p",
+                kind="k",
+                timeout_seconds=20,
+                timeout_strategy=TimeoutStrategy.IGNORE,
+            )
+        ],
+    )
+    tasks = list(ExecutionPlanner().create_graph(blueprint).all())
+    assert tasks[0].timeout_strategy == TimeoutStrategy.IGNORE
+
+
+async def test_executor_wait_and_mark_succeeds_when_task_completes_in_time():
+    fake = FakeProvider(connect_result=True)
+    registry.register(fake)
+
+    blueprint = Blueprint(
+        name="wait-and-mark-ok",
+        resources=[
+            ResourceSpec(
+                name="r",
+                provider="fake",
+                kind="k",
+                timeout_seconds=10.0,
+                timeout_strategy=TimeoutStrategy.WAIT_AND_MARK,
+            )
+        ],
+    )
+    tasks = await BlueprintExecutor().execute(blueprint)
+    assert tasks[0].status == TaskStatus.SUCCESS
+
+
+async def test_executor_ignore_strategy_succeeds_when_task_completes_in_time():
+    fake = FakeProvider(connect_result=True)
+    registry.register(fake)
+
+    blueprint = Blueprint(
+        name="ignore-ok",
+        resources=[
+            ResourceSpec(
+                name="r",
+                provider="fake",
+                kind="k",
+                timeout_seconds=10.0,
+                timeout_strategy=TimeoutStrategy.IGNORE,
+            )
+        ],
+    )
+    tasks = await BlueprintExecutor().execute(blueprint)
+    assert tasks[0].status == TaskStatus.SUCCESS
