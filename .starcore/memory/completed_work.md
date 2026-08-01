@@ -5,6 +5,27 @@
 
 ---
 
+## Sezení: starcore-autonomous-engineering-4p3tlj (pokračování, 2026-08-01, timeout_seconds)
+
+### Per-task timeout_seconds — implementace ADR-016
+
+**Cíl:** Drátovat existující `execute_with_timeout()` přes blueprint schema.
+
+**Výsledek:** COMPLETED — 591 testů, 100% coverage (commit `53ad3dc`)
+
+#### Změny
+
+- `packages/blueprints/models.py`: `ResourceSpec` + `timeout_seconds: float | None = None`
+- `packages/orchestrator/task.py`: `Task` + `timeout_seconds: float | None = None`
+- `packages/blueprints/planner.py`: `create_plan()` a `create_graph()` přenáší pole
+- `packages/blueprints/executor.py`: `execute_with_timeout()` + `except TaskTimeoutError` → FAILED
+- `packages/orchestrator/scheduler.py`: totéž na paralelní cestě
+- `docs/adr/ADR-016-...md`: Status Accepted → Implemented
+- `CLAUDE.md`: "Notable deferral" odstraněno, aktualizovaný popis
+- 9 nových testů (schema, planner, executor ok/timeout, scheduler ok/timeout)
+
+---
+
 ## Sezení: starcore-autonomous-engineering-4p3tlj (pokračování, 2026-08-01, correlation ID)
 
 ### P2 #1 — Correlation ID propagation verification

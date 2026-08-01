@@ -49,10 +49,7 @@ Tyto položky byly navrženy v předchozím auditu a záměrně odloženy na P2:
 - **Stav:** ADR-013 existuje (no semaphore; trigger conditions defined)
 - **Co zbývá:** Nic urgentního — revisit při přidání třetího providera
 
-### 4. README "What's Planned, Not Built Yet" sekce
-- **Stav:** Každý řádek má status `Done` — sekce zavádí
-- **Oprava:** Přejmenovat nebo sloučit s "What Works Today"
-- **Odhad:** 15 minut
+### ~~4. README "What's Planned, Not Built Yet" sekce~~ — CLOSED (sekce v README neexistuje)
 
 ### 5. docker compose config eager interpolation wrinkle
 - **Závažnost:** COSMETIC; neovlivňuje real usage
@@ -66,9 +63,10 @@ Tyto položky byly navrženy v předchozím auditu a záměrně odloženy na P2:
 - ADR-013 zaznamenalo potenciální potřebu per-provider semaphore pro Proxmox API rate limits
 - **Trigger:** Přidání třetího BaseProvider implementace nebo pozorovaný throttling v produkci
 
-### Per-task timeouts (ADR-016)
-- `execute_with_timeout()` existuje a je otestováno
-- **Trigger:** Blueprint schema získá `timeout_seconds` field; nebo hung task incident v produkci
+### ~~Per-task timeouts (ADR-016)~~ — CLOSED (2026-08-01)
+- `timeout_seconds: float | None` přidán do `ResourceSpec` a `Task`
+- Wired do `BlueprintExecutor` i `Scheduler._run_task()` — commit `53ad3dc`
+- 591 testů, 100% coverage
 
 ---
 
