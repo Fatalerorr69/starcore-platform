@@ -4,11 +4,15 @@ Request Correlation ID Tests
 
 from __future__ import annotations
 
+import asyncio
 import re
+from unittest.mock import patch
 
 from core.main import _REQUEST_ID_PATTERN, _resolve_request_id, app
 from fastapi.testclient import TestClient
 from loguru import logger
+from provider_sdk.base import BaseProvider
+from provider_sdk.registry import registry
 
 client = TestClient(app)
 client.headers.update({"X-API-Key": "test-api-key"})
@@ -120,3 +124,89 @@ def test_request_id_reverts_to_default_outside_request_context():
         logger.remove(sink_id)
 
     assert captured[-1]["extra"]["request_id"] == "-"
+
+
+# ---------------------------------------------------------------------------
+# Context propagation through asyncio.to_thread
+# ---------------------------------------------------------------------------
+
+
+async def test_loguru_context_propagates_through_asyncio_to_thread():
+    """loguru.contextualize() binds via contextvars, which asyncio.to_thread()
+    copies into the spawned thread (Python 3.10+). Verify the propagation in
+    isolation, with no HTTP layer involved."""
+    captured: list = []
+    sink_id = logger.add(lambda message: captured.append(message.record), level="INFO")
+    try:
+        with logger.contextualize(request_id="thread-ctx-42"):
+            await asyncio.to_thread(lambda: logger.info("message from thread"))
+    finally:
+        logger.remove(sink_id)
+
+    assert len(captured) == 1
+    assert captured[0]["extra"]["request_id"] == "thread-ctx-42"
+
+
+def test_request_id_propagates_to_provider_execute_log():
+    """End-to-end: X-Request-ID from the HTTP layer must reach logger.info()
+    calls inside provider.execute(), both in the async coroutine and in any
+    asyncio.to_thread() call the provider makes."""
+
+    class _LoggingProvider(BaseProvider):
+        name = "logging-test-provider"
+
+        async def connect(self) -> bool:
+            return True
+
+        async def disconnect(self) -> None:
+            return None
+
+        async def health(self) -> dict:
+            return {"status": "ok"}
+
+        async def list_resources(self) -> list:
+            return []
+
+        async def execute(self, task) -> None:
+            logger.info("[LoggingProvider] async-execute")
+            await asyncio.to_thread(lambda: logger.info("[LoggingProvider] thread-execute"))
+
+    captured: list = []
+    sink_id = logger.add(lambda message: captured.append(message.record), level="INFO")
+
+    saved = dict(registry._providers)
+    registry._providers["logging-test-provider"] = _LoggingProvider()
+    try:
+        payload = {
+            "name": "corr-id-provider-test",
+            "version": "1.0",
+            "resources": [
+                {
+                    "name": "thing",
+                    "provider": "logging-test-provider",
+                    "kind": "svc",
+                    "config": {},
+                }
+            ],
+        }
+        with patch("blueprints.executor.register_default_providers"):
+            response = client.post(
+                "/blueprints/run",
+                json=payload,
+                headers={"X-Request-ID": "provider-trace-id"},
+            )
+        assert response.status_code == 200
+    finally:
+        logger.remove(sink_id)
+        registry._providers.clear()
+        registry._providers.update(saved)
+
+    provider_logs = [r for r in captured if "[LoggingProvider]" in r["message"]]
+    assert len(provider_logs) == 2, (
+        f"expected 2 provider log records, got {len(provider_logs)}: "
+        f"{[r['message'] for r in captured]}"
+    )
+    for record in provider_logs:
+        assert record["extra"]["request_id"] == "provider-trace-id", (
+            f"expected 'provider-trace-id', got {record['extra']['request_id']!r}"
+        )
