@@ -1,7 +1,41 @@
 # Completed Work — STARCORE Platform
 
 > Chronologický záznam dokončené práce po sezeních.
-> **Poslední aktualizace:** 2026-07-27
+> **Poslední aktualizace:** 2026-08-01
+
+---
+
+## Sezení: starcore-autonomous-engineering-4p3tlj (pokračování, 2026-08-01)
+
+### Release v0.2.0 — kompletní vydání
+
+**Cíl:** Uzavřít R-007/R-008/R-010, mergovat PR #111, vytvořit tag v0.2.0, vydat GitHub Release.
+
+**Výsledek:** COMPLETED — GitHub Release "STARCORE Platform v0.2.0" vydán 2026-08-01T16:07:45Z
+
+#### Dokončeno
+
+- **R-016** (STARCORE_POSTGRES_PASSWORD docs): commit `74fcc71`
+- **R-010** (SBOM + cosign): commit `71f81c8` — `anchore/sbom-action@v0.24.0` + `cosign sign` + `cosign attest` v `docker-publish.yml`
+- **R-007** (smazán jekyll-gh-pages.yml): commit `0f05bc7`
+- **R-008** (Dependabot auto-merge omezeno na pip): commit `0f05bc7`
+- **README** test count update: 567 → 580
+- **PR #111** mergenut do main (commit `59924f2`)
+- **Version bump** 0.1.0 → 0.2.0 + CHANGELOG [0.2.0] sekce: commit `2dd6fc8`
+- **Tag v0.2.0** vytvořen via `manual-tag.yml` (workflow run `30707097263`)
+- **release.yml** upraven — přidán `workflow_dispatch` trigger + `RELEASE_TAG` env var + `uv lock --no-upgrade`: commit `784f3b3` (main)
+- **GitHub Release** vytvořen via release.yml workflow_dispatch (run `30707384660`, conclusion: success, 1m 41s)
+
+#### Stav projektu po vydání
+
+| Metrika | Hodnota |
+|---------|---------|
+| Verze | 0.2.0 |
+| Tests | 580/580, 100% coverage |
+| Všechna rizika | CLOSED (R-001..R-018) |
+| GitHub Release | v0.2.0 — published |
+| main HEAD | `784f3b3` |
+| Feature branch | `d3d5759` (rebased on main) |
 
 ---
 
