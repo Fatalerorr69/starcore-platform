@@ -7,6 +7,15 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- **Per-task `timeout_strategy` field (ADR-016)**: `ResourceSpec` and `Task` now carry an
+  optional `timeout_strategy: TimeoutStrategy | None` field alongside `timeout_seconds`.
+  Both `BlueprintExecutor` and `Scheduler._run_task()` feed the strategy into `TimeoutConfig`;
+  default remains `TimeoutStrategy.CANCEL` (backwards-compatible).
+  Supported values: `cancel` (cancels on timeout), `wait_and_mark` (lets task finish, marks
+  `FAILED`), `ignore` (lets task finish, result is `SUCCESS`).
+
 ## [0.3.0] — 2026-08-01
 
 Per-task timeout support: blueprint authors can now set a deadline on individual resources.

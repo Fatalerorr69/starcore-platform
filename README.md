@@ -44,7 +44,7 @@ This README reflects the **actual current state of the codebase**, not the long-
 | Proxmox Environment Discovery | Done | 'starcore proxmox discover' and GET /proxmox/discover catalog node capacity, storage, available VM/LXC templates, and network bridges, used to tailor deployments before they run |
 | AI Blueprint Generation | Done (requires API key/endpoint) | 'starcore ai generate "<description>"' and POST /ai/generate-blueprint translate natural language into a validated blueprint YAML via a pluggable provider: Anthropic (STARCORE_ANTHROPIC_API_KEY) or any OpenAI-compatible /v1/chat/completions server — Ollama, LM Studio, vLLM, LocalAI, OpenAI itself (STARCORE_AI_PROVIDER=openai-compatible, STARCORE_AI_BASE_URL, STARCORE_AI_MODEL) |
 | Request Correlation | Done | Every HTTP response carries X-Request-ID (caller-supplied or generated); bound to every log line emitted while handling that request |
-| Tests | 591 passing | ruff, pyright, pytest (100% coverage floor, incl. Hypothesis property tests), pre-commit, CI on every PR |
+| Tests | 601 passing | ruff, pyright, pytest (100% coverage floor, incl. Hypothesis property tests), pre-commit, CI on every PR |
 
 ## Production Limitations
 
