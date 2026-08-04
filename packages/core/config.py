@@ -56,6 +56,12 @@ class Settings(BaseSettings):
     # acceptable.
     rate_limit_per_minute: int = 60
 
+    # OpenTelemetry OTLP/HTTP endpoint. When set, the OTel SDK is activated
+    # and spans are exported to this collector (Jaeger, Grafana Tempo,
+    # Honeycomb, etc.). When unset (the default), the no-op tracer is used
+    # with zero overhead. See core/tracing.py.
+    otlp_endpoint: str | None = None
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_prefix="STARCORE_",

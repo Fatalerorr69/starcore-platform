@@ -25,6 +25,7 @@ from core.config import get_settings
 from core.diagnostics import check_database_connectivity
 from core.metrics import HTTP_REQUEST_DURATION_SECONDS, HTTP_REQUESTS_TOTAL
 from core.routers import ai, blueprints, diagnostics, providers, runs
+from core.tracing import configure_tracing
 
 app = FastAPI(
     title="STARCORE Platform",
@@ -77,6 +78,8 @@ def _handle_rate_limit_exceeded(request: Request, exc: Exception) -> Response:
     assert isinstance(exc, RateLimitExceeded)
     return _rate_limit_exceeded_handler(request, exc)
 
+
+configure_tracing(get_settings().otlp_endpoint)
 
 _rate_limit_settings = get_settings()
 _default_limits, _rate_limit_enabled = _build_rate_limit_config(

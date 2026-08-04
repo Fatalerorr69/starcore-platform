@@ -19,6 +19,7 @@ from __future__ import annotations
 import asyncio
 
 from core.events import event_bus
+from core.tracing import get_tracer
 from loguru import logger
 from provider_sdk.registry import register_default_providers, registry
 
@@ -36,6 +37,9 @@ class Scheduler:
         completed: set[str] = set()
         dispatched: set[str] = set()
         used_providers: set[str] = set()
+
+        with get_tracer().start_as_current_span("blueprint.execute") as span:
+            span.set_attribute("blueprint.task_count", len(all_tasks))
 
         while len(completed) < len(all_tasks):
             ready = [
@@ -124,9 +128,12 @@ class Scheduler:
                 timeout_seconds=task.timeout_seconds,
                 strategy=task.timeout_strategy or TimeoutStrategy.CANCEL,
             )
-            await execute_with_timeout(
-                provider.execute(task), timeout_config, task.id, task.resource
-            )
+            with get_tracer().start_as_current_span("task.run") as tspan:
+                tspan.set_attribute("task.resource", task.resource)
+                tspan.set_attribute("task.provider", task.provider)
+                await execute_with_timeout(
+                    provider.execute(task), timeout_config, task.id, task.resource
+                )
             task.status = TaskStatus.SUCCESS
         except TaskTimeoutError as exc:
             logger.warning(

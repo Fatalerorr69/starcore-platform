@@ -9,6 +9,7 @@ with the database run_id is emitted after execution completes.
 from __future__ import annotations
 
 import json
+from collections.abc import Generator
 from typing import Any
 from unittest.mock import patch
 
@@ -45,7 +46,7 @@ class _FakeProvider(BaseProvider):
 
 
 @pytest.fixture
-def fake_provider() -> _FakeProvider:
+def fake_provider() -> Generator[_FakeProvider, None, None]:
     p = _FakeProvider()
     registry.register(p)
     yield p

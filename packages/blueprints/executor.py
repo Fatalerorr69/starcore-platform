@@ -12,6 +12,7 @@ from __future__ import annotations
 import uuid
 
 from core.events import event_bus
+from core.tracing import get_tracer
 from loguru import logger
 from orchestrator.task import Task, TaskStatus
 from orchestrator.timeout import (
@@ -35,13 +36,16 @@ class BlueprintExecutor:
         used_providers: set[str] = set()
         status_by_resource: dict[str, TaskStatus] = {}
 
-        for step in plan:
-            task = self._build_task(step)
-            tasks.append(task)
-            await event_bus.emit(
-                "task.started", {"resource": task.resource, "provider": task.provider}
-            )
-            await self._dispatch_task(task, step, used_providers, status_by_resource)
+        with get_tracer().start_as_current_span("blueprint.execute") as span:
+            span.set_attribute("blueprint.name", blueprint.name)
+            span.set_attribute("blueprint.version", blueprint.version)
+            for step in plan:
+                task = self._build_task(step)
+                tasks.append(task)
+                await event_bus.emit(
+                    "task.started", {"resource": task.resource, "provider": task.provider}
+                )
+                await self._dispatch_task(task, step, used_providers, status_by_resource)
 
         await self._finalize_run(tasks, used_providers, blueprint)
         return tasks
@@ -111,9 +115,12 @@ class BlueprintExecutor:
                 timeout_seconds=task.timeout_seconds,
                 strategy=task.timeout_strategy or TimeoutStrategy.CANCEL,
             )
-            await execute_with_timeout(
-                provider.execute(task), timeout_config, task.id, task.resource
-            )
+            with get_tracer().start_as_current_span("task.dispatch") as tspan:
+                tspan.set_attribute("task.resource", task.resource)
+                tspan.set_attribute("task.provider", task.provider)
+                await execute_with_timeout(
+                    provider.execute(task), timeout_config, task.id, task.resource
+                )
             task.status = TaskStatus.SUCCESS
         except TaskTimeoutError as exc:
             logger.warning(
