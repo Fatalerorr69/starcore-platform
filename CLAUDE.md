@@ -388,3 +388,16 @@ uv run python .starcore/scripts/tests/test_qc_engines.py   # 68 tests
 
 Full protocol: `.starcore/memory/qc_engines.md`
 ```
+
+## Communication Preferences
+
+When presenting options, next steps, or decisions, always include a **recommended answer pre-filled directly in the chat**. Format it as:
+
+> **Doporučená odpověď:** `<konkrétní příkaz nebo volba>`
+
+This applies to:
+- Decision Engine option menus (pre-select the recommended varianta)
+- Next-step proposals (state the recommended step first, with the command ready to copy)
+- Confirmation prompts before safety-gated actions (state what will be executed)
+
+The user can confirm with "ano" / "yes" or override by specifying a different option. Never wait silently for a choice without first offering a recommendation.
