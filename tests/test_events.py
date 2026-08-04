@@ -47,3 +47,30 @@ async def test_subscribers_only_called_for_matching_event():
 
     assert a_calls == ["payload"]
     assert b_calls == []
+
+
+async def test_unsubscribe_stops_future_calls():
+    bus = EventBus()
+    received = []
+    bus.subscribe("e", received.append)
+    await bus.emit("e", 1)
+    bus.unsubscribe("e", received.append)
+    await bus.emit("e", 2)
+    assert received == [1]
+
+
+async def test_unsubscribe_nonexistent_callback_is_safe():
+    bus = EventBus()
+    bus.unsubscribe("e", lambda x: x)  # must not raise
+
+
+async def test_unsubscribe_does_not_affect_other_subscribers():
+    bus = EventBus()
+    a_calls: list[int] = []
+    b_calls: list[int] = []
+    bus.subscribe("e", a_calls.append)
+    bus.subscribe("e", b_calls.append)
+    bus.unsubscribe("e", a_calls.append)
+    await bus.emit("e", 99)
+    assert a_calls == []
+    assert b_calls == [99]

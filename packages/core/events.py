@@ -17,6 +17,12 @@ class EventBus:
     def subscribe(self, event: str, callback: Callable) -> None:
         self._subscribers[event].append(callback)
 
+    def unsubscribe(self, event: str, callback: Callable) -> None:
+        try:
+            self._subscribers[event].remove(callback)
+        except ValueError:
+            pass
+
     async def emit(self, event: str, payload: Any = None) -> None:
         for callback in list(self._subscribers[event]):
             result = callback(payload)
