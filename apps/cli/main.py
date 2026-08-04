@@ -7,7 +7,7 @@ import core.logger  # noqa: F401 -- side effect: configures the process-wide log
 import typer
 from ai.generator import BlueprintGenerationError, generate_blueprint_yaml
 from blueprints.executor import BlueprintExecutor
-from blueprints.loader import BlueprintLoader
+from blueprints.loader import BlueprintLoader, BlueprintRenderError
 from blueprints.planner import ExecutionPlanner
 from core.database import get_session
 from core.diagnostics import check_database_connectivity, run_diagnostics
@@ -227,10 +227,38 @@ def audit(
                 console.print(f"  {line}")
 
 
+def _parse_vars(var: list[str]) -> dict[str, object]:
+    """Parse KEY=VALUE strings from --var options into a dict."""
+    result: dict[str, object] = {}
+    for v in var:
+        if "=" not in v:
+            raise typer.BadParameter(f"--var must be KEY=VALUE, got: {v!r}")
+        key, raw_val = v.split("=", 1)
+        for convert in (int, float):
+            try:
+                result[key] = convert(raw_val)
+                break
+            except ValueError:
+                pass
+        else:
+            lower = raw_val.lower()
+            result[key] = False if lower == "false" else (True if lower == "true" else raw_val)
+    return result
+
+
 @blueprint_app.command("plan")
-def blueprint_plan(path: Path = typer.Argument(..., help="Path to a blueprint YAML file.")):
+def blueprint_plan(
+    path: Path = typer.Argument(..., help="Path to a blueprint YAML file."),
+    var: list[str] = typer.Option(
+        [], "--var", help="Override a blueprint variable (KEY=VALUE). Repeatable."
+    ),
+):
     """Show the execution plan for a blueprint without running it."""
-    blueprint = BlueprintLoader.load(path)
+    try:
+        blueprint = BlueprintLoader.load(path, vars=_parse_vars(var))
+    except BlueprintRenderError as exc:
+        console.print(f"[red]Blueprint render error:[/red] {exc}")
+        raise typer.Exit(1) from exc
     plan = ExecutionPlanner().create_plan(blueprint)
 
     table = Table(title=f"Plan for '{blueprint.name}' (v{blueprint.version})")
@@ -252,9 +280,16 @@ def blueprint_run(
         "--parallel",
         help="Execute independent resources concurrently via the dependency-aware Scheduler.",
     ),
+    var: list[str] = typer.Option(
+        [], "--var", help="Override a blueprint variable (KEY=VALUE). Repeatable."
+    ),
 ):
     """Execute a blueprint against its configured providers."""
-    blueprint = BlueprintLoader.load(path)
+    try:
+        blueprint = BlueprintLoader.load(path, vars=_parse_vars(var))
+    except BlueprintRenderError as exc:
+        console.print(f"[red]Blueprint render error:[/red] {exc}")
+        raise typer.Exit(1) from exc
 
     if parallel:
         graph = ExecutionPlanner().create_graph(blueprint)
