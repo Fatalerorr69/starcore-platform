@@ -29,6 +29,9 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+postgres = [
+    "psycopg2-binary>=2.9.10",
+]
 dev = [
     "pytest>=8.4.1",
     "pytest-cov>=6.2.1",
@@ -39,6 +42,7 @@ dev = [
     "mkdocs-material>=9.6.15,<10.0.0",
     "pip-audit>=2.10.1",
     "hypothesis>=6.135.0",
+    "psycopg2-binary>=2.9.10",
 ]
 
 [project.scripts]

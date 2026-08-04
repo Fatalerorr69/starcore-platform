@@ -59,6 +59,51 @@ jobs:
       - name: Documentation build (mkdocs --strict)
         run: uv run mkdocs build --strict
 
+  postgres-smoke:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: starcore_test
+          POSTGRES_USER: starcore
+          POSTGRES_PASSWORD: starcore_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7
+        with:
+          version: "latest"
+
+      - name: Set up Python
+        run: uv python install 3.12
+
+      - name: Install dependencies (including psycopg2-binary)
+        run: uv sync --extra dev
+
+      - name: Alembic migration check (PostgreSQL dialect)
+        env:
+          STARCORE_DATABASE_URL: postgresql://starcore:starcore_test@localhost:5432/starcore_test
+        run: |
+          uv run alembic upgrade head
+          uv run alembic check
+
+      - name: PostgreSQL smoke tests
+        env:
+          STARCORE_TEST_POSTGRES_URL: postgresql://starcore:starcore_test@localhost:5432/starcore_test
+          STARCORE_API_KEY: smoke-test-key
+        run: uv run pytest tests/postgres/ -v
+
   docker-build:
     runs-on: ubuntu-latest
     steps:
