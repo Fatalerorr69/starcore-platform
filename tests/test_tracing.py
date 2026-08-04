@@ -13,7 +13,13 @@ from __future__ import annotations
 
 import opentelemetry.trace as _trace_api
 import pytest
-from core.tracing import _TRACER_NAME, configure_tracing, get_tracer
+from core.tracing import (
+    _SERVICE_NAME,
+    _SERVICE_VERSION,
+    _TRACER_NAME,
+    configure_tracing,
+    get_tracer,
+)
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import SimpleSpanProcessor
 from opentelemetry.sdk.trace.export.in_memory_span_exporter import InMemorySpanExporter
@@ -65,8 +71,8 @@ def test_configure_tracing_creates_resource_attributes():
     provider = _trace_api._TRACER_PROVIDER
     assert isinstance(provider, TracerProvider)
     attrs = provider.resource.attributes
-    assert attrs.get("service.name") == "starcore-platform"
-    assert attrs.get("service.version") == "0.4.0"
+    assert attrs.get("service.name") == _SERVICE_NAME
+    assert attrs.get("service.version") == _SERVICE_VERSION
 
 
 def test_get_tracer_returns_tracer():

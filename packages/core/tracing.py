@@ -26,7 +26,7 @@ from opentelemetry.sdk.trace.export import BatchSpanProcessor
 
 _TRACER_NAME = "starcore"
 _SERVICE_NAME = "starcore-platform"
-_SERVICE_VERSION = "0.4.0"
+_SERVICE_VERSION = "0.5.0"
 
 
 def configure_tracing(endpoint: str | None) -> None:

@@ -7,6 +7,42 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.5.0] — 2026-08-04
+
+### Added
+
+- **Blueprint parametrization (REC-006)**: `Blueprint` model carries a `vars:` map;
+  `BlueprintLoader` renders the YAML through a Jinja2 `SandboxedEnvironment` with
+  `StrictUndefined` before loading — undefined variables raise `BlueprintRenderError`.
+  `starcore blueprint plan/run` accept repeatable `--var KEY=VALUE` flags; values are
+  auto-coerced to `int`, `float`, or `bool` where unambiguous.
+
+- **SSE streaming endpoint (REC-004)**: `POST /blueprints/run/stream` streams Server-Sent
+  Events in real time: `task.started`, `task.completed`, `run.completed`, and a final
+  `run.persisted` event carrying the database `run_id`. Client disconnect cancels the
+  in-flight execution task via `asyncio.Task.cancel()`. `EventBus` gains an `unsubscribe()`
+  method for per-request handler cleanup.
+
+- **OpenTelemetry distributed tracing (REC-005)**: `packages/core/tracing.py` provides
+  `configure_tracing(endpoint)` (no-op when unset, zero overhead) and `get_tracer()`.
+  `STARCORE_OTLP_ENDPOINT` activates a `BatchSpanProcessor` + OTLP/HTTP exporter targeting
+  any OTel-compatible collector (Jaeger, Grafana Tempo, Honeycomb, etc.). Span instrumentation
+  added to `BlueprintExecutor` (`blueprint.execute`, `task.dispatch`) and `Scheduler`
+  (`blueprint.execute`, `task.run`).
+
+- **PostgreSQL CI smoke tests (REC-003)**: `postgres-smoke` job in `ci.yml` spins up
+  `postgres:16`, runs Alembic migrations against it, and executes a dedicated
+  `tests/postgres/` suite verifying schema compatibility, run persistence, and multi-run
+  queries under the PostgreSQL dialect.
+
+### Changed
+
+- **BlueprintExecutor refactor (REC-007)**: `execute()` reduced from ~110 lines to ~20 by
+  extracting `_build_task()`, `_dispatch_task()`, `_finalize_run()`, and `_emit_task_completed()`
+  helpers. No behaviour change; all 685 tests pass.
+
+- Test suite: 685 tests (↑ from 601), 100% coverage maintained.
+
 ## [0.4.0] — 2026-08-01
 
 Per-task timeout strategy: blueprint authors can now control what happens when a resource hits its deadline.
