@@ -7,6 +7,16 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed
+
+- **Root-level release workflows**: promoted `release.yml` (publishes GitHub Releases on
+  `v*` tag push or `workflow_dispatch`) and `manual-tag.yml` (creates and pushes a tag from
+  the Actions UI) from `platform/.github/workflows/` to `.github/workflows/` so GitHub
+  Actions can discover and run them. `release.yml` gains `defaults: run: working-directory:
+  platform` to match `ci.yml`. Also fixed the changelog gate in `ci.yml` to skip the
+  `[Unreleased]` check on release PRs/commits (title or message starts with
+  `chore: release`).
+
 ## [0.6.0] — 2026-08-05
 
 ### Added
