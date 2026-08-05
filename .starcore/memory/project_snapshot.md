@@ -1,7 +1,7 @@
 # Project Snapshot — STARCORE Platform
 
 > Kanonická referenční karta pro cold-start. Aktualizovat při každé strukturální změně.
-> **Poslední aktualizace:** 2026-08-04 (sezení: starcore-autonomous-engineering-4p3tlj)
+> **Poslední aktualizace:** 2026-08-05 (sezení: starcore-autonomous-engineering-4p3tlj)
 
 ## Identita projektu
 
@@ -17,17 +17,18 @@
 | Výchozí větev | main |
 | Dev větev | claude/starcore-autonomous-engineering-4p3tlj |
 
-## Klíčové metriky (stav 2026-07-27)
+## Klíčové metriky (stav 2026-08-05)
 
 | Metrika | Hodnota |
 |---------|---------|
-| Testy | 630 passed, 0 failed |
+| Testy | 792 passed, 0 failed (9 skipped — postgres) |
 | Coverage | 100.00% |
 | Ruff | 0 chyb |
-| Pyright | 0 chyb (0 type: ignore) |
+| Pyright | 0 chyb |
 | pip-audit | 0 zranitelností |
 | Bandit | čistý |
 | ADR záznamy | ADR-001 až ADR-016 |
+| Regression sentinel | PASS (baseline: 801 testy, 21 routes, 32 config fields) |
 
 ## Architektura (přehled)
 
@@ -42,7 +43,7 @@ apps/cli (Typer)           packages/core/main.py (FastAPI)
    packages/provider_sdk    ← port (BaseProvider ABC)
          |
          v
-   packages/providers/*     ← adapters (docker, proxmox)
+   packages/providers/*     ← adapters (docker, proxmox, kubernetes)
 ```
 
 **Klíčové moduly:**

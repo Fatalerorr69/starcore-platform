@@ -1,5 +1,9 @@
 # STARCORE Platform – GitHub Copilot & Claude Integration Guide
 
+> **Note:** [`CLAUDE.md`](../CLAUDE.md) at the repo root is the authoritative project guide for
+> Claude Code (the CLI). This file covers general Copilot/AI assistant conventions and may
+> lag behind recent architecture changes. When the two disagree, `CLAUDE.md` wins.
+
 ## Overview
 This document defines best practices and guidelines for using GitHub Copilot and Claude AI to develop STARCORE Platform.
 

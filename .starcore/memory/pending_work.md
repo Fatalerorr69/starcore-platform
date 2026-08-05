@@ -47,7 +47,7 @@ Tyto položky byly navrženy v předchozím auditu a záměrně odloženy na P2:
 
 ### 3. Provider concurrency policy ADR dokument
 - **Stav:** ADR-013 existuje (no semaphore; trigger conditions defined)
-- **Co zbývá:** Nic urgentního — revisit při přidání třetího providera
+- **Co zbývá:** Třetí provider (Kubernetes) přidán v REC-008. Zvážit aktualizaci ADR-013 s poznámkou o Kubernetes SDK thread safety (asyncio.to_thread pattern). Nízká priorita.
 
 ### ~~4. README "What's Planned, Not Built Yet" sekce~~ — CLOSED (sekce v README neexistuje)
 
@@ -72,6 +72,12 @@ Tyto položky byly navrženy v předchozím auditu a záměrně odloženy na P2:
 - `timeout_strategy: TimeoutStrategy | None` přidán do `ResourceSpec` a `Task`
 - `cancel` / `wait_and_mark` / `ignore` per resource; default `CANCEL` (backwards-compatible)
 - 10 nových testů; 601 testů celkem, 100% coverage
+
+---
+
+### ADR-017 pro REC-009 (plugin operator controls)
+- **Stav:** OPEN — nízká priorita
+- **Co zbývá:** Napsat `docs/adr/ADR-017-plugin-operator-controls.md` dokumentující rozhodnutí o `STARCORE_PLUGINS_ENABLED` a `STARCORE_PLUGINS_ALLOWLIST`. Implementace hotova (REC-009, commit `011cc3f`).
 
 ---
 

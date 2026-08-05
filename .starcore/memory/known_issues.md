@@ -36,16 +36,10 @@
 
 ## KI-005 — `.claude/instructions.md` vs `CLAUDE.md` překryv
 
-**Stav:** TECH DEBT — nezablokuje nic
-**Popis:** `.claude/instructions.md` (~300 řádků Copilot/AI guide) obsahuje stale reference a překrývá se s CLAUDE.md
-**Dopad:** Matoucí pro nové přispěvatele; risk dokumentačního driftu
-**Navrhovaná oprava:** Označit `.claude/instructions.md` jako deprecated nebo sloučit s CLAUDE.md
-**Priorita:** P3
+**Stav:** MITIGATED — 2026-08-05
+**Popis:** `.claude/instructions.md` označen deprecation bannerem odkazujícím na CLAUDE.md jako autoritativní zdroj.
 
 ## KI-006 — `.claude/commands/health.md` chybí bandit a gitleaks kroky
 
-**Stav:** MINOR — neblokuje
-**Popis:** Health check slash command (`.claude/commands/health.md`) provádí 8 kroků ale vynechává bandit a gitleaks security scans
-**Dopad:** Neúplný health check při použití slash commandu
-**Navrhovaná oprava:** Přidat kroky 9 a 10 do health commandu
-**Priorita:** P3
+**Stav:** CLOSED — 2026-08-05
+**Oprava:** Přidány kroky 9 (`bandit`) a 10 (`regression_sentinel`) do health commandu.

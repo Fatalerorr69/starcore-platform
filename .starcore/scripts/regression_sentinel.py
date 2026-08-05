@@ -44,12 +44,17 @@ def probe_test_count() -> int:
 
 
 def probe_api_routes() -> int:
-    """Count FastAPI route decorators in core/main.py."""
-    main_py = _REPO_ROOT / "packages" / "core" / "main.py"
-    if not main_py.exists():
-        return -1
-    text = main_py.read_text()
-    return len(re.findall(r"^@app\.\w+\(", text, re.MULTILINE))
+    """Count HTTP/WebSocket route decorators in core/main.py and core/routers/."""
+    route_re = re.compile(
+        r"^@(?:app|router)\.(get|post|put|delete|patch|websocket)\(",
+        re.MULTILINE,
+    )
+    count = 0
+    core_dir = _REPO_ROOT / "packages" / "core"
+    for py_file in [core_dir / "main.py"] + list((core_dir / "routers").glob("*.py")):
+        if py_file.exists():
+            count += len(route_re.findall(py_file.read_text()))
+    return count
 
 
 def probe_cli_commands() -> int:
