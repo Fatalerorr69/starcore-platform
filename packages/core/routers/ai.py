@@ -6,9 +6,9 @@ from blueprints.models import Blueprint
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
-from core.auth import verify_api_key
+from core.auth import UserRole, require_role
 
-router = APIRouter(dependencies=[Depends(verify_api_key)])
+router = APIRouter(dependencies=[Depends(require_role(UserRole.operator))])
 
 
 class GenerateBlueprintRequest(BaseModel):

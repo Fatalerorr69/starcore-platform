@@ -5,12 +5,12 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 
-from core.auth import verify_api_key
+from core.auth import UserRole, require_role
 from core.database import get_session
 from core.models_api import RunRecordResponse, TaskResult
 from core.repository import get_run, list_runs
 
-router = APIRouter(dependencies=[Depends(verify_api_key)])
+router = APIRouter(dependencies=[Depends(require_role(UserRole.reader))])
 
 
 @router.get("/runs", response_model=list[RunRecordResponse])

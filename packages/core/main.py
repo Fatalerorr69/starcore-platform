@@ -22,15 +22,21 @@ from slowapi.util import get_remote_address
 
 import core.logger  # noqa: F401 -- side effect: configures the process-wide loguru sink
 from core.config import get_settings
+from core.database import create_initial_admin
 from core.diagnostics import check_database_connectivity
 from core.metrics import HTTP_REQUEST_DURATION_SECONDS, HTTP_REQUESTS_TOTAL
-from core.routers import ai, blueprints, diagnostics, providers, runs
+from core.routers import ai, auth, blueprints, diagnostics, providers, runs
 from core.tracing import configure_tracing
 
 app = FastAPI(
     title="STARCORE Platform",
     version="0.1.0-dev",
 )
+
+
+@app.on_event("startup")
+def _on_startup() -> None:
+    create_initial_admin()
 
 
 # Rate limiting (RISK-03 / TD-12): a single, process-wide, in-memory limiter
@@ -194,6 +200,7 @@ def health():
 
 
 # ── Domain routers ─────────────────────────────────────────────────────────
+app.include_router(auth.router)
 app.include_router(providers.router)
 app.include_router(blueprints.router)
 app.include_router(runs.router)

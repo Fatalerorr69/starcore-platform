@@ -6,12 +6,12 @@ from fastapi import APIRouter, Depends, HTTPException
 from provider_sdk.registry import register_default_providers, registry
 from pydantic import BaseModel
 
-from core.auth import verify_api_key
+from core.auth import UserRole, require_role
 from core.discovery import discover_proxmox_environment
 from core.plugin_manager import plugin_manager
 from core.resource_actions import execute_resource_action
 
-router = APIRouter(dependencies=[Depends(verify_api_key)])
+router = APIRouter(dependencies=[Depends(require_role(UserRole.reader))])
 
 
 @router.get("/providers")
@@ -35,7 +35,7 @@ async def provider_health(name: str):
             await provider.disconnect()
 
 
-@router.get("/proxmox/discover")
+@router.get("/proxmox/discover", dependencies=[Depends(require_role(UserRole.operator))])
 async def discover_proxmox():
     return await discover_proxmox_environment()
 
@@ -58,7 +58,11 @@ class ResourceActionResponse(BaseModel):
     result: dict
 
 
-@router.post("/resources/action", response_model=ResourceActionResponse)
+@router.post(
+    "/resources/action",
+    response_model=ResourceActionResponse,
+    dependencies=[Depends(require_role(UserRole.operator))],
+)
 async def resource_action_endpoint(request: ResourceActionRequest):
     payload: dict = {}
     if request.node:

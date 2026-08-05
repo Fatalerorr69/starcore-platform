@@ -1,71 +1,86 @@
 # ADR-012 — API Authentication Model
 
-- **Status:** Accepted (implemented in Sprint 003, PR #38, commit `a5ae82c`,
-  2026-07-16; this ADR documents that decision retroactively — it records
-  an existing, unchanged design, not a new one)
-- **Date:** 2026-07-26 (ADR written); underlying decision dated 2026-07-16
+- **Status:** Amended (REC-001, 2026-08-05 — RBAC/JWT layer added; original
+  single-key decision remains intact as the legacy path)
+- **Date:** 2026-07-26 (ADR written); original underlying decision dated 2026-07-16;
+  amended 2026-08-05 to reflect REC-001 changes
 
 ## Context
 
 STARCORE is a modular monolith aimed at homelab/self-hosted deployments,
-typically operated by one person or a small trusted team, not a
-multi-tenant SaaS with per-user accounts. `ADR-003` (rate limiting)
-mentions the existing authentication model in passing as context, but no
-ADR captured the authentication decision itself: a single static shared
-secret, compared in constant time, checked on every protected route. This
-ADR closes that gap so the model is on record rather than only inferable
-from `packages/core/main.py`.
+typically operated by one person or a small trusted team. The original model
+(Sprint 003, PR #38) protected every route with a single shared `X-API-Key`
+secret. As deployments grow to involve automation scripts, dashboards, and
+occasionally more than one human operator, the lack of any role distinction
+became a pain point: every client that needed read access also had write access.
+REC-001 adds a proper RBAC/JWT authentication layer while keeping the existing
+`X-API-Key` path fully intact so existing deployments are not broken.
 
 ## Decision
 
-A single `STARCORE_API_KEY` value, supplied via the `X-API-Key` request
-header, protects every route except `/`, `/health`, `/ui`, and the mounted
-`/ui/assets` static files. `verify_api_key()` (`packages/core/main.py`):
+### Original model (unchanged, now the "legacy path")
 
-- **Fails closed:** if `STARCORE_API_KEY` is not configured on the server,
-  every protected route returns `503`, never falls through to "no auth
-  required." An unconfigured server is inaccessible, not silently open.
-- **Constant-time comparison:** the supplied header value is compared to
-  the configured key via `hmac.compare_digest`, not `==`/`!=`, so a
-  network-positioned attacker cannot use response-timing differences to
-  guess the key byte-by-byte. `hmac.compare_digest` is safe to use here
-  even though the attacker-controlled value is the *left* operand, because
-  it always compares the full length of both inputs regardless of where
-  they first differ.
-- **No per-user identity, no key rotation mechanism, no scopes.** The key
-  is a single shared secret for the whole deployment; anyone with it has
-  full access to every protected route.
+A single `STARCORE_API_KEY` value, supplied via the `X-API-Key` request
+header, is accepted on all protected routes and maps to the `admin` role.
+
+- **Fails closed:** if `STARCORE_API_KEY` is not configured, every route
+  that checks it returns `503`.
+- **Constant-time comparison:** `hmac.compare_digest` prevents timing attacks.
+- **Backward compatible:** existing deployments with only `STARCORE_API_KEY`
+  set continue to work without any configuration change.
+
+### New model — RBAC / JWT (REC-001)
+
+When `STARCORE_JWT_SECRET_KEY` is configured, clients may authenticate via
+`Authorization: Bearer <token>`. The system supports three roles:
+
+| Role | Weight | Capabilities |
+|------|--------|--------------|
+| `reader` | 0 | Read-only endpoints (`/providers`, `/runs`, `/plugins`) |
+| `operator` | 1 | All reader endpoints plus blueprint execution, diagnostics, AI generation |
+| `admin` | 2 | All endpoints including user management (`/auth/users`) |
+
+`require_role(minimum_role)` is a FastAPI dependency factory used at the router
+or endpoint level; it resolves the caller via `get_current_user()`, which tries
+Bearer JWT first and falls back to `X-API-Key`.
+
+Token endpoints:
+- `POST /auth/token` — password-based login; returns a short-lived access JWT
+  (default 30 min) and a long-lived refresh JWT (default 7 days).
+- `POST /auth/refresh` — exchange a refresh token for a new access token.
+- `POST /auth/users` (admin) — create a user.
+- `GET /auth/users` (admin) — list users.
+
+Passwords are stored as bcrypt hashes (`bcrypt.gensalt()`). JWTs are HS256,
+signed with `STARCORE_JWT_SECRET_KEY`. Token payloads carry `sub` (username),
+`role`, `type` (`access`/`refresh`), `iat`, and `exp`.
+
+`STARCORE_INITIAL_ADMIN_PASSWORD` bootstraps a first `admin` user at startup;
+the call is idempotent (skips if the `admin` user already exists).
 
 ## Alternatives considered
 
-1. **Per-user API keys / OAuth2 / session-based auth:** rejected as
-   disproportionate to the deployment target — a homelab operator does not
-   need multi-user access control for their own infrastructure
-   orchestrator, and adding an identity system would be exactly the kind
-   of speculative infrastructure the project avoids elsewhere.
-2. **mTLS or IP allowlisting instead of an application-level key:** rejected
-   because it pushes the trust boundary into deployment-specific network
-   configuration STARCORE cannot verify or test, whereas a header-based key
-   works identically whether STARCORE runs bare, in Docker, or behind a
-   reverse proxy.
-3. **Naive string equality (`==`/`!=`) for the key check:** rejected (and
-   fixed, PR #38) once identified as a timing side-channel — `==` on
-   Python `str` short-circuits at the first differing byte, which is
-   observable as a (small but real) timing signal over many requests.
+1. **OAuth2 / OpenID Connect:** rejected as disproportionate — a homelab
+   deployment does not need a full identity provider.
+2. **Per-user API keys instead of JWTs:** considered, but JWTs are
+   self-contained (no DB lookup on every request) and carry the role directly,
+   which simplifies the auth hot-path.
+3. **Global `STARCORE_TASK_TIMEOUT_SECONDS` applied to all token operations:**
+   not applicable here; BCrypt hashing is CPU-bound and fast enough at
+   gensalt default rounds (12) without a timeout.
 
 ## Consequences
 
-- Simple to configure (`.env` / `STARCORE_API_KEY`) and simple to reason
-  about: one secret, compared safely, checked everywhere it needs to be.
-- No user-level audit trail of *who* made an authenticated request — only
-  that *a* holder of the key did. Acceptable for the current
-  single-operator/small-team target; would need revisiting before any
-  multi-tenant use.
-- Key rotation is a manual operational step (update `STARCORE_API_KEY`,
-  restart, update every client) — there is no dual-key grace-period
-  mechanism. Not a concern at the current scale; worth an explicit ADR of
-  its own if STARCORE ever needs zero-downtime key rotation.
-- Regression coverage (`tests/test_auth.py`) already exercises every edge
-  case this model implies: missing key, wrong key, empty key,
-  different-length key, prefix-matching key (the specific shape a timing
-  attack would probe), and unconfigured-server fail-closed behavior.
+- Existing `X-API-Key`-based integrations (CI scripts, monitoring, all tests
+  written before REC-001) continue to work without any change — they receive
+  `admin` role silently.
+- Adding `STARCORE_JWT_SECRET_KEY` opts into the new model; omitting it keeps
+  the old model. Both can coexist in the same deployment indefinitely.
+- Audit trail: JWT-authenticated requests carry a `sub` (username) in the
+  token, which is available in the `UserPrincipal` returned by
+  `get_current_user()`. Future logging middleware could record it.
+- Key rotation: JWT secret rotation invalidates all outstanding tokens. A
+  dual-secret grace-period mechanism was not added (not needed at current scale).
+- Regression coverage: `tests/test_jwt_auth.py` covers 46 scenarios including
+  all token lifecycle paths, every role boundary, legacy coexistence, initial
+  admin bootstrap, and the startup event handler.

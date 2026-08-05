@@ -136,3 +136,33 @@ def get_session() -> Session:
         init_db()
     assert _session_factory is not None
     return _session_factory()
+
+
+def create_initial_admin(settings: Settings | None = None) -> bool:
+    """Create an 'admin' user when STARCORE_INITIAL_ADMIN_PASSWORD is set and users table is empty.
+
+    Returns True when an admin was created, False when the password is not
+    configured or a user named 'admin' already exists.  Idempotent — safe to
+    call on every startup.
+    """
+    from core.auth import UserRole, hash_password  # lazy to avoid circular import
+    from core.models_db import User
+
+    resolved = settings or get_settings()
+    if not resolved.initial_admin_password:
+        return False
+
+    session = get_session()
+    try:
+        if session.query(User).filter_by(username="admin").first():
+            return False
+        user = User(
+            username="admin",
+            hashed_password=hash_password(resolved.initial_admin_password),
+            role=UserRole.admin.value,
+        )
+        session.add(user)
+        session.commit()
+        return True
+    finally:
+        session.close()

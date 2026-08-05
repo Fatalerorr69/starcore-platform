@@ -7,6 +7,23 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- **RBAC / JWT authentication (REC-001)**: Full role-based access control layered on top of the
+  existing single-key model. Three roles (`reader`, `operator`, `admin`) gate every API endpoint;
+  `reader ≤ operator ≤ admin` hierarchy is enforced by `require_role()` FastAPI dependencies.
+  - `POST /auth/token` — password login returns a short-lived access JWT + long-lived refresh JWT.
+  - `POST /auth/refresh` — exchange a valid refresh token for a new access token.
+  - `POST /auth/users` (admin only) — create users.
+  - `GET /auth/users` (admin only) — list users.
+  - `User` ORM model added; Alembic migration `0002_add_users.py` creates the `users` table.
+  - `STARCORE_JWT_SECRET_KEY`, `STARCORE_JWT_ALGORITHM`, `STARCORE_ACCESS_TOKEN_EXPIRE_MINUTES`,
+    `STARCORE_REFRESH_TOKEN_EXPIRE_DAYS`, and `STARCORE_INITIAL_ADMIN_PASSWORD` settings added.
+  - `STARCORE_INITIAL_ADMIN_PASSWORD` bootstraps a first `admin` user on startup.
+  - Backward-compatible: `X-API-Key` header still accepted on all endpoints and maps to `admin`.
+    Existing deployments with no `STARCORE_JWT_SECRET_KEY` continue to work unchanged.
+  - Dependencies added: `pyjwt>=2.8.0`, `bcrypt>=4.0.0`.
+
 ## [0.5.0] — 2026-08-04
 
 ### Added

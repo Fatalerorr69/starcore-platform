@@ -4,12 +4,12 @@ from fastapi import APIRouter, Depends, Request
 from fastapi.responses import Response
 from prometheus_client import CONTENT_TYPE_LATEST
 
-from core.auth import verify_api_key
+from core.auth import UserRole, require_role
 from core.diagnostics import run_diagnostics
 from core.environment import classify_client_platform
 from core.metrics import render_metrics
 
-router = APIRouter(dependencies=[Depends(verify_api_key)])
+router = APIRouter(dependencies=[Depends(require_role(UserRole.operator))])
 
 
 @router.get("/diagnostics")

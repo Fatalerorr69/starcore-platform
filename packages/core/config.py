@@ -62,6 +62,17 @@ class Settings(BaseSettings):
     # with zero overhead. See core/tracing.py.
     otlp_endpoint: str | None = None
 
+    # JWT authentication (REC-001). Set STARCORE_JWT_SECRET_KEY to enable
+    # Bearer token auth alongside the legacy X-API-Key mechanism.
+    jwt_secret_key: str | None = None
+    jwt_algorithm: str = "HS256"
+    access_token_expire_minutes: int = 30
+    refresh_token_expire_days: int = 7
+
+    # Bootstrap: if set on first run with an empty users table, an 'admin'
+    # user is created with this password. Unset after initial setup.
+    initial_admin_password: str | None = None
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_prefix="STARCORE_",

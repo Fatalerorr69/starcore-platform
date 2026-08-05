@@ -14,13 +14,13 @@ from orchestrator.scheduler import Scheduler
 from orchestrator.task import Task
 from pydantic import BaseModel
 
-from core.auth import verify_api_key
+from core.auth import UserRole, require_role
 from core.database import get_session
 from core.events import event_bus
 from core.models_api import TaskResult
 from core.repository import save_run
 
-router = APIRouter(dependencies=[Depends(verify_api_key)])
+router = APIRouter(dependencies=[Depends(require_role(UserRole.operator))])
 
 
 class PlanResponse(BaseModel):
