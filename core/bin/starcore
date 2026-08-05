@@ -1,0 +1,45 @@
+#!/data/data/com.termux/files/usr/bin/bash
+
+BASE=$HOME/STARCORE
+
+case "$1" in
+
+status)
+
+echo "===== STARCORE STATUS ====="
+
+echo "DEVICE:"
+getprop ro.product.model
+
+echo "ANDROID:"
+getprop ro.build.version.release
+
+echo "PYTHON:"
+python --version
+
+echo "STORAGE:"
+df -h $HOME | tail -1
+
+;;
+
+doctor)
+
+echo "===== STARCORE DOCTOR ====="
+
+command -v python
+command -v git
+command -v node
+command -v sqlite3
+
+;;
+
+*)
+
+echo "STARCORE COMMANDS"
+echo
+echo "status"
+echo "doctor"
+
+;;
+
+esac

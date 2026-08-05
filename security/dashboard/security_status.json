@@ -1,0 +1,22 @@
+{
+    "timestamp": "2026-08-05 07:25:37.007249",
+    "device": {
+        "ro.product.model": "SM-A536B",
+        "ro.product.brand": "samsung",
+        "ro.build.version.release": "15",
+        "ro.build.version.sdk": "35",
+        "ro.build.version.security_patch": "2026-03-01",
+        "ro.boot.verifiedbootstate": "green",
+        "ro.boot.flash.locked": "1",
+        "ro.build.fingerprint": "samsung/a53xnaeea/a53x:15/AP3A.240905.015.A2/A536BXXSHFYH1:user/release-keys"
+    },
+    "root": "ACTIVE",
+    "magisk": "30.7:MAGISK:R",
+    "package_count": 616,
+    "security_score": 25,
+    "risk": "LOW",
+    "findings": [
+        "ROOT ACCESS ENABLED",
+        "MAGISK DETECTED"
+    ]
+}

@@ -1,0 +1,61 @@
+{
+    "timestamp": "2026-08-05 07:34:02.791662",
+    "score": 50,
+    "risk": "HIGH",
+    "findings": [
+        {
+            "name": "ROOT ACCESS",
+            "points": 15,
+            "severity": "HIGH"
+        },
+        {
+            "name": "MAGISK FRAMEWORK",
+            "points": 10,
+            "severity": "MEDIUM"
+        },
+        {
+            "name": "PLAY INTEGRITY FIX",
+            "points": 10,
+            "severity": "MEDIUM"
+        },
+        {
+            "name": "TRICKY STORE",
+            "points": 10,
+            "severity": "HIGH"
+        },
+        {
+            "name": "ZYGISK ASSISTANT",
+            "points": 5,
+            "severity": "MEDIUM"
+        }
+    ],
+    "integrity": {
+        "timestamp": "2026-08-05 07:34:02.653532",
+        "modules": [
+            "YetAnotherBootloopProtector",
+            "aa4mg",
+            "abootloop",
+            "adb-ndk",
+            "amtsmagisk",
+            "busybox-ndk",
+            "ccbins",
+            "com.chiller3.alterinstaller",
+            "data_restore_Courier",
+            "livebootmagisk",
+            "mm",
+            "mountify",
+            "nano-ndk",
+            "playintegrityfix",
+            "tricky_store",
+            "zygisk-assistant"
+        ],
+        "play_integrity_fix": true,
+        "tricky_store": true,
+        "zygisk_assistant": true,
+        "files": {
+            "custom_pif_prop": true,
+            "target_txt": true,
+            "keybox_xml": true
+        }
+    }
+}

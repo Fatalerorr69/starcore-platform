@@ -1,0 +1,25 @@
+project: STARCORE
+
+version: 1.0
+
+github:
+  owner: Fatalerorr69
+  repository: starcore-platform
+
+paths:
+  workspace: workspace
+  logs: logs
+  reports: automation/github/reports
+  backups: STARCORE_BACKUPS
+
+doctor:
+  auto_fix: true
+
+security:
+  enabled: true
+
+ai:
+  enabled: true
+
+plugins:
+  enabled: true

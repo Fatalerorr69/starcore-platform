@@ -1,0 +1,23 @@
+system:
+  name: STARCORE
+  version: 0.1
+  platform: android-termux
+
+device:
+  type: samsung
+  android: 15
+
+runtime:
+  python: python
+  database: sqlite
+
+modules:
+  android: enabled
+  system: enabled
+  security: enabled
+  ai: enabled
+  network: enabled
+
+logging:
+  level: INFO
+  path: core/logs/starcore.log

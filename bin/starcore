@@ -1,0 +1,139 @@
+#!/data/data/com.termux/files/usr/bin/bash
+
+ROOT="$HOME/STARCORE"
+SCRIPTS="$ROOT/automation/github/scripts"
+
+banner() {
+echo
+echo "=========================================="
+echo " STARCORE PLATFORM"
+echo "=========================================="
+echo
+}
+
+case "$1" in
+
+doctor)
+banner
+"$SCRIPTS/starcore_doctor.sh"
+;;
+
+audit)
+banner
+"$SCRIPTS/repository_audit.sh"
+;;
+
+security)
+banner
+"$SCRIPTS/security_scan.sh"
+;;
+
+backup)
+banner
+"$SCRIPTS/backup_sync.sh"
+;;
+
+release)
+banner
+"$SCRIPTS/release_check.sh"
+;;
+
+health)
+banner
+"$ROOT/automation/github/github_health.sh"
+;;
+
+status)
+banner
+"$ROOT/bin/starcore-status"
+;;
+
+info)
+banner
+
+echo "STARCORE INFORMATION"
+echo
+
+echo "Hostname : $(hostname)"
+echo "Kernel   : $(uname -r)"
+echo "Android  : $(getprop ro.build.version.release)"
+echo "Device   : $(getprop ro.product.model)"
+echo "CPU      : $(uname -m)"
+
+echo
+echo "Python"
+python --version
+
+echo
+echo "Git"
+git --version
+
+echo
+echo "GitHub"
+gh --version | head -1
+
+echo
+echo "Disk"
+df -h "$HOME"
+;;
+
+push)
+banner
+
+git -C "$ROOT" add .
+
+git -C "$ROOT" commit -m "STARCORE automatic update" || true
+
+git -C "$ROOT" push origin main
+;;
+
+update)
+banner
+
+pkg update -y
+pkg upgrade -y
+
+git -C "$ROOT" pull --rebase
+;;
+
+report)
+banner
+
+ls -lh "$ROOT"/automation/github/reports
+;;
+
+
+report)
+banner
+
+ls -lh "$ROOT"/automation/github/reports
+
+;;
+
+verify)
+banner
+
+"$ROOT/automation/stabilization/scripts/starcore_verify.sh"
+
+;;
+
+*)
+banner
+
+echo "Usage:"
+echo
+echo " starcore doctor"
+echo " starcore audit"
+echo " starcore security"
+echo " starcore backup"
+echo " starcore release"
+echo " starcore health"
+echo " starcore status"
+echo " starcore info"
+echo " starcore push"
+echo " starcore update"
+echo " starcore report"
+
+;;
+
+esac

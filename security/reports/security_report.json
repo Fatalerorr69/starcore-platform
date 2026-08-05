@@ -1,0 +1,32 @@
+{
+    "timestamp": "2026-08-05 07:23:47.797799",
+    "security": {
+        "root": {
+            "normal": "uid=10344(u0_a344) gid=10344(u0_a344) groups=10344(u0_a344),1079(ext_obb_rw),3003(inet),9997(everybody),20344(u0_a344_cache),50344(all_a344) context=u:r:untrusted_app_27:s0:c88,c257,c512,c768",
+            "root": "uid=0(root) gid=0(root) groups=0(root) context=u:r:magisk:s0"
+        },
+        "magisk": {
+            "version": "30.7:MAGISK:R",
+            "zygisk": [
+                "/system/lib/libzygisk.so",
+                "/system/lib64/libzygisk.so"
+            ],
+            "modules": "YetAnotherBootloopProtector\naa4mg\nabootloop\nadb-ndk\namtsmagisk\nbusybox-ndk\nccbins\ncom.chiller3.alterinstaller\ndata_restore_Courier\nlivebootmagisk\nmm\nmountify\nnano-ndk\nplayintegrityfix\ntricky_store\nzygisk-assistant"
+        },
+        "kernelsu": {
+            "detected": []
+        },
+        "boot": {
+            "verifiedboot_normal": "green",
+            "verifiedboot_root": "green",
+            "flash_locked": "1"
+        },
+        "selinux": {
+            "status": "Enforcing"
+        },
+        "integrity": {
+            "play_integrity_fix": [],
+            "tricky_store": []
+        }
+    }
+}

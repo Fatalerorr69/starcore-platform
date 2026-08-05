@@ -1,0 +1,3 @@
+#!/data/data/com.termux/files/usr/bin/bash
+
+$HOME/STARCORE/automation/stabilization/scripts/starcore_verify.sh

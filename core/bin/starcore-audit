@@ -1,0 +1,25 @@
+#!/data/data/com.termux/files/usr/bin/bash
+
+
+BASE=$HOME/STARCORE
+
+
+echo "===== STARCORE ANDROID AUDIT ====="
+
+
+cd $BASE/core/modules/android
+
+
+python audit.py
+
+
+echo
+
+
+echo "REPORT:"
+echo "$BASE/security/reports/device_audit.json"
+
+
+echo
+
+echo "===== AUDIT COMPLETE ====="

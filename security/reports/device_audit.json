@@ -1,0 +1,23 @@
+{
+    "timestamp": "2026-08-05 07:13:12.919336",
+    "device": {
+        "model": "SM-A536B",
+        "brand": "samsung",
+        "android": "15",
+        "sdk": "35",
+        "kernel": "5.10.223-android12-9-31153516-abA536BXXSHFYH1",
+        "arch": "aarch64"
+    },
+    "resources": {
+        "storage_total_gb": 105.51,
+        "storage_used_gb": 62.16,
+        "storage_free_gb": 43.23
+    },
+    "security": {
+        "root_binary": false,
+        "magisk_detected": false
+    },
+    "network": {
+        "interfaces": "unknown"
+    }
+}

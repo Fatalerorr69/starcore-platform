@@ -1,0 +1,36 @@
+#!/data/data/com.termux/files/usr/bin/bash
+
+ROOT="$HOME/STARCORE"
+
+echo
+echo "==============================================="
+echo " STARCORE SYSTEM STATUS"
+echo "==============================================="
+
+echo
+echo "[PROJECT]"
+echo "$ROOT"
+
+echo
+echo "[GIT]"
+git -C "$ROOT" branch --show-current
+git -C "$ROOT" status --short
+
+echo
+echo "[PYTHON]"
+python --version 2>/dev/null
+
+echo
+echo "[FILES]"
+find "$ROOT" -type f | wc -l
+
+echo
+echo "[SIZE]"
+du -sh "$ROOT"
+
+echo
+echo "[SERVICES]"
+ps | grep -E "python|node|pm2" | grep -v grep || echo "none"
+
+echo
+echo "==============================================="

@@ -1,0 +1,74 @@
+===============================================
+ STARCORE VERIFY
+===============================================
+
+[1] PROJECT ROOT
+/data/data/com.termux/files/home/STARCORE
+
+[2] STRUCTURE
+OK DIR: bin
+OK DIR: core
+OK DIR: automation
+OK DIR: security
+OK DIR: platform
+OK DIR: ai
+OK DIR: agents
+OK DIR: backup
+OK DIR: logs
+OK DIR: runtime
+OK DIR: workspace
+
+[3] MAIN CLI
+OK: bin/starcore executable
+
+[4] GIT
+On branch main
+Your branch is up to date with 'origin/main'.
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+	automation/stabilization/
+	bin/starcore-verify
+
+nothing added to commit but untracked files present (use "git add" to track)
+
+* main 7450730 [origin/main] STARCORE global configuration
+
+origin	https://github.com/Fatalerorr69/starcore-platform.git (fetch)
+origin	https://github.com/Fatalerorr69/starcore-platform.git (push)
+
+[5] GITHUB CLI
+gh version 2.97.0
+
+[6] PYTHON
+Python 3.14.6
+Python 3.14.6
+
+[7] VENV
+NO .venv detected
+
+[8] SCRIPT PERMISSIONS
+EXEC OK automation/git/starcore_git_health.sh
+EXEC OK automation/github/github_health.sh
+EXEC OK automation/github/scripts/release_check.sh
+EXEC OK automation/github/scripts/security_scan.sh
+EXEC OK automation/github/scripts/backup_sync.sh
+EXEC OK automation/github/scripts/repository_audit.sh
+EXEC OK automation/github/scripts/starcore_doctor.sh
+EXEC OK automation/github/scripts/doctor_fix.sh
+EXEC OK automation/github/scripts/full_backup.sh
+EXEC OK automation/github/scripts/live_monitor.sh
+EXEC OK automation/github/starcore_github_control.sh
+EXEC OK automation/stabilization/scripts/starcore_verify.sh
+
+[9] PYTHON FILE COUNT
+912
+
+[10] PROJECT SIZE
+31M	.
+
+===============================================
+ VERIFY COMPLETE
+REPORT:
+/data/data/com.termux/files/home/STARCORE/automation/stabilization/reports/verify_20260805_152107.txt
+===============================================
