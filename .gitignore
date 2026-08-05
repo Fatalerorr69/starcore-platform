@@ -8,3 +8,8 @@ automation/stabilization/reports/*.txt
 automation/github/reports/*
 
 bin/*.backup.*
+
+# Python / test artifacts (generated in repo root by pre-reorganization runs)
+.coverage
+data/
+site/
