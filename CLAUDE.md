@@ -207,6 +207,8 @@ Key variables:
 | `STARCORE_KUBERNETES_KUBECONFIG` | _(none)_ | Path to kubeconfig file; falls back to in-cluster then `~/.kube/config` |
 | `STARCORE_KUBERNETES_CONTEXT` | _(none)_ | kubeconfig context to use (default context if unset) |
 | `STARCORE_KUBERNETES_NAMESPACE` | `default` | Default namespace for Kubernetes actions |
+| `STARCORE_PLUGINS_ENABLED` | `true` | Set to `false` to disable all plugin loading |
+| `STARCORE_PLUGINS_ALLOWLIST` | _(empty)_ | Comma-separated list of allowed plugin names; empty = allow all |
 | `STARCORE_POSTGRES_PASSWORD` | _(none)_ | PostgreSQL password for the `postgres` service in `docker-compose.yml`; not read by `Settings` — docker-compose only |
 
 ## Test Isolation

@@ -89,6 +89,43 @@ container boundary, a restricted API surface passed to `register()` instead
 of the live `ProviderRegistry`/`EventBus`) — do not assume isolation that
 does not exist.
 
+## Operator controls
+
+Two settings let an operator restrict which plugins load, without modifying
+`plugins/` or the codebase.
+
+### `STARCORE_PLUGINS_ENABLED`
+
+Boolean (default `true`). When set to `false`, `load_all()` returns
+immediately without importing or registering any plugin:
+
+```bash
+STARCORE_PLUGINS_ENABLED=false
+```
+
+Use this to disable all plugin loading in environments where no plugins
+are deployed, or where you want to guarantee that `plugins/` cannot execute
+even if its contents change.
+
+### `STARCORE_PLUGINS_ALLOWLIST`
+
+Comma-separated list of plugin names (default `""` — empty means *allow
+all*). When non-empty, any discovered plugin whose name is **not** in the
+list is skipped with a warning:
+
+```bash
+STARCORE_PLUGINS_ALLOWLIST=run_logger,my_custom_provider
+```
+
+Leading and trailing whitespace around each name is trimmed. An empty
+string (the default) disables the allowlist — all discovered plugins are
+eligible to load (subject to `STARCORE_PLUGINS_ENABLED`).
+
+**Note:** these controls restrict *which* plugins are loaded, not *what*
+a loaded plugin can do. A plugin on the allowlist still runs with the full
+privileges of the STARCORE process — the trust model documented above
+still applies.
+
 ## Writing a plugin
 
 See `plugins/example_provider/` (registers a custom provider) and

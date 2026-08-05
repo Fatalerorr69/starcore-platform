@@ -9,6 +9,17 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **Plugin operator controls (REC-009)**: Two new settings give operators control over which plugins
+  are loaded, without requiring code changes or plugin removal.
+  - `STARCORE_PLUGINS_ENABLED=false` disables all plugin loading at the `load_all()` level — no
+    plugin imports execute, regardless of what is in `plugins/`.
+  - `STARCORE_PLUGINS_ALLOWLIST=name1,name2` restricts loading to explicitly named plugins;
+    any discovered plugin not on the list is skipped with a warning. An empty value (the default)
+    keeps the existing behavior where every discovered plugin may load.
+  - These controls restrict *which* plugins are loaded, not *what* a loaded plugin can do — the
+    full-privilege trust model documented in `docs/plugins.md` and ADR-011 still applies.
+  - 4 new tests, 100% coverage.
+
 - **Kubernetes infrastructure provider (REC-008)**: New `KubernetesProvider` implementing the full
   `BaseProvider` contract against any Kubernetes cluster.
   - Authenticates via explicit kubeconfig (`STARCORE_KUBERNETES_KUBECONFIG`), in-cluster service

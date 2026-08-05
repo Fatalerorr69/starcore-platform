@@ -124,3 +124,65 @@ def test_get_returns_loaded_plugin_or_none():
 
     assert manager.get("example_provider") is not None
     assert manager.get("does_not_exist") is None
+
+
+# ---------------------------------------------------------------------------
+# REC-009: operator plugin controls
+# ---------------------------------------------------------------------------
+
+
+def test_load_all_returns_empty_when_plugins_disabled(monkeypatch):
+    monkeypatch.setenv("STARCORE_PLUGINS_ENABLED", "false")
+    from core.config import get_settings
+
+    get_settings.cache_clear()
+    try:
+        manager = PluginManager(plugins_dir="plugins")
+        loaded = manager.load_all()
+        assert loaded == []
+        assert manager.names() == []
+    finally:
+        get_settings.cache_clear()
+
+
+def test_load_all_allowlist_restricts_to_named_plugins(monkeypatch):
+    monkeypatch.setenv("STARCORE_PLUGINS_ALLOWLIST", "run_logger")
+    from core.config import get_settings
+
+    get_settings.cache_clear()
+    try:
+        manager = PluginManager(plugins_dir="plugins")
+        loaded = manager.load_all()
+        assert "run_logger" in loaded
+        assert "example_provider" not in loaded
+        assert "noop" not in registry.names()
+    finally:
+        get_settings.cache_clear()
+
+
+def test_load_all_allowlist_whitespace_trimmed(monkeypatch):
+    monkeypatch.setenv("STARCORE_PLUGINS_ALLOWLIST", " example_provider , run_logger ")
+    from core.config import get_settings
+
+    get_settings.cache_clear()
+    try:
+        manager = PluginManager(plugins_dir="plugins")
+        loaded = manager.load_all()
+        assert "example_provider" in loaded
+        assert "run_logger" in loaded
+    finally:
+        get_settings.cache_clear()
+
+
+def test_load_all_empty_allowlist_loads_all_plugins(monkeypatch):
+    monkeypatch.setenv("STARCORE_PLUGINS_ALLOWLIST", "")
+    from core.config import get_settings
+
+    get_settings.cache_clear()
+    try:
+        manager = PluginManager(plugins_dir="plugins")
+        loaded = manager.load_all()
+        assert "example_provider" in loaded
+        assert "run_logger" in loaded
+    finally:
+        get_settings.cache_clear()

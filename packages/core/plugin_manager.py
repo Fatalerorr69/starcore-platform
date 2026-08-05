@@ -38,6 +38,15 @@ class PluginManager:
         ]
 
     def load_all(self) -> list[str]:
+        from core.config import get_settings
+
+        settings = get_settings()
+        if not settings.plugins_enabled:
+            logger.info("Plugin loading is disabled (STARCORE_PLUGINS_ENABLED=false)")
+            return []
+
+        allowlist = {n.strip() for n in settings.plugins_allowlist.split(",") if n.strip()}
+
         base_dir = str(self.plugins_dir.parent.resolve())
         if base_dir not in sys.path:
             sys.path.insert(0, base_dir)
@@ -46,6 +55,10 @@ class PluginManager:
 
         loaded: list[str] = []
         for name in self.discover():
+            if allowlist and name not in allowlist:
+                logger.warning("Plugin '{}' not in allowlist, skipping", name)
+                continue
+
             if name in self.plugins:
                 loaded.append(name)
                 continue

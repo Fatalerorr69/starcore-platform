@@ -68,6 +68,12 @@ class Settings(BaseSettings):
     kubernetes_context: str | None = None
     kubernetes_namespace: str = "default"
 
+    # Plugin operator controls (REC-009). plugins_enabled=False disables all
+    # plugin loading. plugins_allowlist is a comma-separated list of plugin
+    # names; when non-empty, only those plugins are loaded (others are skipped).
+    plugins_enabled: bool = True
+    plugins_allowlist: str = ""
+
     # JWT authentication (REC-001). Set STARCORE_JWT_SECRET_KEY to enable
     # Bearer token auth alongside the legacy X-API-Key mechanism.
     jwt_secret_key: str | None = None
