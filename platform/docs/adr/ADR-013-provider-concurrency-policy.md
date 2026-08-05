@@ -2,7 +2,7 @@
 
 - **Status:** Accepted — decision is "do not add a concurrency limit yet",
   not "a limit exists"
-- **Date:** 2026-07-26
+- **Date:** 2026-08-05
 
 ## Context
 
@@ -36,6 +36,17 @@ limit?
   (`docker/api/client.py`) also subclasses `requests.Session` directly.
   Same shape: concurrent `execute()` calls issue concurrent blocking
   requests via `asyncio.to_thread()`.
+- **`KubernetesProvider`** (added 2026-08-05, PR #121): the official
+  `kubernetes` Python client's `ApiClient` uses `urllib3`'s `PoolManager`
+  as its HTTP backend — the same thread-safety story as `requests.Session`
+  above. `ApiClient` is constructed once in `connect()` and reused;
+  `AppsV1Api`/`CoreV1Api` are stateless wrappers around the shared client,
+  also created once at connect time. Every action branch in
+  `packages/providers/kubernetes/provider.py`'s `execute()` is wrapped in
+  `asyncio.to_thread()` (five branches: `deploy`/`create`, `delete`,
+  `scale`, `restart`, `apply-namespace`). No per-request mutation of shared
+  client state occurs in `execute()` — same no-hazard verdict as Proxmox
+  and Docker.
 - **`requests.Session`** is documented and widely relied upon (by both
   libraries here) as safe for issuing concurrent requests from multiple
   threads — its connection pool (via `urllib3`) is the part that needs
@@ -80,6 +91,14 @@ project's own operating principles argue against.
 3. A future provider (a third `BaseProvider` implementation) has a
    documented, hard API rate limit (many cloud provider APIs do) that
    would be violated by unbounded concurrent calls.
+   *Partially met (2026-08-05): `KubernetesProvider` is now the third
+   `BaseProvider` implementation (PR #121). The Kubernetes API server
+   applies server-side Priority-and-Fairness throttling, but the Python
+   client itself imposes no hard per-client concurrency limit — a
+   rate-limited response is an error returned to the caller, not a
+   contract requiring client-side throttling. Decision unchanged: trigger
+   condition 3 requires a documented hard limit on the client side, which
+   Kubernetes does not impose.*
 
 If any of these occurs, the fix is a bounded `asyncio.Semaphore` acquired
 around the `provider.execute(task)` call in `Scheduler._run_task`, sized
