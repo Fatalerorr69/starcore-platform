@@ -114,7 +114,7 @@ async def test_sequential_run_persists_to_postgres(client, fake_provider):
     run_id = body["run_id"]
     assert run_id
     assert len(body["tasks"]) == 2
-    assert all(t["status"] == "completed" for t in body["tasks"])
+    assert all(t["status"] == "success" for t in body["tasks"])
 
     # Verify via /runs/{id} that data was persisted correctly to PostgreSQL
     detail = await client.get(f"/runs/{run_id}")
@@ -124,7 +124,7 @@ async def test_sequential_run_persists_to_postgres(client, fake_provider):
     assert d["blueprint_name"] == "pg-seq"
     assert d["parallel"] is False
     assert len(d["tasks"]) == 2
-    assert all(t["status"] == "completed" for t in d["tasks"])
+    assert all(t["status"] == "success" for t in d["tasks"])
 
 
 # ── Parallel execution + persistence ──────────────────────────────────────
