@@ -96,9 +96,7 @@ def refresh_token(req: RefreshRequest) -> AccessTokenResponse:
         role = UserRole(payload["role"])
     except (KeyError, ValueError) as exc:
         raise HTTPException(status_code=401, detail="Invalid token payload.") from exc
-    return AccessTokenResponse(
-        access_token=create_access_token(payload["sub"], role, settings)
-    )
+    return AccessTokenResponse(access_token=create_access_token(payload["sub"], role, settings))
 
 
 @router.post("/users", response_model=UserResponse, status_code=201)
@@ -107,9 +105,7 @@ def create_user(req: CreateUserRequest, _: _AdminPrincipal) -> UserResponse:
     session = get_session()
     try:
         if session.query(User).filter_by(username=req.username).first():
-            raise HTTPException(
-                status_code=409, detail=f"User {req.username!r} already exists."
-            )
+            raise HTTPException(status_code=409, detail=f"User {req.username!r} already exists.")
         user = User(
             username=req.username,
             hashed_password=hash_password(req.password),

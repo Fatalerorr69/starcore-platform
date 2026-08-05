@@ -67,9 +67,7 @@ def _make_token(
     token_type: str = "access",
     expired: bool = False,
 ) -> str:
-    exp = datetime.now(UTC) + (
-        timedelta(seconds=-1) if expired else timedelta(minutes=30)
-    )
+    exp = datetime.now(UTC) + (timedelta(seconds=-1) if expired else timedelta(minutes=30))
     payload = {
         "sub": username,
         "role": role.value,
@@ -576,7 +574,6 @@ def test_create_initial_admin_skips_if_admin_exists(monkeypatch):
 async def test_require_role_allows_sufficient_role(monkeypatch):
     _settings_with_jwt(monkeypatch)
     try:
-
         from core.auth import UserPrincipal, UserRole
 
         principal = UserPrincipal(username="alice", role=UserRole.operator)

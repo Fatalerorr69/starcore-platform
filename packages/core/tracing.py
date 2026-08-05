@@ -33,9 +33,7 @@ def configure_tracing(endpoint: str | None) -> None:
     """Activate the OTel SDK when *endpoint* is provided; otherwise keep the no-op tracer."""
     if not endpoint:
         return
-    resource = Resource.create(
-        {SERVICE_NAME: _SERVICE_NAME, SERVICE_VERSION: _SERVICE_VERSION}
-    )
+    resource = Resource.create({SERVICE_NAME: _SERVICE_NAME, SERVICE_VERSION: _SERVICE_VERSION})
     provider = TracerProvider(resource=resource)
     provider.add_span_processor(BatchSpanProcessor(OTLPSpanExporter(endpoint=endpoint)))
     trace.set_tracer_provider(provider)

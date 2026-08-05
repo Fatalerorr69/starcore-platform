@@ -58,7 +58,7 @@ def _unreleased_body(changelog: str) -> str:
     m = _UNRELEASED_RE.search(changelog)
     if not m:
         sys.exit("ERROR: [Unreleased] section not found in CHANGELOG.md")
-    after = changelog[m.end():]
+    after = changelog[m.end() :]
     next_sec = _NEXT_SECTION_RE.search(after)
     return after[: next_sec.start()] if next_sec else after
 
@@ -105,13 +105,7 @@ def cmd_bump(version: str) -> None:
     assert unreleased_match  # already checked in _unreleased_body
     start = unreleased_match.start()
     body_end = unreleased_match.end() + len(body)
-    updated = (
-        changelog[:start]
-        + new_unreleased
-        + versioned_header
-        + body
-        + changelog[body_end:]
-    )
+    updated = changelog[:start] + new_unreleased + versioned_header + body + changelog[body_end:]
     _write(CHANGELOG, updated)
     print(f"CHANGELOG.md: [Unreleased] → [{version}] — {today}")
 
@@ -119,7 +113,7 @@ def cmd_bump(version: str) -> None:
     pyproject = _read(PYPROJECT)
     new_pyproject, n = re.subn(
         r'^(version\s*=\s*")[^"]*(")',
-        rf'\g<1>{version}\g<2>',
+        rf"\g<1>{version}\g<2>",
         pyproject,
         count=1,
         flags=re.MULTILINE,
@@ -133,7 +127,7 @@ def cmd_bump(version: str) -> None:
     tracing = _read(TRACING)
     new_tracing, n = re.subn(
         r'^(_SERVICE_VERSION\s*=\s*")[^"]*(")',
-        rf'\g<1>{version}\g<2>',
+        rf"\g<1>{version}\g<2>",
         tracing,
         count=1,
         flags=re.MULTILINE,
