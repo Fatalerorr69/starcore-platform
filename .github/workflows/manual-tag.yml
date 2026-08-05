@@ -1,6 +1,8 @@
 name: Manual Tag
 
-# Creates a git tag on main and pushes it — which automatically triggers release.yml.
+# Creates a git tag on main and explicitly dispatches release.yml.
+# GITHUB_TOKEN-triggered tag pushes do not re-trigger other workflows (GitHub
+# Actions security model), so release.yml is dispatched via workflow_dispatch.
 # Usage: Actions → Manual Tag → Run workflow → enter version (e.g. v0.6.0)
 
 on:
@@ -13,6 +15,7 @@ on:
 
 permissions:
   contents: write
+  actions: write
 
 jobs:
   tag:
@@ -23,11 +26,26 @@ jobs:
           ref: main
           fetch-depth: 0
 
+      - name: Guard against duplicate tags
+        run: |
+          TAG="${{ github.event.inputs.tag }}"
+          if git rev-parse "$TAG" >/dev/null 2>&1; then
+            echo "ERROR: tag $TAG already exists — aborting to prevent overwrite"
+            exit 1
+          fi
+
       - name: Create and push tag
         run: |
+          TAG="${{ github.event.inputs.tag }}"
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git tag "${{ github.event.inputs.tag }}"
-          git push origin "${{ github.event.inputs.tag }}"
+          git tag "$TAG"
+          git push origin "$TAG"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Dispatch release workflow
+        run: |
+          gh workflow run release.yml --ref main --field tag_name="${{ github.event.inputs.tag }}"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

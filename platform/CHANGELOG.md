@@ -16,6 +16,11 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   platform` to match `ci.yml`. Also fixed the changelog gate in `ci.yml` to skip the
   `[Unreleased]` check on release PRs/commits (title or message starts with
   `chore: release`).
+- **Release workflow fixes**: corrected `release.yml` tag filter from regex (`v[0-9]+…+`) to
+  valid glob (`v[0-9]*…*`) so tag-push events actually trigger the workflow. Updated
+  `manual-tag.yml` to guard against duplicate tags and explicitly dispatch `release.yml` via
+  `workflow_dispatch` after pushing the tag (GITHUB_TOKEN push events do not re-trigger other
+  workflows per GitHub Actions security model).
 
 ## [0.6.0] — 2026-08-05
 
