@@ -21,6 +21,11 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   `manual-tag.yml` to guard against duplicate tags and explicitly dispatch `release.yml` via
   `workflow_dispatch` after pushing the tag (GITHUB_TOKEN push events do not re-trigger other
   workflows per GitHub Actions security model).
+- **Gitleaks config path**: set `GITLEAKS_CONFIG: platform/.gitleaks.toml` on the gitleaks
+  step in both root-level workflows (`ci.yml`, `release.yml`). The `gitleaks-action` `uses:`
+  step runs from the repo root regardless of `defaults: run: working-directory: platform`, so
+  without this the allowlist for test fixtures (e.g. `_SYNTHETIC_PASSWORD` in
+  `tests/test_security.py`) was silently ignored, causing false-positive failures.
 
 ## [0.6.0] — 2026-08-05
 
