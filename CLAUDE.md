@@ -160,6 +160,8 @@ All endpoints except `/`, `/health`, and `/ui/*` require `X-API-Key` header.
 | POST | `/ai/generate-blueprint` | Generate blueprint YAML from natural language |
 | POST | `/blueprints/plan` | Validate blueprint and return execution plan |
 | POST | `/blueprints/run` | Execute blueprint (`?parallel=true` for concurrent) |
+| POST | `/blueprints/run/stream` | Execute blueprint, stream events as Server-Sent Events |
+| WS | `/blueprints/run/ws` | Execute blueprint, stream events over WebSocket (`?token=` or `?api_key=`) |
 | GET | `/runs` | List persisted run records (`?limit=&offset=`) |
 | GET | `/runs/{run_id}` | Get a specific run record |
 

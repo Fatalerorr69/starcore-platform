@@ -9,6 +9,22 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **WebSocket blueprint execution stream (REC-002)**: New `WS /blueprints/run/ws` endpoint streams
+  real-time execution events over a persistent WebSocket connection — a full-duplex alternative to
+  the SSE endpoint.
+  - After connecting, client sends the blueprint as a single JSON text frame; server streams
+    `task.started`, `task.completed`, `run.completed`, and `run.persisted` JSON frames.
+  - Auth via query parameters (HTTP headers are not forwarded on WebSocket handshakes):
+    `?token=<jwt>` or `?api_key=<key>`; requires `operator` role or higher.
+  - Custom application close codes: `4401` (auth failure), `4403` (forbidden / insufficient role),
+    `4422` (invalid blueprint JSON or template resolution error).
+  - Client disconnect cancels the in-flight `asyncio.Task` via `Task.cancel()`, mirroring the SSE
+    endpoint's disconnect semantics.
+  - `?parallel=true` engages `Scheduler` (wave-based graph execution); default is sequential
+    `BlueprintExecutor`.
+  - 20 new tests in `tests/test_ws_blueprint.py` covering all auth paths, happy-path event
+    ordering, error events, multi-resource blueprints, parallel mode, and disconnect/cancel.
+
 - **RBAC / JWT authentication (REC-001)**: Full role-based access control layered on top of the
   existing single-key model. Three roles (`reader`, `operator`, `admin`) gate every API endpoint;
   `reader ≤ operator ≤ admin` hierarchy is enforced by `require_role()` FastAPI dependencies.

@@ -25,7 +25,7 @@ from core.config import get_settings
 from core.database import create_initial_admin
 from core.diagnostics import check_database_connectivity
 from core.metrics import HTTP_REQUEST_DURATION_SECONDS, HTTP_REQUESTS_TOTAL
-from core.routers import ai, auth, blueprints, diagnostics, providers, runs
+from core.routers import ai, auth, blueprints, diagnostics, providers, runs, ws
 from core.tracing import configure_tracing
 
 app = FastAPI(
@@ -206,3 +206,4 @@ app.include_router(blueprints.router)
 app.include_router(runs.router)
 app.include_router(ai.router)
 app.include_router(diagnostics.router)
+app.include_router(ws.router)
