@@ -1,0 +1,102 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'Tag name for the release (e.g. v0.6.0)'
+        required: true
+        default: 'v0.6.0'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: platform
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ github.event.inputs.tag_name || github.ref }}
+
+      - name: Set release tag
+        run: echo "RELEASE_TAG=${{ github.event.inputs.tag_name || github.ref_name }}" >> "$GITHUB_ENV"
+        working-directory: ${{ github.workspace }}
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7
+        with:
+          version: "latest"
+
+      - name: Set up Python
+        run: uv python install 3.12
+
+      - name: Install dependencies
+        run: uv sync --extra dev
+
+      - name: Sync lockfile
+        run: uv lock --no-upgrade
+
+      - name: Ruff check
+        run: uv run ruff check .
+
+      - name: Pyright
+        run: uv run pyright
+
+      - name: pip-audit (dependency vulnerability scan)
+        run: uv run pip-audit
+
+      - name: Bandit SAST (medium+ severity)
+        run: uv run bandit -r packages/ apps/ scripts/ -ll -q
+
+      - name: Secret scanning (gitleaks)
+        uses: gitleaks/gitleaks-action@ff98106e4c7b2bc287b24eaf42907196329070c7 # v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Pytest
+        run: uv run pytest -q --tb=short --cov --cov-report=term-missing --cov-fail-under=100
+
+      - name: Alembic check (detect un-migrated model changes)
+        run: |
+          STARCORE_DATABASE_URL=sqlite:///./ci-check.db uv run alembic upgrade head
+          STARCORE_DATABASE_URL=sqlite:///./ci-check.db uv run alembic check
+
+      - name: Documentation build (mkdocs --strict)
+        run: uv run mkdocs build --strict
+
+      - name: Verify tag matches pyproject.toml version
+        run: |
+          TAG="${RELEASE_TAG#v}"
+          PKG="$(uv run python -c 'import importlib.metadata; print(importlib.metadata.version("starcore-platform"))')"
+          if [[ "$TAG" != "$PKG" ]]; then
+            echo "ERROR: tag $TAG != pyproject.toml version $PKG"
+            exit 1
+          fi
+          echo "Version check passed: $TAG"
+
+      - name: Extract release notes from CHANGELOG.md
+        run: |
+          VERSION="${RELEASE_TAG#v}"
+          awk "/^## \\[${VERSION}\\]/{found=1; next} /^## \\[/{if(found) exit} found{print}" CHANGELOG.md \
+            | sed '/^[[:space:]]*$/d;' > release-notes.txt
+          if [[ ! -s release-notes.txt ]]; then
+            echo "ERROR: no release notes found in CHANGELOG.md for version $VERSION"
+            exit 1
+          fi
+          echo "Release notes extracted:"
+          cat release-notes.txt
+
+      - name: Create GitHub Release
+        run: |
+          gh release create "$RELEASE_TAG" \
+            --title "STARCORE Platform $RELEASE_TAG" \
+            --notes-file release-notes.txt
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

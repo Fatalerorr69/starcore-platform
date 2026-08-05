@@ -1,0 +1,33 @@
+name: Manual Tag
+
+# Creates a git tag on main and pushes it — which automatically triggers release.yml.
+# Usage: Actions → Manual Tag → Run workflow → enter version (e.g. v0.6.0)
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to create (e.g. v0.6.0)'
+        required: true
+        default: 'v0.6.0'
+
+permissions:
+  contents: write
+
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Create and push tag
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag "${{ github.event.inputs.tag }}"
+          git push origin "${{ github.event.inputs.tag }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
