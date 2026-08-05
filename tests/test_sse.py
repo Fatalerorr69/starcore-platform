@@ -71,8 +71,7 @@ def _bp(name: str, *resource_names: str) -> dict:
         "name": name,
         "version": "1.0",
         "resources": [
-            {"name": r, "provider": "fake", "kind": "svc", "config": {}}
-            for r in resource_names
+            {"name": r, "provider": "fake", "kind": "svc", "config": {}} for r in resource_names
         ],
     }
 
@@ -165,6 +164,41 @@ async def test_stream_sse_headers(client, fake_provider):
     async with client.stream("POST", "/blueprints/run/stream", json=_bp("h", "r")) as response:
         assert response.headers.get("cache-control") == "no-cache"
         assert response.headers.get("x-accel-buffering") == "no"
+
+
+async def test_stream_execution_error_emits_error_event(client):
+    """If the executor raises inside exec_task, an error event is streamed (no hang)."""
+    from unittest.mock import AsyncMock, patch
+
+    from blueprints.executor import BlueprintExecutor
+
+    with patch.object(
+        BlueprintExecutor,
+        "execute",
+        new_callable=AsyncMock,
+        side_effect=ValueError("cyclic dependency detected"),
+    ):
+        events = await _collect_sse(client, "/blueprints/run/stream", json=_bp("bad", "r"))
+
+    error_events = [e for e in events if e["event"] == "error"]
+    assert len(error_events) == 1
+    assert "cyclic" in error_events[0]["detail"]
+    assert not any(e["event"] == "run.persisted" for e in events)
+
+
+async def test_stream_concurrent_runs_are_isolated(client, fake_provider):
+    """Two concurrent SSE streams must not receive each other's task events."""
+    import asyncio
+
+    results = await asyncio.gather(
+        _collect_sse(client, "/blueprints/run/stream", json=_bp("run-A", "res-a")),
+        _collect_sse(client, "/blueprints/run/stream", json=_bp("run-B", "res-b")),
+    )
+
+    for events, expected_resource in zip(results, ["res-a", "res-b"], strict=True):
+        started = [e for e in events if e["event"] == "task.started"]
+        assert len(started) == 1, f"expected 1 task.started, got {started}"
+        assert started[0]["resource"] == expected_resource
 
 
 async def test_sse_generator_cancels_task_on_early_close():

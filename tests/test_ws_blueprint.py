@@ -323,6 +323,28 @@ def test_ws_template_resolution_error_sends_error_event():
         assert exc_info.value.code == 4422
 
 
+def test_ws_execution_error_sends_error_frame(fake_provider):
+    """Executor exception inside exec_task is surfaced as an error frame (no hang)."""
+    from unittest.mock import AsyncMock, patch
+
+    from blueprints.executor import BlueprintExecutor
+
+    with patch.object(
+        BlueprintExecutor,
+        "execute",
+        new_callable=AsyncMock,
+        side_effect=ValueError("execution failure"),
+    ):
+        with client.websocket_connect("/blueprints/run/ws?api_key=test-api-key") as ws:
+            ws.send_text(_bp("r"))
+            evt = ws.receive_json()
+            assert evt["event"] == "error"
+            assert "execution failure" in evt["detail"]
+            with pytest.raises(WebSocketDisconnect) as exc_info:
+                ws.receive_json()
+    assert exc_info.value.code == 4422
+
+
 # ── Disconnect / cancel semantics ─────────────────────────────────────────────
 
 

@@ -49,9 +49,7 @@ class KubernetesProvider(BaseProvider):
                 self._core_v1 = client.CoreV1Api(api_client)
                 return True
             except Exception as exc:
-                logger.error(
-                    "Kubernetes connection failed: {}", scrub_configured_secrets(str(exc))
-                )
+                logger.error("Kubernetes connection failed: {}", scrub_configured_secrets(str(exc)))
                 self._api_client = None
                 self._apps_v1 = None
                 self._core_v1 = None
@@ -87,9 +85,7 @@ class KubernetesProvider(BaseProvider):
         if self._api_client is None:
             return {"status": "disconnected", "provider": self.name}
         try:
-            version: Any = await asyncio.to_thread(
-                client.VersionApi(self._api_client).get_code
-            )
+            version: Any = await asyncio.to_thread(client.VersionApi(self._api_client).get_code)
             return {
                 "status": "ok",
                 "provider": self.name,
@@ -130,7 +126,7 @@ class KubernetesProvider(BaseProvider):
         namespace = task.payload.get("namespace", settings.kubernetes_namespace)
         action = task.action
 
-        if action == "deploy":
+        if action in ("deploy", "create"):
             await asyncio.to_thread(self._apply_deployment, task, namespace)
         elif action == "delete":
             await asyncio.to_thread(self._delete_deployment, task, namespace)
@@ -152,8 +148,7 @@ class KubernetesProvider(BaseProvider):
 
         replicas = int(task.payload.get("replicas", 1))
         env_vars = [
-            client.V1EnvVar(name=k, value=str(v))
-            for k, v in task.payload.get("env", {}).items()
+            client.V1EnvVar(name=k, value=str(v)) for k, v in task.payload.get("env", {}).items()
         ]
         deployment = client.V1Deployment(
             metadata=client.V1ObjectMeta(name=task.resource),
@@ -186,9 +181,7 @@ class KubernetesProvider(BaseProvider):
             )
         except ApiException as exc:
             if exc.status == 404:
-                self._apps_v1.create_namespaced_deployment(
-                    namespace=namespace, body=deployment
-                )
+                self._apps_v1.create_namespaced_deployment(namespace=namespace, body=deployment)
                 logger.info(
                     "[Kubernetes] Created deployment '{}' in namespace '{}'",
                     task.resource,
@@ -212,16 +205,12 @@ class KubernetesProvider(BaseProvider):
             raise RuntimeError("Kubernetes provider is not connected")
         replicas = task.payload.get("replicas")
         if replicas is None:
-            raise ValueError(
-                f"Resource '{task.resource}' is missing required 'replicas' in config"
-            )
+            raise ValueError(f"Resource '{task.resource}' is missing required 'replicas' in config")
         replicas = int(replicas)
         self._apps_v1.patch_namespaced_deployment_scale(
             name=task.resource, namespace=namespace, body={"spec": {"replicas": replicas}}
         )
-        logger.info(
-            "[Kubernetes] Scaled deployment '{}' to {} replicas", task.resource, replicas
-        )
+        logger.info("[Kubernetes] Scaled deployment '{}' to {} replicas", task.resource, replicas)
         task.result = {"name": task.resource, "namespace": namespace, "replicas": replicas}
 
     def _restart_deployment(self, task, namespace: str) -> None:
@@ -234,9 +223,7 @@ class KubernetesProvider(BaseProvider):
             body={
                 "spec": {
                     "template": {
-                        "metadata": {
-                            "annotations": {"kubectl.kubernetes.io/restartedAt": now}
-                        }
+                        "metadata": {"annotations": {"kubectl.kubernetes.io/restartedAt": now}}
                     }
                 }
             },
@@ -255,9 +242,7 @@ class KubernetesProvider(BaseProvider):
         except ApiException as exc:
             if exc.status == 404:
                 self._core_v1.create_namespace(
-                    body=client.V1Namespace(
-                        metadata=client.V1ObjectMeta(name=task.resource)
-                    )
+                    body=client.V1Namespace(metadata=client.V1ObjectMeta(name=task.resource))
                 )
                 logger.info("[Kubernetes] Created namespace '{}'", task.resource)
             else:

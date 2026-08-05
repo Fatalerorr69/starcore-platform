@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 import hmac
 import json
+import uuid
 from collections.abc import Callable
 from typing import Annotated
 
@@ -20,7 +21,7 @@ from pydantic import ValidationError
 from core.auth import UserPrincipal, UserRole, decode_token
 from core.config import get_settings
 from core.database import get_session
-from core.events import event_bus
+from core.events import _STREAM_CTX, event_bus
 from core.repository import save_run
 
 router = APIRouter()
@@ -128,16 +129,18 @@ async def _ws_run_blueprint(websocket: WebSocket, parallel: bool) -> None:
 
     queue: asyncio.Queue[tuple[str, dict]] = asyncio.Queue()
     completed_tasks: list[Task] = []
+    run_nonce = str(uuid.uuid4())
 
     def _make_handler(event_name: str) -> Callable[[dict], None]:
         def _handler(payload: dict) -> None:
-            queue.put_nowait((event_name, payload))
+            if isinstance(payload, dict) and payload.get("_stream_id") == run_nonce:
+                clean = {k: v for k, v in payload.items() if k != "_stream_id"}
+                queue.put_nowait((event_name, clean))
 
         return _handler
 
     subscribed = {
-        name: _make_handler(name)
-        for name in ("task.started", "task.completed", "run.completed")
+        name: _make_handler(name) for name in ("task.started", "task.completed", "run.completed")
     }
     for name, handler in subscribed.items():
         event_bus.subscribe(name, handler)
@@ -150,17 +153,36 @@ async def _ws_run_blueprint(websocket: WebSocket, parallel: bool) -> None:
             tasks = await BlueprintExecutor().execute(blueprint)
         completed_tasks.extend(tasks)
 
+    token = _STREAM_CTX.set(run_nonce)
     exec_task = asyncio.create_task(_run())
+    _STREAM_CTX.reset(token)
+
+    queue_getter: asyncio.Task[tuple[str, dict]] = asyncio.create_task(queue.get())
     try:
         while True:
-            event_name, payload = await queue.get()
-            await websocket.send_text(json.dumps({"event": event_name, **payload}))
-            if event_name == "run.completed":
-                break
+            done, _ = await asyncio.wait(
+                {exec_task, queue_getter},
+                return_when=asyncio.FIRST_COMPLETED,
+            )
+
+            if queue_getter in done:
+                event_name, payload = queue_getter.result()
+                await websocket.send_text(json.dumps({"event": event_name, **payload}))
+                if event_name == "run.completed":
+                    queue_getter.cancel()
+                    break
+                queue_getter = asyncio.create_task(queue.get())
+
+            if exec_task in done and not exec_task.cancelled():
+                exc = exec_task.exception()
+                if exc is not None:
+                    queue_getter.cancel()
+                    await websocket.send_text(json.dumps({"event": "error", "detail": str(exc)}))
+                    await websocket.close(code=4422, reason="Execution error")
+                    return
+
         await exec_task
-        run_id = await asyncio.to_thread(
-            lambda: _persist_run(blueprint, parallel, completed_tasks)
-        )
+        run_id = await asyncio.to_thread(lambda: _persist_run(blueprint, parallel, completed_tasks))
         await websocket.send_text(json.dumps({"event": "run.persisted", "run_id": run_id}))
         await websocket.close()
     except WebSocketDisconnect:
@@ -174,6 +196,7 @@ async def _ws_run_blueprint(websocket: WebSocket, parallel: bool) -> None:
                 await exec_task
             except asyncio.CancelledError:
                 pass
+        queue_getter.cancel()
 
 
 def _persist_run(blueprint: Blueprint, parallel: bool, tasks: list[Task]) -> str:

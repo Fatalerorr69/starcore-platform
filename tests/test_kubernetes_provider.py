@@ -276,6 +276,15 @@ async def test_execute_raises_for_unsupported_action():
         await p.execute(task)
 
 
+async def test_execute_create_action_maps_to_deploy():
+    """Blueprint-standard action='create' must route to deployment creation."""
+    p = _make_provider()
+    p._apps_v1.read_namespaced_deployment.side_effect = _api_exc(404)
+    task = _task("create", "web", {"image": "nginx:latest"})
+    await p.execute(task)
+    p._apps_v1.create_namespaced_deployment.assert_called_once()
+
+
 # ---------------------------------------------------------------------------
 # execute() — deploy
 # ---------------------------------------------------------------------------
@@ -385,9 +394,7 @@ async def test_delete_calls_correct_endpoint():
     task = _task("delete", "web", {"namespace": "prod"})
     await p.execute(task)
 
-    p._apps_v1.delete_namespaced_deployment.assert_called_once_with(
-        name="web", namespace="prod"
-    )
+    p._apps_v1.delete_namespaced_deployment.assert_called_once_with(name="web", namespace="prod")
     assert task.result == {"name": "web", "namespace": "prod"}
 
 
