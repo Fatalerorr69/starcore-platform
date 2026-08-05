@@ -75,9 +75,9 @@ Tyto položky byly navrženy v předchozím auditu a záměrně odloženy na P2:
 
 ---
 
-### ADR-017 pro REC-009 (plugin operator controls)
-- **Stav:** OPEN — nízká priorita
-- **Co zbývá:** Napsat `docs/adr/ADR-017-plugin-operator-controls.md` dokumentující rozhodnutí o `STARCORE_PLUGINS_ENABLED` a `STARCORE_PLUGINS_ALLOWLIST`. Implementace hotova (REC-009, commit `011cc3f`).
+### ~~ADR-017 pro REC-009 (plugin operator controls)~~ — CLOSED (2026-08-05)
+- `docs/adr/ADR-017-plugin-operator-controls.md` napsán a commitnut.
+- Baseline aktualizován: adr_count 16→17, sentinel PASS.
 
 ---
 

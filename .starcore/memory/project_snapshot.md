@@ -27,8 +27,8 @@
 | Pyright | 0 chyb |
 | pip-audit | 0 zranitelností |
 | Bandit | čistý |
-| ADR záznamy | ADR-001 až ADR-016 |
-| Regression sentinel | PASS (baseline: 801 testy, 21 routes, 32 config fields) |
+| ADR záznamy | ADR-001 až ADR-017 |
+| Regression sentinel | PASS (baseline: 801 testy, 21 routes, 32 config fields, 17 ADRs) |
 
 ## Architektura (přehled)
 
