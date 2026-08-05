@@ -28,9 +28,10 @@ registry = ProviderRegistry()
 def register_default_providers() -> None:
     """Register all built-in providers into the global registry."""
     from providers.docker.provider import DockerProvider
+    from providers.kubernetes.provider import KubernetesProvider
     from providers.proxmox.provider import ProxmoxProvider
 
-    for provider_cls in (DockerProvider, ProxmoxProvider):
+    for provider_cls in (DockerProvider, ProxmoxProvider, KubernetesProvider):
         instance = provider_cls()
         if instance.name not in registry.names():
             registry.register(instance)

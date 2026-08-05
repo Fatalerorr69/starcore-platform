@@ -204,6 +204,9 @@ Key variables:
 | `STARCORE_PROXMOX_TOKEN_NAME` | _(none)_ | Proxmox API token name |
 | `STARCORE_PROXMOX_TOKEN_VALUE` | _(none)_ | Proxmox API token value |
 | `STARCORE_PROXMOX_VERIFY_SSL` | `true` | SSL verification for Proxmox |
+| `STARCORE_KUBERNETES_KUBECONFIG` | _(none)_ | Path to kubeconfig file; falls back to in-cluster then `~/.kube/config` |
+| `STARCORE_KUBERNETES_CONTEXT` | _(none)_ | kubeconfig context to use (default context if unset) |
+| `STARCORE_KUBERNETES_NAMESPACE` | `default` | Default namespace for Kubernetes actions |
 | `STARCORE_POSTGRES_PASSWORD` | _(none)_ | PostgreSQL password for the `postgres` service in `docker-compose.yml`; not read by `Settings` — docker-compose only |
 
 ## Test Isolation

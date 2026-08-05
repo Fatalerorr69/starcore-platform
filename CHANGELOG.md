@@ -9,6 +9,23 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **Kubernetes infrastructure provider (REC-008)**: New `KubernetesProvider` implementing the full
+  `BaseProvider` contract against any Kubernetes cluster.
+  - Authenticates via explicit kubeconfig (`STARCORE_KUBERNETES_KUBECONFIG`), in-cluster service
+    account (when running inside a Pod), or the default `~/.kube/config` — tried in that order.
+  - Optional `STARCORE_KUBERNETES_CONTEXT` selects the kubeconfig context; `STARCORE_KUBERNETES_NAMESPACE`
+    sets the default namespace (default: `default`).
+  - Five actions: `deploy` (create or update a Deployment), `delete` (delete a Deployment),
+    `scale` (set replica count), `restart` (rolling restart via annotation patch), and
+    `apply-namespace` (idempotent namespace creation).
+  - `connect()` is concurrency-safe via `BaseProvider._connect_lock`; the Kubernetes `ApiClient`
+    is created at most once per instance regardless of concurrent callers.
+  - All blocking SDK calls are offloaded to `asyncio.to_thread`; the provider never blocks the
+    event loop.
+  - Registered in `ProviderRegistry` alongside Docker and Proxmox via `register_default_providers()`.
+  - 37 new tests in `tests/test_kubernetes_provider.py` covering connect/disconnect/health,
+    list_resources, all five actions, error paths, and registry integration.
+
 - **WebSocket blueprint execution stream (REC-002)**: New `WS /blueprints/run/ws` endpoint streams
   real-time execution events over a persistent WebSocket connection — a full-duplex alternative to
   the SSE endpoint.

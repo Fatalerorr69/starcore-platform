@@ -62,6 +62,12 @@ class Settings(BaseSettings):
     # with zero overhead. See core/tracing.py.
     otlp_endpoint: str | None = None
 
+    # Kubernetes provider (REC-008). Optional: leave all unset to use the
+    # default kubeconfig at ~/.kube/config with the current context.
+    kubernetes_kubeconfig: str | None = None
+    kubernetes_context: str | None = None
+    kubernetes_namespace: str = "default"
+
     # JWT authentication (REC-001). Set STARCORE_JWT_SECRET_KEY to enable
     # Bearer token auth alongside the legacy X-API-Key mechanism.
     jwt_secret_key: str | None = None
