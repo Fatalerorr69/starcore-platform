@@ -10,7 +10,7 @@ Aktualizováno: 2026-08-06
 |---|---|---|---|
 | SES-000 | Engineering Constitution | ✅ AKTIVNÍ | `SES-000-ENGINEERING-CONSTITUTION.md` |
 | SES-001 | Technical Engineering Standard | ✅ AKTIVNÍ | `SES-001-TECHNICAL-STANDARD.md` |
-| SAKB-000 | Knowledge Model | ⏳ ČEKÁ | TBD |
+| SAKB-000 | Knowledge Model | ✅ AKTIVNÍ | `../sakb/SAKB-000-KNOWLEDGE-MODEL.md` |
 | SPOS-000 | Runtime Bootstrap | ⏳ ČEKÁ | TBD |
 | SPOS-001+ | SPOS Modules | ⏳ ČEKÁ | TBD |
 
@@ -24,7 +24,7 @@ LAYER 1 — Engineering Standard (SES)
   └── SES-001 ✅
 
 LAYER 2 — Knowledge System (SAKB)
-  └── SAKB-000 ⏳
+  └── SAKB-000 ✅
 
 LAYER 3 — Project OS (SPOS)
   └── SPOS-000 ⏳

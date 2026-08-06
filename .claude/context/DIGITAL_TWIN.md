@@ -103,7 +103,7 @@ planned_modules:
 ses_documents:
   SES-000: ACTIVE
   SES-001: ACTIVE
-  SAKB-000: PENDING
+  SAKB-000: ACTIVE
   SPOS-000: PENDING
 
 ses_001_compliance:
@@ -154,6 +154,23 @@ documentation_coverage:
 
 ---
 
+## KNOWLEDGE STATUS (SAKB-000 §18)
+
+```yaml
+knowledge_base:
+  sources_registered: 9
+  sources_planned: 12
+  technology_profiles_created: 6
+  technology_profiles_planned: 16
+  knowledge_packages_created: 1
+  research_pipeline: defined_not_automated
+  rag_embedding_pipeline: not_implemented
+  known_conflicts:
+    - "Python 3.11 (environment) vs >=3.12 (platform pyproject.toml requirement) — mitigated via uv"
+```
+
+---
+
 ## POSLEDNÍ AKTUALIZACE HISTORY
 
 | Datum | Změna | Autor |
@@ -161,3 +178,4 @@ documentation_coverage:
 | 2026-08-06 | Bootstrap 00 — Discovery reports, .claude/ struktura, root README | Claude Code |
 | 2026-08-06 | SES-000 — Engineering Constitution registrace, všechny registry | Claude Code |
 | 2026-08-06 | SES-001 — Technical Standard gap analýza, MODULE/AI registry rozšíření | Claude Code |
+| 2026-08-06 | SAKB-000 — Knowledge Base struktura, 6 Technology Profiles, Source/Knowledge Registry | Claude Code |

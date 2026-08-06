@@ -1,6 +1,6 @@
 # DOCUMENTATION REGISTRY
 
-Aktualizováno: 2026-08-06 | Standard: SES-000
+Aktualizováno: 2026-08-06 | Standard: SAKB-000 §17
 
 ---
 
@@ -9,11 +9,13 @@ Aktualizováno: 2026-08-06 | Standard: SES-000
 | ID | Název | Soubor | Status | Verze |
 |---|---|---|---|---|
 | SES-000 | Engineering Constitution | `.claude/ses/SES-000-ENGINEERING-CONSTITUTION.md` | ✅ AKTIVNÍ | 1.0.0 |
-| SES-001 | Engineering Standard | TBD | ⏳ ČEKÁ | — |
+| SES-001 | Technical Engineering Standard | `.claude/ses/SES-001-TECHNICAL-STANDARD.md` | ✅ AKTIVNÍ | 1.0.0 |
+| SAKB-000 | Knowledge Model | `.claude/sakb/SAKB-000-KNOWLEDGE-MODEL.md` | ✅ AKTIVNÍ | 1.0.0 |
+| SPOS-000 | Runtime Bootstrap | TBD | ⏳ ČEKÁ | — |
 
 ---
 
-## DISCOVERY REPORTS
+## DISCOVERY / IMPLEMENTATION REPORTS
 
 | ID | Název | Soubor | Status |
 |---|---|---|---|
@@ -22,6 +24,21 @@ Aktualizováno: 2026-08-06 | Standard: SES-000
 | DR-003 | Current Architecture | `.claude/reports/CURRENT_ARCHITECTURE.md` | ✅ HOTOVO |
 | DR-004 | Documentation Audit | `.claude/reports/DOCUMENTATION_AUDIT.md` | ✅ HOTOVO |
 | DR-005 | Improvement Roadmap | `.claude/reports/IMPROVEMENT_ROADMAP.md` | ✅ HOTOVO |
+| DR-006 | Final Initialization Report (Bootstrap 00) | `.claude/reports/FINAL_INITIALIZATION_REPORT.md` | ✅ HOTOVO |
+| DR-007 | SES-001 Implementation Report | `.claude/reports/SES-001-IMPLEMENTATION-REPORT.md` | ✅ HOTOVO |
+| DR-008 | SAKB-000 Implementation Report | `.claude/reports/SAKB-000-IMPLEMENTATION-REPORT.md` | ✅ HOTOVO |
+
+---
+
+## SAKB — KNOWLEDGE BASE (`knowledge/`)
+
+| Kategorie | Počet položek | Status |
+|---|---|---|
+| Technology Profiles | 6 vytvořeno / 22 plánováno | ⚠️ ČÁSTEČNĚ |
+| Knowledge Packages | 1 | ✅ ZALOŽENO |
+| Source Registry | 9 zdrojů (L5) | ✅ ZALOŽENO |
+
+Detail: `.claude/registry/KNOWLEDGE_REGISTRY.md`
 
 ---
 
@@ -53,6 +70,5 @@ Aktualizováno: 2026-08-06 | Standard: SES-000
 | `docker/ai-stack/README.md` | VYSOKÁ | ❌ CHYBÍ |
 | `ansible/README.md` | STŘEDNÍ | ❌ CHYBÍ |
 | `ECOSYSTEM_MAP.md` | STŘEDNÍ | ❌ CHYBÍ |
-| SES-001 | VYSOKÁ | ⏳ ČEKÁ |
-| SAKB-000 | STŘEDNÍ | ⏳ ČEKÁ |
-| SPOS-000 | STŘEDNÍ | ⏳ ČEKÁ |
+| 16 zbývajících Technology Profiles | STŘEDNÍ | ⏳ PLÁNOVÁNO |
+| SPOS-000 | VYSOKÁ | ⏳ ČEKÁ |
