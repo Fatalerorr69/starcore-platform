@@ -104,7 +104,16 @@ ses_documents:
   SES-000: ACTIVE
   SES-001: ACTIVE
   SAKB-000: ACTIVE
-  SPOS-000: PENDING
+  SPOS-000: ACTIVE
+
+spos_status:
+  discovery: "platform/.starcore/ already exists — mature runtime (3843 lines Python, 171 tests)"
+  decision: "Adopted existing platform/.starcore/ as canonical SPOS implementation; no duplicate created at root"
+  modules_fully_covered: [SPOS-001, SPOS-002, SPOS-003, SPOS-005]
+  modules_partial: [SPOS-004, SPOS-008]
+  modules_missing: [SPOS-006, SPOS-007, SPOS-009]
+  duplicate_concept: "SPOS-010 — two digital twin docs with different scope (ecosystem vs platform); platform snapshot STALE (v0.4.0 vs actual v0.6.0)"
+  correction_to_ses_001: "Dependabot + SBOM configs DO exist (platform/.github/) but are orphaned — GitHub only reads root .github/, not nested platform/.github/"
 
 ses_001_compliance:
   platform_layer: COMPLIANT
@@ -179,3 +188,4 @@ knowledge_base:
 | 2026-08-06 | SES-000 — Engineering Constitution registrace, všechny registry | Claude Code |
 | 2026-08-06 | SES-001 — Technical Standard gap analýza, MODULE/AI registry rozšíření | Claude Code |
 | 2026-08-06 | SAKB-000 — Knowledge Base struktura, 6 Technology Profiles, Source/Knowledge Registry | Claude Code |
+| 2026-08-06 | SPOS-000 — Discovery existujícího platform/.starcore/ runtime, formální adopce, SPOS_REGISTRY, oprava SES-001 (Dependabot/SBOM orphaned) | Claude Code |

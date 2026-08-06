@@ -89,11 +89,11 @@ Povinná metadata pro každý modul: `MODULE_ID, MODULE_NAME, PURPOSE, OWNER, ST
 | Požadavek | Stav |
 |---|---|
 | pip-audit | ✅ v CI (`ci.yml`) |
-| Dependabot | ❌ CHYBÍ — žádný `.github/dependabot.yml` |
-| SBOM | ❌ CHYBÍ |
+| Dependabot | ⚠️ KONFIGUROVÁN, ALE NEAKTIVNÍ — `platform/.github/dependabot.yml` existuje, ale GitHub čte pouze `.github/` v ROOTu repozitáře, nikoli v podadresáři `platform/`. Config je tedy mrtvý. |
+| SBOM | ⚠️ KONFIGUROVÁN, ALE NEAKTIVNÍ — `platform/.github/workflows/docker-publish.yml` (cosign + sbom-action) existuje ve stejném orphaned umístění |
 | Lockfile (uv.lock) | ✅ existuje, kontrolován v CI (`uv lock --check`) |
 
-**GAP:** Dependabot a SBOM nejsou nastaveny. → přidáno do Implementation Plan.
+**OPRAVA (zjištěno při SPOS-000 auditu, 2026-08-06):** Původní hodnocení "Dependabot/SBOM chybí" bylo nepřesné. Ve skutečnosti existují plně nakonfigurované, ale jsou umístěny v `platform/.github/`, které GitHub nikdy nenačte (GitHub Actions/Dependabot skenují pouze `.github/` v kořeni repozitáře). Toto je **repository audit finding** — orphaned config, ne chybějící funkcionalita. Oprava: přesunout `platform/.github/dependabot.yml` → root `.github/dependabot.yml` (s úpravou `directory: "/platform"`) a `platform/.github/workflows/docker-publish.yml` → root `.github/workflows/`. Klasifikace: MINOR, nízké riziko, ale vyžaduje schválení (přesun/merge workflow souborů).
 
 ---
 
