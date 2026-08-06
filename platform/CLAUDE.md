@@ -278,6 +278,15 @@ CI also builds the Docker image and smoke-tests `GET /health`. A nightly workflo
 | ADR-014 | Task Timeout Support | Accepted |
 | ADR-015 | Request Correlation via Context Variables | Accepted |
 | ADR-016 | Task Timeout Integration | Implemented |
+| ADR-017 | Plugin Operator Controls | Accepted |
+| ADR-018 | Repository Root vs. `platform/` Boundary | Accepted |
+| ADR-019 | `platform/` Extension Policy | Accepted |
+| ADR-020 | Legacy Root Layer Freeze | Accepted |
+| ADR-021 | AI Layer Consolidation | Accepted |
+| ADR-022 | Documentation Boundary | Accepted |
+| ADR-023 | SAEF as a Workflow Protocol, Not a System | Accepted |
+| ADR-024 | Android/Termux as an Edge Node, Outside Core Runtime | Accepted |
+| ADR-025 | STARCORE Change Governance Lifecycle | Proposed |
 
 ### Task timeouts (ADR-016)
 
@@ -319,6 +328,9 @@ The `.starcore/` directory is a cross-session state layer for the STARCORE Auton
     release_readiness.py     — Release Readiness Engine (12 gates)
     qc_engine.py             — QC Orchestrator (unified report)
     startup_protocol.py      — Startup Protocol (12-step session init, Czech report)
+    repository_map.py        — (PLANNED) repository_map.py is planned as a read-only
+                                repository governance discovery tool. It does not
+                                modify or delete repository content.
     tests/                   — standalone tests for scripts/ (171 tests)
   state/
     regression_baseline.json — test/coverage/vulnerability + sentinel baseline
