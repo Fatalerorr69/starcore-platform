@@ -1,34 +1,34 @@
 # Project Snapshot — STARCORE Platform
 
 > Kanonická referenční karta pro cold-start. Aktualizovat při každé strukturální změně.
-> **Poslední aktualizace:** 2026-08-05 (sezení: starcore-autonomous-engineering-4p3tlj)
+> **Poslední aktualizace:** 2026-08-06 (sezení: claude/session-76mlz8)
 
 ## Identita projektu
 
 | Pole | Hodnota |
 |------|---------|
 | Název | starcore-platform |
-| Verze | 0.4.0 |
+| Verze | 0.6.0 |
 | Popis | AI-powered infrastructure orchestration for homelabs |
 | Licence | Apache-2.0 |
 | Python | >=3.12 (vývoj na 3.12.3) |
 | Package manager | uv |
 | Repo | github.com/Fatalerorr69/starcore-platform |
 | Výchozí větev | main |
-| Dev větev | claude/starcore-autonomous-engineering-4p3tlj |
+| Dev větev | claude/session-76mlz8 |
 
-## Klíčové metriky (stav 2026-08-05)
+## Klíčové metriky (stav 2026-08-06)
 
 | Metrika | Hodnota |
 |---------|---------|
-| Testy | 792 passed, 0 failed (9 skipped — postgres) |
+| Testy | 805 collected (current regression baseline), 0 failed (9 skipped — postgres) |
 | Coverage | 100.00% |
 | Ruff | 0 chyb |
 | Pyright | 0 chyb |
 | pip-audit | 0 zranitelností |
 | Bandit | čistý |
-| ADR záznamy | ADR-001 až ADR-017 |
-| Regression sentinel | PASS (baseline: 801 testy, 21 routes, 32 config fields, 17 ADRs) |
+| ADR záznamy | ADR-001 až ADR-025 |
+| Regression sentinel | PASS (baseline: 805 collected, 21 routes, 32 config fields, 25 ADRs) |
 
 ## Architektura (přehled)
 
@@ -47,7 +47,7 @@ apps/cli (Typer)           packages/core/main.py (FastAPI)
 ```
 
 **Klíčové moduly:**
-- `packages/orchestrator/timeout.py` — TimeoutConfig/Strategy/execute_with_timeout (OPRAVENO R-005; není zapojen do Scheduler/BlueprintExecutor — viz ADR-016)
+- `packages/orchestrator/timeout.py` — TimeoutConfig/Strategy/execute_with_timeout (OPRAVENO R-005; zapojeno do Scheduler i BlueprintExecutor — ADR-016 Implemented)
 - `packages/core/security.py` — jediné místo pro redakci secrets
 - `packages/core/correlation.py` — ContextVar-based request ID (ADR-015)
 - `packages/provider_sdk/retry.py` — RetryConfig / attempt_with_retry

@@ -23,16 +23,15 @@
 
 ## KI-003 — GitHub Actions SHA pinning chybí (R-001)
 
-**Stav:** OPEN RISK
-**Popis:** Viz `memory/risks.md` R-001
-**Dopad:** Supply chain riziko v CI
+**Stav:** CLOSED — 2026-07-27 (commit `c0d2b38`)
+**Popis:** Viz `memory/risks.md` R-001 (CLOSED). 22 mutable referencí pinned
+na immutable SHA ve všech 7 workflow souborech.
 
-## KI-004 — `timeout.py` není zapojen do runtime (ADR-016)
+## KI-004 — `timeout.py` zapojení do runtime (ADR-016)
 
-**Stav:** ZÁMĚRNĚ — deliberate deferral
-**Popis:** `execute_with_timeout()` je implementováno a otestováno, ale Scheduler a BlueprintExecutor ho nevyužívají
-**Workaround:** Žádný potřebný — dokumentováno v ADR-016
-**Revisit podmínky:** Blueprint schema dostane `timeout_seconds` field
+**Stav:** CLOSED — 2026-08-01
+**Popis:** `execute_with_timeout()` je zapojeno jak do `Scheduler._run_task()`,
+tak do `BlueprintExecutor` (ověřeno přímo v kódu). ADR-016 status: Implemented.
 
 ## KI-005 — `.claude/instructions.md` vs `CLAUDE.md` překryv
 
