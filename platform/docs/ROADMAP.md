@@ -18,7 +18,7 @@ legacy vrstvu, která je zmrazena dle ADR-020.
 | Metrika | Hodnota |
 |---|---|
 | Verze | 0.4.0 |
-| Testy | 601 passing, 100% coverage |
+| Testy | 805 collected (current regression baseline), 100% coverage |
 | ADR | 25 (ADR-001–017 produktové, ADR-018–025 governance) |
 | CI | ruff, pyright, bandit, pip-audit, pytest, alembic check, mkdocs --strict — vše PASS |
 
