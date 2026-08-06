@@ -1,9 +1,11 @@
 # Session Ledger — Current
 
 > Aktivní session ledger. Archivovat do `sessions/archive/` na konci sezení.
-> **Sezení ID:** starcore-autonomous-engineering-4p3tlj
-> **Datum:** 2026-07-27
-> **Větev:** claude/starcore-autonomous-engineering-4p3tlj
+> **Sezení ID:** claude/session-76mlz8
+> **Datum:** 2026-08-06
+> **Větev:** claude/session-76mlz8
+> Předchozí sezení (`starcore-autonomous-engineering-4p3tlj`) bylo uzavřeno
+> a archivováno: `sessions/archive/2026-07-26-starcore-autonomous-engineering-4p3tlj.md`
 
 ---
 
@@ -11,46 +13,60 @@
 
 | Pole | Hodnota |
 |------|---------|
-| Status | MEMORY_IMPLEMENTATION_COMPLETE |
-| Fáze | Post-Phase 9 (FINAL OPERATING MODE) |
-| Poslední commit | `134a939` — fix(timeout): replace coroutine reuse with asyncio.create_task + shield |
-| Testy | 569 passed / 100% coverage |
+| Status | CONSISTENCY_RECOVERY_WAVE_01_IN_PROGRESS |
+| Fáze | Post-Architecture-Governance (ADR-018–025 committed + pushed) |
+| Poslední commit (pushed) | `134a939` (předchozí sezení) — fix(timeout): replace coroutine reuse |
+| Testy | 805 collected / 100% coverage |
 | CI gates | Všechny zelené |
 
 ---
 
-## Co bylo provedeno v tomto sezení
+## Co bylo provedeno v tomto sezení (claude/session-76mlz8)
 
-### Phase 8 (6 batchů) — committed, pushed
-- Viz `memory/completed_work.md` pro detaily
+### STARCORE Architecture Governance (ADR-018–025)
+- ADR-018: Repository Root vs. `platform/` Boundary
+- ADR-019: `platform/` Extension Policy
+- ADR-020: Legacy Root Layer Freeze
+- ADR-021: AI Layer Consolidation
+- ADR-022: Documentation Boundary
+- ADR-023: SAEF as Workflow Protocol
+- ADR-024: Android/Termux Edge Node
+- ADR-025: STARCORE Change Governance Lifecycle
+- Vše committed + pushed na `claude/session-76mlz8`
 
-### Phase 9 — Final Validation
-- Status: READY_WITH_WARNINGS
-- Warning: R-001 (SHA pinning) — OPEN, neblokující
+### Dokumentace
+- `platform/docs/ROADMAP.md` — vytvoření + oprava mkdocs strict chyby
+- `platform/docs/architecture/edge-node.md` — Edge Node architektura
+- `platform/docs/governance/repository-history.md` — historická restrukturalizace (`0af3560`)
+- `platform/mkdocs.yml` — nav rozšíření (ADR-017–025, ROADMAP, edge-node)
 
-### STARCORE WORKSPACE MEMORY IMPLEMENTATION v1.0
-- Vytvořena celá `.starcore/` struktura
-- Populovány všechny memory soubory aktuálním stavem
-- **Stav:** V PRŮBĚHU → COMPLETE (po tomto souboru)
-- **NECOMMITOVÁNO — per user instructions**
+### Scripts
+- `platform/.starcore/scripts/repository_map.py` — governance discovery tool (scan + diff)
+- `platform/.starcore/scripts/tests/test_repository_map.py` — 19 unittest testů
+
+### Governance metadata
+- `platform/.starcore/prompts/registry.yaml` — PROM-009–012
+- `platform/.starcore/state/regression_baseline.json` — adr_count 17→25, test_count 801→805
+- `platform/.starcore/sessions/ledger.yaml` — cleanup: stale session uzavřena, nová zahájena
+
+### Dokumentace historie
+- `platform/.starcore/memory/completed_work.md` — CHECKPOINT B záznam
+
+### CONSISTENCY RECOVERY WAVE 01 (probíhá)
+- BLOCK 1: `memory/project_snapshot.md` — resync (verze, branch, metriky) ✓
+- BLOCK 2: `memory/user_preferences.md` — dev branch aktualizace ✓
+- BLOCK 3: `sessions/current.md` — tato aktualizace ✓
+- BLOCK 4A: `docs/ROADMAP.md` — verze 0.4.0→0.6.0 ✓
 
 ---
 
 ## Otevřené položky pro příští sezení
 
-1. **R-001** (SHA pinning) — P1, nejdůležitější zbývající riziko
-2. Commit + push `.starcore/` struktury (pokud user schválí)
-3. R-007, R-008 — vyžadují operator decision
-4. R-012 (assert guards) — rychlá win, 30 minut
-5. README "What's Planned, Not Built Yet" cleanup — 15 minut
-
-## Kde sezení skončilo
-
-Implementace `.starcore/` memory layer — všechny soubory vytvořeny.
-Returning czech report per user instructions.
-Čekám na volbu uživatele: [1]-[4] ACTION_REQUIRED menu.
-
----
+1. **WAVE 01 RELEASE** — commit BLOCK 1+2+3+4A, push
+2. **PR #128** — test addition: `test_git_activity_untracked_path`
+3. **PR #128** — opengrep false positive komentář (subprocess.run, shell=False)
+4. **ADR-013 Kubernetes** — concurrency poznámka (P2, nízká priorita)
+5. **R-001** (SHA pinning) — P1, otevřené riziko
 
 ## Startup instrukce pro nové sezení
 
@@ -70,7 +86,7 @@ cat .starcore/memory/pending_work.md
 ```
 
 **Kritické připomenutí:**
-- Branch: `claude/starcore-autonomous-engineering-4p3tlj` — veškerá práce sem
+- Branch: `claude/session-76mlz8` — veškerá práce sem
 - Push vyžaduje souhlas uživatele
 - Czech language pro komunikaci
 - Viz `memory/user_preferences.md` pro kompletní pravidla
