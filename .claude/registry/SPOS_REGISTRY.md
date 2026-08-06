@@ -1,6 +1,6 @@
 # SPOS REGISTRY
 
-Aktualizováno: 2026-08-06 | Standard: SPOS-007
+Aktualizováno: 2026-08-06 | Standard: SPOS-008
 
 Registr operačních modulů Project Operating System. Fyzická implementace primárně v `platform/.starcore/` (viz SPOS-000 rozhodnutí — adoptováno, ne duplikováno).
 
@@ -15,8 +15,9 @@ Registr operačních modulů Project Operating System. Fyzická implementace pri
 | SPOS-005 | Audit Engine | `scripts/qc_engine.py`, `regression_sentinel.py`, `release_readiness.py`, plný CI toolchain (pytest/ruff/pyright/bandit/pip-audit) + nově `.claude/registry/AUDIT_REGISTRY.md` (7 domén A01-A07) | ✅ AKTIVNÍ — ROZŠÍŘENO, ŽIVĚ OTESTOVÁNO (plný `uv sync --extra dev` + 6 nástrojů) |
 | SPOS-006 | Documentation Engine | `.claude/context/DOCUMENTATION_MAP.md` + `.claude/reports/DOCUMENTATION_HEALTH_REPORT.md` + `mkdocs build --strict` (živě ověřeno) | ✅ AKTIVNÍ — ROZŠÍŘENO, ŽIVĚ OTESTOVÁNO |
 | SPOS-007 | Infrastructure Control | `platform/packages/providers` + nově `.claude/context/INFRASTRUCTURE_MAP.md` + 4 registry (HARDWARE/COMPUTE/CONTAINER/REMOTE_SERVICE) | ✅ AKTIVNÍ — ROZŠÍŘENO, ŽIVĚ OTESTOVÁNO |
-| SPOS-008 | AI Orchestration | částečně (`scripts/decision_engine.py`) | ⚠️ ČÁSTEČNÉ |
-| SPOS-009 | Evolution Engine | — | ❌ NEEXISTUJE |
+| SPOS-008 | Deployment Automation Engine (skutečné pořadí promptů — viz poznámka níže) | `.claude/context/DEPLOYMENT_ARCHITECTURE.md` + `DEPLOYMENT_REGISTRY.md` + `INSTALLER_STUDIO_PLAN.md` | ✅ AKTIVNÍ — ŽIVĚ OTESTOVÁNO |
+| SPOS-008-ORIG | AI Orchestration (původní SPOS-000 mapování, nyní bez vlastního promptu) | částečně (`scripts/decision_engine.py`) | ⚠️ ČÁSTEČNÉ, ČEKÁ NA VLASTNÍ PROMPT |
+| SPOS-009 | Security & Compliance Engine (dle SPOS-008 §19, skutečné pořadí — ne "Evolution Engine" z původní SPOS-000 mapy) | — | ⏳ ČEKÁ NA PROMPT |
 | SPOS-010 | Digital Twin Runtime | `.claude/context/DIGITAL_TWIN.md` (ekosystém) + `platform/.starcore/memory/project_snapshot.md` (platform, ZASTARALÉ) | ⚠️ DUPLICITNÍ SCOPE |
 
 ---
@@ -170,3 +171,20 @@ Vytvořeno: `INFRASTRUCTURE_MAP.md` (§3/§18 model DATACENTER→HOST→HYPERVIS
 Nové nálezy: `api_gateway/` a `backups/` v root repo nejsou v MODULE_REGISTRY ani auditovány — přidáno jako TODO.
 
 Žádný Python skript nebyl změněn.
+
+---
+
+## SPOS-008 IMPLEMENTACE (2026-08-06)
+
+**Zásadní nález:** Živě ověřeno (`head -1` na všech 65 `install_*.sh`) — **100 % skriptů** má shebang `#!/data/data/com.termux/files/usr/bin/bash` (Termux/Android specifický). Tyto skripty generují stub Python soubory (`{"status": "online"}`), ne funkční deploy automation. Skutečná produkční deployment cesta je **Track A**: `platform/Dockerfile` + `docker-compose.yml` + CI (`ci.yml`).
+
+**Poznámka k číslování:** Tento prompt (SPOS-008 "Deployment Automation Engine") **neodpovídá** původnímu SPOS-000 mapování, kde SPOS-008 = "AI Orchestration". Skutečné pořadí promptů se od SPOS-007 mírně liší od SPOS-000 abstraktního seznamu — zaznamenáno jako governance drift, ne chyba. Tabulka výše aktualizována, aby odrážela realitu (co bylo skutečně implementováno) místo původního plánu.
+
+Provedeno:
+1. Audit 65 install skriptů — potvrzeno 100 % Termux shebang
+2. Audit root `.github/workflows/` — 3 z 6 workflow souborů jsou scaffolding/placeholder (`starcore-release.yml`, `starcore-integrity.yml` odkazuje na neexistující `core/` adresář), jen `ci.yml` a `starcore-security.yml` dělají něco reálného
+3. Vytvořen `DEPLOYMENT_ARCHITECTURE.md` (§3/§18) — Track A vs Track B jasně odděleny
+4. Vytvořen `DEPLOYMENT_REGISTRY.md` (§9) — 4 záznamy (1 aktivní CI gate, 1 orphaned docker-publish, 1 plánovaný Proxmox, 1 historický Termux)
+5. Vytvořen `INSTALLER_STUDIO_PLAN.md` (§8) — **návrh, ne implementace**, staví na existujícím Provider SDK
+
+Žádný Python/shell skript nebyl vytvořen ani změněn — pouze auditováno a zdokumentováno.

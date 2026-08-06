@@ -112,6 +112,14 @@ ses_documents:
   SPOS-005: ACTIVE
   SPOS-006: ACTIVE
   SPOS-007: ACTIVE
+  SPOS-008: ACTIVE
+
+deployment_status:
+  installed_components: "platform/ (CI-tested), Docker Compose (defined, not run here)"
+  versions: "platform v0.6.0"
+  last_deployment: "DEPLOY-002 (CI gate), continuous, last verified 2026-08-06"
+  health: "CI gate ACTIVE; docker-publish ORPHANED (config exists in platform/.github/, GitHub doesn't read it); Proxmox provisioning PLANNED, blocked (no credentials)"
+  track_a_vs_b: "Track A (Docker/CI, platform/) is the real production path. Track B (65 install_*.sh scripts) confirmed 100% Termux/Android-shebang stub generators, not production deployment -- see DEPLOYMENT_ARCHITECTURE.md"
 
 infrastructure_status_spos007:
   hosts: 3 (1 active: this container, 2 planned/unreachable: Proxmox, Android)
@@ -164,6 +172,17 @@ spos_006_status:
   new_finding: "D004 duplicate-naming risk: platform/docs/ses/SES-0000-MASTER-INDEX.md (ChatGPT-authored, 4-digit numbering) vs .claude/ses/SES-000-*.md (this session, 3-digit) -- documented, not deleted (P010)"
   gaps: "STARCORE Installation Manual (§10) and USER_GUIDE (§13) not created -- large scope, deferred to future step"
   no_files_deleted_or_modified_outside_claude: true
+
+spos_008_status:
+  major_finding: "All 65 install_*.sh scripts confirmed to have #!/data/data/com.termux/files/usr/bin/bash shebang (100%, live-verified via head -1 loop) -- these are Termux/Android-targeted stub generators (same placeholder pattern as knowledge_core.py found in SAKB-000), NOT a general Linux/Proxmox deployment framework"
+  real_production_path: "Track A: platform/Dockerfile + docker-compose.yml + platform/.github/workflows/ci.yml -- verified functional in SPOS-005"
+  root_workflows_finding: "3/6 root .github/workflows/ files are scaffolding/broken (starcore-integrity.yml references non-existent root core/ directory); only ci.yml and starcore-security.yml (gitleaks) do real work"
+  numbering_drift: "This prompt's SPOS-008 ('Deployment Automation Engine') does not match original SPOS-000 module map (SPOS-008 was 'AI Orchestration' there) -- documented as governance drift, not an error; SPOS_REGISTRY.md updated to reflect actual delivered sequence"
+  added:
+    - ".claude/context/DEPLOYMENT_ARCHITECTURE.md (§3/§18) -- Track A vs Track B clearly separated"
+    - ".claude/registry/DEPLOYMENT_REGISTRY.md (§9) -- 4 entries"
+    - ".claude/context/INSTALLER_STUDIO_PLAN.md (§8) -- forward-looking design, explicitly NOT implementation, builds on existing Provider SDK"
+  no_scripts_created_or_modified: true
 
 spos_007_status:
   approach: "Inventoried existing provider code (platform/packages/providers/docker, proxmox) rather than building a parallel infra management system"
@@ -311,3 +330,4 @@ knowledge_base:
 | 2026-08-06 | SPOS-005 — `uv sync --extra dev` + plný toolchain (pytest/ruff/pyright/bandit/pip-audit) živě spuštěn, Alembic FAIL opraven (lokální DB), health score 88.2%, AUDIT_REGISTRY + FIRST_FULL_AUDIT_REPORT vytvořeny | Claude Code |
 | 2026-08-06 | SPOS-006 — `mkdocs build --strict` živě ověřen (PASS), DOCUMENTATION_MAP (126 dokumentů) + Health Report (9 nálezů) vytvořeny, objevena SES-0000 vs SES-000 duplicita | Claude Code |
 | 2026-08-06 | SPOS-007 — `starcore diagnose` živě ověřen, 4 nové infra registry, oprava Docker "Aktivní"→"daemon neběží", nalezeny nedokumentované api_gateway/ a backups/ | Claude Code |
+| 2026-08-06 | SPOS-008 — 65/65 install_*.sh potvrzeno jako Termux stub skripty (ne produkční deployment), DEPLOYMENT_ARCHITECTURE/REGISTRY/INSTALLER_STUDIO_PLAN vytvořeny, zaznamenán numbering drift | Claude Code |

@@ -19,7 +19,8 @@ Aktualizováno: 2026-08-06
 | SPOS-005 | Audit Engine | ✅ AKTIVNÍ | (plný CI toolchain živě spuštěn, viz AUDIT_REGISTRY.md a FIRST_FULL_AUDIT_REPORT.md) |
 | SPOS-006 | Documentation Engine | ✅ AKTIVNÍ | (mkdocs build --strict živě ověřen, viz DOCUMENTATION_MAP.md a DOCUMENTATION_HEALTH_REPORT.md) |
 | SPOS-007 | Infrastructure Control Engine | ✅ AKTIVNÍ | (starcore diagnose živě ověřen, viz INFRASTRUCTURE_MAP.md a 4 nové registry) |
-| SPOS-008+ | SPOS Modules | ⏳ ČEKÁ | TBD |
+| SPOS-008 | Deployment Automation Engine | ✅ AKTIVNÍ | (65 install skriptů auditováno — Termux stub, ne produkce; viz DEPLOYMENT_ARCHITECTURE.md) |
+| SPOS-009+ | SPOS Modules | ⏳ ČEKÁ | TBD (další prompt: pravděpodobně Security & Compliance Engine) |
 
 ---
 
