@@ -1,8 +1,9 @@
 {
   "component": "Release Registry",
-  "version": "14.0.0",
-  "current": "14.0.0",
-  "previous": "9.10.0",
-  "phase": "STARCORE PHASE 1 COMPLETE",
+  "version": "15.10.0",
+  "current": "15.10.0",
+  "previous": "14.0.0",
+  "codename": "NEXUS",
+  "phase": "PHASE_2",
   "status": "current"
 }

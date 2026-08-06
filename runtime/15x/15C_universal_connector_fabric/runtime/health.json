@@ -1,0 +1,9 @@
+{
+  "layer": "15C",
+  "component": "Universal Connector Fabric",
+  "version": "15.3.0",
+  "timestamp": "2026-08-06T01:02:14Z",
+  "checks": {"protocol_adapter":"ok","schema_normalizer":"ok","event_bridge":"ok","semantic_router":"ok","connector_registry":"ok"},
+  "errors": 0,
+  "status": "healthy"
+}
