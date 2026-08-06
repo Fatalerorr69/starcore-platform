@@ -1,0 +1,10 @@
+{
+  "layer": "16J",
+  "name": "STARCORE 16 OS Release — TRANSCENDENCE",
+  "version": "16.10.0",
+  "codename": "TRANSCENDENCE",
+  "timestamp": "2026-08-06T01:12:57Z",
+  "modules": ["starcore_16_os"],
+  "dependencies": ["16I"],
+  "status": "PRODUCTION"
+}
