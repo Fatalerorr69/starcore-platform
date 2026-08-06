@@ -5,8 +5,9 @@
 Vysokoúrovňový, pomalu se měnící přehled směru vývoje STARCORE Platform.
 Popisuje *co* je hotové, *co* se právě řeší, a *co* je vize bez závazku
 k datu. Pro živý, granulární seznam úkolů viz
-[`.starcore/memory/pending_work.md`](../.starcore/memory/pending_work.md) —
-viz sekce "Hranice" níže.
+`.starcore/memory/pending_work.md` (soubor mimo tento dokumentační strom —
+`.starcore/` není publikovaná MkDocs dokumentace) — viz sekce "Hranice"
+níže.
 
 Tento dokument se řídí ADR-022 (Documentation Boundary): žije výhradně v
 `platform/docs/` a popisuje pouze `platform/` (ADR-018) — nikoli root
