@@ -1,6 +1,6 @@
 # SPOS REGISTRY
 
-Aktualizováno: 2026-08-06 | Standard: SPOS-003
+Aktualizováno: 2026-08-06 | Standard: SPOS-004
 
 Registr operačních modulů Project Operating System. Fyzická implementace primárně v `platform/.starcore/` (viz SPOS-000 rozhodnutí — adoptováno, ne duplikováno).
 
@@ -11,7 +11,7 @@ Registr operačních modulů Project Operating System. Fyzická implementace pri
 | SPOS-001 | Project Memory | `platform/.starcore/memory/*.md` (+ nově `current_state.md`, `state/project_state.json`) | ✅ AKTIVNÍ — ROZŠÍŘENO |
 | SPOS-002 | Session Management | `platform/.starcore/sessions/` + `scripts/ledger.py` (+ nově `.claude/registry/SESSION_REGISTRY.md`, `.claude/context/SESSION_CONTEXT.md`) | ✅ AKTIVNÍ — ROZŠÍŘENO, ŽIVĚ OTESTOVÁNO |
 | SPOS-003 | Prompt Registry | `platform/.starcore/prompts/registry.yaml` + `scripts/registry.py` (+ nově `.claude/registry/PROMPT_REGISTRY.md`, 7 SES/SAKB/SPOS promptů zaregistrováno) | ✅ AKTIVNÍ — ROZŠÍŘENO, ŽIVĚ OTESTOVÁNO |
-| SPOS-004 | Project Intelligence | `scripts/impact_analyzer.py` | ⚠️ ČÁSTEČNÉ |
+| SPOS-004 | Project Intelligence | `scripts/impact_analyzer.py` + `regression_sentinel.py` + `release_readiness.py` + `qc_engine.py` (sdíleno s SPOS-005) + nově `.claude/registry/INTELLIGENCE_REGISTRY.md` | ✅ AKTIVNÍ — ROZŠÍŘENO, ŽIVĚ OTESTOVÁNO |
 | SPOS-005 | Audit Engine | `scripts/qc_engine.py`, `regression_sentinel.py`, `release_readiness.py` | ✅ AKTIVNÍ |
 | SPOS-006 | Documentation Engine | manuální (`.claude/registry/DOCUMENTATION_REGISTRY.md`) | ❌ NEAUTOMATIZOVÁNO |
 | SPOS-007 | Infrastructure Control | rozptýleno (`platform/packages/providers`) | ❌ NENÍ SAMOSTATNÝ MODUL |
@@ -95,3 +95,20 @@ Provedeno (živě, přes `registry.py` CLI, ne ruční YAML editace):
 Nalezená mezera: `PromptEntry` model nemá `RELATED_FILES`/`RELATED_COMMITS`/`VALIDATION_STATUS`/`INPUTS`/`OUTPUTS` z §5 — zaznamenáno v `PROMPT_REGISTRY.md`, dataclass vědomě nerozšiřován (riziko zásahu do 384řádkového otestovaného skriptu).
 
 Vytvořeny: `.claude/registry/PROMPT_REGISTRY.md` (ekosystémový index, §19 povinný registr).
+
+---
+
+## SPOS-004 IMPLEMENTACE (2026-08-06)
+
+**Klíčové zjištění:** Project Intelligence Engine (PIE) v podstatě **už existoval** — `impact_analyzer.py`, `regression_sentinel.py`, `release_readiness.py`, `qc_engine.py` dohromady implementují přesně model §3 (OBSERVE→COLLECT→ANALYZE→UNDERSTAND→RECOMMEND→DECIDE), jen nebyly formálně zaregistrovány jako "intelligence layer".
+
+Provedeno:
+1. `impact_analyzer.py analyze --since HEAD~5` — živě otestováno, 35 souborů korektně namapováno na testy (§8 Change Intelligence)
+2. `qc_engine.py run --quick` — živě otestováno, produkuje STAV/ZJIŠTĚNO/RIZIKA/DOPORUČENÍ/DOPAD/RIZIKO/ROLLBACK/DALŠÍ KROK (přesně Decision Engine formát)
+3. Vytvořen `.claude/registry/INTELLIGENCE_REGISTRY.md` (§5) — 7 engines zaregistrováno (4 v Pythonu + 3 mapované na existující `.claude/` dokumenty: MODULE_REGISTRY = Architecture Intelligence, IMPROVEMENT_ROADMAP = Roadmap Intelligence, CONTEXT_RESTORATION_PROTOCOL = AI Context Generation)
+4. Vytvořen `.claude/reports/SPOS-004-HEALTH-REPORT.md` (§6) — provizorní PROJECT_HEALTH_SCORE 77.8 % vypočten manuálně z živého výstupu (kód nerozšiřován)
+5. Zjištěno skutečné, nesouvisející riziko: Alembic migrace nejsou v sync (PACKAGE gate FAIL) — zaznamenáno jako reálné doporučení P1
+
+Mezery: §12 Automatic Reporting (daily/weekly/milestone) neimplementováno — vyžaduje scheduler infrastrukturu, mimo scope. §6 numerický health score neexistuje v kódu — nahrazeno manuální agregací v reportu.
+
+Žádný Python skript nebyl změněn.

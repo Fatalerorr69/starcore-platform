@@ -15,6 +15,7 @@ Aktualizováno: 2026-08-06 | Standard: SPOS-001
 | SPOS-001 | Project Memory Engine | implementováno v `platform/.starcore/` + `.claude/context/CONTEXT_RESTORATION_PROTOCOL.md` | ✅ AKTIVNÍ | 1.0.0 |
 | SPOS-002 | Session Management Engine | implementováno v `platform/.starcore/sessions/` + `.claude/registry/SESSION_REGISTRY.md` + `.claude/context/SESSION_CONTEXT.md` | ✅ AKTIVNÍ | 1.0.0 |
 | SPOS-003 | Prompt Registry Engine | implementováno v `platform/.starcore/prompts/` + `.claude/registry/PROMPT_REGISTRY.md` | ✅ AKTIVNÍ | 1.0.0 |
+| SPOS-004 | Project Intelligence Engine | `.claude/registry/INTELLIGENCE_REGISTRY.md` + `.claude/reports/SPOS-004-HEALTH-REPORT.md` | ✅ AKTIVNÍ | 1.0.0 |
 
 ---
 
@@ -34,6 +35,8 @@ Aktualizováno: 2026-08-06 | Standard: SPOS-001
 | DR-010 | SPOS-001 Implementation Report | `.claude/reports/SPOS-001-IMPLEMENTATION-REPORT.md` | ✅ HOTOVO |
 | DR-011 | SPOS-002 Implementation Report | `.claude/reports/SPOS-002-IMPLEMENTATION-REPORT.md` | ✅ HOTOVO |
 | DR-012 | SPOS-003 Implementation Report | `.claude/reports/SPOS-003-IMPLEMENTATION-REPORT.md` | ✅ HOTOVO |
+| DR-013 | SPOS-004 Health Report | `.claude/reports/SPOS-004-HEALTH-REPORT.md` | ✅ HOTOVO |
+| DR-014 | SPOS-004 Implementation Report | `.claude/reports/SPOS-004-IMPLEMENTATION-REPORT.md` | ✅ HOTOVO |
 
 ---
 

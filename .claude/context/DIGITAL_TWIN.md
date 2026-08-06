@@ -108,6 +108,16 @@ ses_documents:
   SPOS-001: ACTIVE
   SPOS-002: ACTIVE
   SPOS-003: ACTIVE
+  SPOS-004: ACTIVE
+
+intelligence_status:
+  health_score: "77.8% (14/18 checks PASS, provisional — 3 UNKNOWN due to --quick mode, not failures)"
+  active_risks:
+    - "PACKAGE gate FAIL — Alembic migrations not in sync (P1, real pre-existing issue)"
+    - "test_count probe UNKNOWN in Regression Sentinel"
+    - "BUILD, SECURITY gates UNKNOWN (skipped in --quick mode)"
+  recommendations_open: 3
+  engines_registered: 7
 
 prompt_status:
   total_prompts: 15
@@ -152,6 +162,16 @@ spos_003_status:
   linked: "ledger.py add-prompt x7 to bind prompts to this session (§12 Prompt Memory Integration)"
   verified: "registry.py validate -> 15 prompts, no errors; list/search/get all functional"
   gap: "PromptEntry model lacks RELATED_FILES/RELATED_COMMITS/VALIDATION_STATUS/INPUTS/OUTPUTS fields from spec §5 — documented, dataclass not extended (avoid touching tested 384-line script)"
+  no_scripts_modified: true
+
+spos_004_status:
+  finding: "PIE already existed as impact_analyzer.py + regression_sentinel.py + release_readiness.py + qc_engine.py — implements exactly the §3 OBSERVE->COLLECT->ANALYZE->UNDERSTAND->RECOMMEND->DECIDE model, just never formally registered as an intelligence layer"
+  action: "Live-ran impact_analyzer.py (35 files mapped to tests) and qc_engine.py --quick (full Decision Engine format output)"
+  added:
+    - ".claude/registry/INTELLIGENCE_REGISTRY.md (§5) — 7 engines: 4 Python scripts + 3 mapped to existing .claude/ docs (MODULE_REGISTRY=Architecture Intelligence, IMPROVEMENT_ROADMAP=Roadmap Intelligence, CONTEXT_RESTORATION_PROTOCOL=AI Context Generation)"
+    - ".claude/reports/SPOS-004-HEALTH-REPORT.md (§6) — manually computed composite score from live qc_engine output, methodology documented, no code added"
+  real_finding: "PACKAGE gate genuinely FAILs (Alembic out of sync) — pre-existing issue, unrelated to this bootstrap, flagged as P1 recommendation"
+  gaps: "§12 Automatic Reporting (daily/weekly/milestone) not implemented — needs scheduler infra, out of scope"
   no_scripts_modified: true
 
 ses_001_compliance:
@@ -231,3 +251,4 @@ knowledge_base:
 | 2026-08-06 | SPOS-001 — current_state.md + project_state.json doplněny, Context Restoration Protocol propojuje .claude/ s platform/.starcore/ | Claude Code |
 | 2026-08-06 | SPOS-002 — Uzavřena osiřelá session (end_time null), zaregistrována aktuální session v ledgeru, SESSION_CONTEXT + SESSION_REGISTRY vytvořeny | Claude Code |
 | 2026-08-06 | SPOS-003 — 7 governance promptů (SES/SAKB/SPOS) zaregistrováno do existujícího prompts/registry.yaml, propojeno se session, PROMPT_REGISTRY vytvořen | Claude Code |
+| 2026-08-06 | SPOS-004 — Objeveny existující QC engines (impact_analyzer, sentinel, release_readiness, qc_engine) jako hotová PIE, INTELLIGENCE_REGISTRY + Health Report (77.8%) vytvořeny, zjištěn reálný Alembic sync problém | Claude Code |
