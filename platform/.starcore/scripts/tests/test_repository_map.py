@@ -201,6 +201,15 @@ class TestGitActivity(RepoMapTestCase):
         self.assertGreaterEqual(activity["commit_count"], 1)
         self.assertIsNotNone(activity["last_commit"])
 
+    def test_git_activity_untracked_path(self):
+        # Create a new directory that is not added or committed to the repo
+        untracked_dir = self.repo_root / "untracked_dir"
+        untracked_dir.mkdir(exist_ok=True)
+
+        activity = git_activity(self.repo_root, "untracked_dir")
+        self.assertEqual(activity["commit_count"], 0)
+        self.assertIsNone(activity["last_commit"])
+
     def test_git_activity_never_mutates(self):
         with (
             patch("shutil.rmtree") as mock_rmtree,
