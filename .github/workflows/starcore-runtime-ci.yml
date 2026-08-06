@@ -1,0 +1,75 @@
+name: STARCORE Runtime CI
+
+on:
+  push:
+    branches: [main, "claude/session-*"]
+    paths:
+      - "runtime/17x/**"
+      - "runtime/18x/**"
+      - "runtime/19x/**"
+      - "tests/run_all_starcore_tests.py"
+      - "install_STARCORE_*_MASTER.sh"
+  pull_request:
+    branches: [main]
+    paths:
+      - "runtime/17x/**"
+      - "runtime/18x/**"
+      - "runtime/19x/**"
+      - "tests/run_all_starcore_tests.py"
+      - "install_STARCORE_*_MASTER.sh"
+
+jobs:
+  starcore-runtime-tests:
+    name: STARCORE Runtime Tests (17x / 18x / 19x)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Verify runtime layer structure
+        run: |
+          for gen in 17x 18x 19x; do
+            count=$(ls -d runtime/${gen}/*/ 2>/dev/null | wc -l)
+            echo "  ${gen}: ${count} layers found"
+            if [ "$count" -eq 0 ]; then
+              echo "ERROR: No layers found in runtime/${gen}/"
+              exit 1
+            fi
+          done
+
+      - name: Run master test suite
+        run: python3 tests/run_all_starcore_tests.py
+
+      - name: Validate manifests
+        run: |
+          fail=0
+          for f in $(find runtime/17x runtime/18x runtime/19x -name "manifest.json"); do
+            python3 -c "import json,sys; d=json.load(open('$f')); assert 'layer' in d and 'version' in d, 'missing keys'" \
+              && echo "  OK  $f" \
+              || { echo "  FAIL  $f"; fail=1; }
+          done
+          exit $fail
+
+      - name: Validate health files
+        run: |
+          fail=0
+          for f in $(find runtime/17x runtime/18x runtime/19x -name "health.json"); do
+            python3 -c "import json,sys; d=json.load(open('$f')); assert 'status' in d, 'missing status key'" \
+              && echo "  OK  $f" \
+              || { echo "  FAIL  $f"; fail=1; }
+          done
+          exit $fail
+
+      - name: Python syntax check — all core modules
+        run: |
+          fail=0
+          for f in $(find runtime/17x runtime/18x runtime/19x -name "*.py" -path "*/core/*"); do
+            python3 -m py_compile "$f" && echo "  OK  $f" || { echo "  FAIL  $f"; fail=1; }
+          done
+          exit $fail

@@ -1,0 +1,9 @@
+{
+  "layer": "9F",
+  "component": "Digital Twin Runtime",
+  "version": "9.6.0",
+  "timestamp": "2026-08-06T00:45:05Z",
+  "checks": {"twin_engine":"ok","state_mirror":"ok","simulation_runner":"ok","divergence_detector":"ok","sync_bridge":"ok"},
+  "errors": 0,
+  "status": "healthy"
+}

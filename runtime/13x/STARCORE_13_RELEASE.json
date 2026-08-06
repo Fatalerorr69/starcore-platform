@@ -1,0 +1,16 @@
+{
+  "release": "STARCORE 13 Enterprise Platform",
+  "version": "13.0.0",
+  "timestamp": "2026-08-06T00:48:58Z",
+  "layers": {
+    "13A": {"name": "Enterprise Runtime", "status": "PRODUCTION"},
+    "13B": {"name": "Multi-Tenant Engine", "status": "PRODUCTION"},
+    "13C": {"name": "SLA Manager", "status": "PRODUCTION"},
+    "13D": {"name": "Enterprise Security", "status": "PRODUCTION"},
+    "13E": {"name": "Business Intelligence", "status": "PRODUCTION"}
+  },
+  "previous_release": "STARCORE_12_RELEASE",
+  "rollback": "runtime/12x/STARCORE_12_RELEASE.json",
+  "errors": 0,
+  "status": "PRODUCTION"
+}

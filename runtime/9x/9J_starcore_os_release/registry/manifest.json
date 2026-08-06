@@ -1,0 +1,9 @@
+{
+  "layer": "9J",
+  "name": "STARCORE 9 OS Release",
+  "version": "9.10.0",
+  "timestamp": "2026-08-06T00:45:05Z",
+  "modules": ["os_kernel","boot_sequencer","layer_orchestrator","upgrade_controller","starcore_9_release_manager"],
+  "dependencies": ["9I"],
+  "status": "PRODUCTION"
+}

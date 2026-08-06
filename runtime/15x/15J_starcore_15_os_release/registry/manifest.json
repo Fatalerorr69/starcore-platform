@@ -1,0 +1,10 @@
+{
+  "layer": "15J",
+  "name": "STARCORE 15 OS Release",
+  "version": "15.10.0",
+  "timestamp": "2026-08-06T01:02:14Z",
+  "modules": ["nexus_kernel","phase2_boot","collective_orchestrator","evolution_scheduler","nexus_release_manager"],
+  "dependencies": ["15I"],
+  "phase": "PHASE_2",
+  "status": "PRODUCTION"
+}

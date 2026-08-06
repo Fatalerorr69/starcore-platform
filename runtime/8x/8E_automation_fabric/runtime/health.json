@@ -1,0 +1,15 @@
+{
+  "layer": "8E",
+  "component": "Automation Fabric",
+  "version": "8.5.0",
+  "timestamp": "2026-08-06T00:42:14Z",
+  "checks": {
+    "workflow_engine": "ok",
+    "trigger_system": "ok",
+    "action_executor": "ok",
+    "pipeline_manager": "ok",
+    "event_coordinator": "ok"
+  },
+  "errors": 0,
+  "status": "healthy"
+}

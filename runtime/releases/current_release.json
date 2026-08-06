@@ -1,6 +1,7 @@
 {
-    "component": "Release Registry",
-    "version": "7.10.01",
-    "current": "7.10.10",
-    "status": "current"
+  "current": "16.10.0",
+  "codename": "TRANSCENDENCE",
+  "phase": "PHASE 2",
+  "updated_at": "2026-08-06T01:12:57Z",
+  "release_file": "runtime/16x/STARCORE_16_RELEASE.json"
 }

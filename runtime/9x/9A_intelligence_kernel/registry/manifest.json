@@ -1,0 +1,9 @@
+{
+  "layer": "9A",
+  "name": "Intelligence Kernel",
+  "version": "9.1.0",
+  "timestamp": "2026-08-06T00:45:05Z",
+  "modules": ["reasoning_engine","belief_updater","goal_planner","hypothesis_generator","cognitive_kernel"],
+  "dependencies": ["8J"],
+  "status": "PRODUCTION"
+}

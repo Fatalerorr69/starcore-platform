@@ -1,0 +1,9 @@
+{
+  "layer": "9J",
+  "component": "STARCORE 9 OS Release",
+  "version": "9.10.0",
+  "timestamp": "2026-08-06T00:45:05Z",
+  "checks": {"os_kernel":"ok","boot_sequencer":"ok","layer_orchestrator":"ok","upgrade_controller":"ok","starcore_9_release_manager":"ok"},
+  "errors": 0,
+  "status": "healthy"
+}
