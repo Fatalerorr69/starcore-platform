@@ -2,6 +2,12 @@
 
 Aktualizováno: 2026-08-06 | Standard: SES-000
 
+> **SPOS-007 poznámka:** Tento registr (Bootstrap 00) byl rozdělen do specializovaných registrů:
+> `HARDWARE_REGISTRY.md`, `COMPUTE_REGISTRY.md`, `CONTAINER_REGISTRY.md`, `REMOTE_SERVICE_REGISTRY.md`
+> (viz `.claude/context/INFRASTRUCTURE_MAP.md`). Tento soubor zůstává jako obecný přehled, data níže
+> jsou nyní živě ověřená a přesnější v nových registrech (např. Docker zde uvedený jako "Aktivní" byl
+> opraven na "CLI nainstalováno, daemon neběží" — viz CONTAINER_REGISTRY.md).
+
 ---
 
 ## AKTUÁLNÍ PROSTŘEDÍ (Claude Code Remote)

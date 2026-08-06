@@ -18,7 +18,8 @@ Aktualizováno: 2026-08-06
 | SPOS-004 | Project Intelligence Engine | ✅ AKTIVNÍ | (existující QC engines formálně adoptovány, viz INTELLIGENCE_REGISTRY.md) |
 | SPOS-005 | Audit Engine | ✅ AKTIVNÍ | (plný CI toolchain živě spuštěn, viz AUDIT_REGISTRY.md a FIRST_FULL_AUDIT_REPORT.md) |
 | SPOS-006 | Documentation Engine | ✅ AKTIVNÍ | (mkdocs build --strict živě ověřen, viz DOCUMENTATION_MAP.md a DOCUMENTATION_HEALTH_REPORT.md) |
-| SPOS-007+ | SPOS Modules | ⏳ ČEKÁ | TBD |
+| SPOS-007 | Infrastructure Control Engine | ✅ AKTIVNÍ | (starcore diagnose živě ověřen, viz INFRASTRUCTURE_MAP.md a 4 nové registry) |
+| SPOS-008+ | SPOS Modules | ⏳ ČEKÁ | TBD |
 
 ---
 

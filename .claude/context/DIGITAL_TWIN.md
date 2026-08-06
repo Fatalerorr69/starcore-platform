@@ -111,6 +111,14 @@ ses_documents:
   SPOS-004: ACTIVE
   SPOS-005: ACTIVE
   SPOS-006: ACTIVE
+  SPOS-007: ACTIVE
+
+infrastructure_status_spos007:
+  hosts: 3 (1 active: this container, 2 planned/unreachable: Proxmox, Android)
+  services: {defined: 4, running_here: 0, planned: 3}
+  vm_count: 0 (real), 3 planned
+  resource_usage: "HOST-001 (this container): 15GiB RAM, 252GB disk, Xeon 2.80GHz"
+  health: "Proxmox/Docker daemon unreachable from this environment (verified live via starcore diagnose --json)"
 
 documentation_health:
   total_documents: 126
@@ -156,6 +164,16 @@ spos_006_status:
   new_finding: "D004 duplicate-naming risk: platform/docs/ses/SES-0000-MASTER-INDEX.md (ChatGPT-authored, 4-digit numbering) vs .claude/ses/SES-000-*.md (this session, 3-digit) -- documented, not deleted (P010)"
   gaps: "STARCORE Installation Manual (§10) and USER_GUIDE (§13) not created -- large scope, deferred to future step"
   no_files_deleted_or_modified_outside_claude: true
+
+spos_007_status:
+  approach: "Inventoried existing provider code (platform/packages/providers/docker, proxmox) rather than building a parallel infra management system"
+  verified: "starcore diagnose --json live-run: provider.proxmox=error (missing credentials), provider.docker=error (daemon not running), db migrations at head (0002)"
+  correction: "Bootstrap 00 claimed Docker 'Active' in this environment based on `docker --version` alone -- live test now shows the daemon socket doesn't exist, only the CLI binary is installed. Corrected in CONTAINER_REGISTRY.md"
+  added:
+    - ".claude/context/INFRASTRUCTURE_MAP.md (§3/§18 DATACENTER->HOST->HYPERVISOR->VM/LXC->SERVICE model)"
+    - ".claude/registry/HARDWARE_REGISTRY.md, COMPUTE_REGISTRY.md, CONTAINER_REGISTRY.md, REMOTE_SERVICE_REGISTRY.md"
+  new_findings: "api_gateway/ and backups/ directories in root repo are undocumented and not in MODULE_REGISTRY -- flagged as future audit TODO"
+  no_scripts_modified: true
 
 prompt_status:
   total_prompts: 15
@@ -292,3 +310,4 @@ knowledge_base:
 | 2026-08-06 | SPOS-004 — Objeveny existující QC engines (impact_analyzer, sentinel, release_readiness, qc_engine) jako hotová PIE, INTELLIGENCE_REGISTRY + Health Report (77.8%) vytvořeny, zjištěn reálný Alembic sync problém | Claude Code |
 | 2026-08-06 | SPOS-005 — `uv sync --extra dev` + plný toolchain (pytest/ruff/pyright/bandit/pip-audit) živě spuštěn, Alembic FAIL opraven (lokální DB), health score 88.2%, AUDIT_REGISTRY + FIRST_FULL_AUDIT_REPORT vytvořeny | Claude Code |
 | 2026-08-06 | SPOS-006 — `mkdocs build --strict` živě ověřen (PASS), DOCUMENTATION_MAP (126 dokumentů) + Health Report (9 nálezů) vytvořeny, objevena SES-0000 vs SES-000 duplicita | Claude Code |
+| 2026-08-06 | SPOS-007 — `starcore diagnose` živě ověřen, 4 nové infra registry, oprava Docker "Aktivní"→"daemon neběží", nalezeny nedokumentované api_gateway/ a backups/ | Claude Code |

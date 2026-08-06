@@ -1,6 +1,6 @@
 # SPOS REGISTRY
 
-Aktualizováno: 2026-08-06 | Standard: SPOS-006
+Aktualizováno: 2026-08-06 | Standard: SPOS-007
 
 Registr operačních modulů Project Operating System. Fyzická implementace primárně v `platform/.starcore/` (viz SPOS-000 rozhodnutí — adoptováno, ne duplikováno).
 
@@ -14,7 +14,7 @@ Registr operačních modulů Project Operating System. Fyzická implementace pri
 | SPOS-004 | Project Intelligence | `scripts/impact_analyzer.py` + `regression_sentinel.py` + `release_readiness.py` + `qc_engine.py` (sdíleno s SPOS-005) + nově `.claude/registry/INTELLIGENCE_REGISTRY.md` | ✅ AKTIVNÍ — ROZŠÍŘENO, ŽIVĚ OTESTOVÁNO |
 | SPOS-005 | Audit Engine | `scripts/qc_engine.py`, `regression_sentinel.py`, `release_readiness.py`, plný CI toolchain (pytest/ruff/pyright/bandit/pip-audit) + nově `.claude/registry/AUDIT_REGISTRY.md` (7 domén A01-A07) | ✅ AKTIVNÍ — ROZŠÍŘENO, ŽIVĚ OTESTOVÁNO (plný `uv sync --extra dev` + 6 nástrojů) |
 | SPOS-006 | Documentation Engine | `.claude/context/DOCUMENTATION_MAP.md` + `.claude/reports/DOCUMENTATION_HEALTH_REPORT.md` + `mkdocs build --strict` (živě ověřeno) | ✅ AKTIVNÍ — ROZŠÍŘENO, ŽIVĚ OTESTOVÁNO |
-| SPOS-007 | Infrastructure Control | rozptýleno (`platform/packages/providers`) | ❌ NENÍ SAMOSTATNÝ MODUL |
+| SPOS-007 | Infrastructure Control | `platform/packages/providers` + nově `.claude/context/INFRASTRUCTURE_MAP.md` + 4 registry (HARDWARE/COMPUTE/CONTAINER/REMOTE_SERVICE) | ✅ AKTIVNÍ — ROZŠÍŘENO, ŽIVĚ OTESTOVÁNO |
 | SPOS-008 | AI Orchestration | částečně (`scripts/decision_engine.py`) | ⚠️ ČÁSTEČNÉ |
 | SPOS-009 | Evolution Engine | — | ❌ NEEXISTUJE |
 | SPOS-010 | Digital Twin Runtime | `.claude/context/DIGITAL_TWIN.md` (ekosystém) + `platform/.starcore/memory/project_snapshot.md` (platform, ZASTARALÉ) | ⚠️ DUPLICITNÍ SCOPE |
@@ -150,3 +150,23 @@ Provedeno:
 Mezery: STARCORE Installation Manual (§10) a USER_GUIDE (§13) nevytvořeny — velký rozsah, vyžadují samostatný implementační krok, ne součást tohoto auditu. Automatická generace dokumentace (§7) neimplementována — mimo scope.
 
 Žádný Python/MkDocs konfigurační soubor nebyl změněn — pouze spuštěn existující build.
+
+---
+
+## SPOS-007 IMPLEMENTACE (2026-08-06)
+
+Audit potvrdil: žádný samostatný infrastrukturní inventář neexistoval (registrováno jako gap ve SPOS-000/006), ale **kód pro správu existuje** (`platform/packages/providers/{docker,proxmox}`, MOD-005/006). Vytvořen inventář nad tímto kódem, ne duplicitní implementace.
+
+Živě ověřeno přes `starcore diagnose --json`:
+- `runtime_environment: local`
+- `provider.proxmox: error` — chybí credentials (STARCORE_PROXMOX_*)
+- `provider.docker: error` — Docker daemon neběží (jen CLI binárka nainstalována)
+- DB migrace na head (0002) — potvrzuje SPOS-005 opravu
+
+**Oprava Bootstrap 00:** Tehdejší INFRASTRUCTURE_REGISTRY.md uváděl Docker jako "Aktivní". Live test ukázal: CLI je nainstalováno, ale `/var/run/docker.sock` neexistuje — daemon neběží. Opraveno v `CONTAINER_REGISTRY.md`.
+
+Vytvořeno: `INFRASTRUCTURE_MAP.md` (§3/§18 model DATACENTER→HOST→HYPERVISOR→VM/LXC→SERVICE), `HARDWARE_REGISTRY.md` (3 hosty), `COMPUTE_REGISTRY.md` (3 plánované VM), `CONTAINER_REGISTRY.md` (4 služby), `REMOTE_SERVICE_REGISTRY.md` (4 služby, GitHub+Anthropic aktivní).
+
+Nové nálezy: `api_gateway/` a `backups/` v root repo nejsou v MODULE_REGISTRY ani auditovány — přidáno jako TODO.
+
+Žádný Python skript nebyl změněn.
