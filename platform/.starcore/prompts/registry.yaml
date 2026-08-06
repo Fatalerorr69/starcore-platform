@@ -169,3 +169,99 @@ prompts:
   session_id: null
   tags: []
   description: ''
+- id: PROM-009
+  name: STARCORE SAEF BOOTSTRAP PROMPT
+  version: '1.0'
+  type: MASTER
+  purpose: Bootstrap prompt navrhující paralelní "STARCORE AI Engineering Framework"
+    (SAEF) s vlastním discovery/planning/implementation/review/optimization
+    režimem a Proxmox/Android/Termux/lokálním environment discovery
+  phase: null
+  status: REJECTED
+  created_at: '2026-08-06'
+  updated_at: '2026-08-06'
+  source: USER
+  supersedes: null
+  superseded_by: null
+  dependencies: []
+  session_id: claude/session-76mlz8
+  tags:
+  - master
+  - saef
+  - bootstrap
+  - rejected
+  description: Zamítnut jako duplicitní k existujícímu .starcore/ systému (ADR-018,
+    ADR-023) — SAEF principy integrovány jako workflow protokol, ne jako nový
+    paralelní framework.
+- id: PROM-010
+  name: STARCORE SAEF INTEGRATION DISCOVERY (PROMPT 00.5)
+  version: '1.0'
+  type: AUDIT
+  purpose: Read-only discovery audit mapující existující STARCORE architekturu
+    (platform/, .starcore/, root legacy vrstva) proti navrhovaným SAEF modulům
+  phase: null
+  status: ACTIVE
+  created_at: '2026-08-06'
+  updated_at: '2026-08-06'
+  source: USER
+  supersedes: null
+  superseded_by: null
+  dependencies:
+  - PROM-009
+  session_id: claude/session-76mlz8
+  tags:
+  - audit
+  - discovery
+  - saef
+  - read-only
+  description: 'Výstup: STARCORE SAEF Integration Discovery Report — architecture
+    map, produkční/experimentální/legacy klasifikace, SAEF compatibility matrix,
+    duplication report.'
+- id: PROM-011
+  name: STARCORE ARCHITECTURE GOVERNANCE REPORT
+  version: '1.0'
+  type: IMPLEMENTATION
+  purpose: Definice finální architektury governance (SSOT, extension policy,
+    legacy freeze, migrační strategie, Edge Node strategie, dokumentační
+    strategie, budoucí SAEF integrace) formou GADR návrhů
+  phase: null
+  status: ACTIVE
+  created_at: '2026-08-06'
+  updated_at: '2026-08-06'
+  source: USER
+  supersedes: null
+  superseded_by: null
+  dependencies:
+  - PROM-010
+  session_id: claude/session-76mlz8
+  tags:
+  - implementation
+  - governance
+  - adr
+  - architecture
+  description: 'GADR-001 až GADR-007 schváleny uživatelem a formalizovány jako
+    ADR-018 až ADR-025 (STARCORE Change Governance Lifecycle).'
+- id: PROM-012
+  name: STARCORE FINAL IMPLEMENTATION READINESS REVIEW
+  version: '1.0'
+  type: AUDIT
+  purpose: Kontrola návazností ADR-018 až ADR-025 a PROM-009 až PROM-012, dopad
+    na CI/testy/regression sentinel/CLAUDE.md/mkdocs/registry.yaml, přesné
+    pořadí commitů, rollback strategie a klasifikace kroků
+  phase: null
+  status: ACTIVE
+  created_at: '2026-08-06'
+  updated_at: '2026-08-06'
+  source: USER
+  supersedes: null
+  superseded_by: null
+  dependencies:
+  - PROM-011
+  session_id: claude/session-76mlz8
+  tags:
+  - audit
+  - readiness-review
+  - governance
+  description: Readiness review před zápisem ADR-018 až ADR-025; zavedl SAFE
+    AUTOMATIC / REQUIRE REVIEW / REQUIRE USER APPROVAL klasifikaci kroků
+    (formalizováno v ADR-025).
