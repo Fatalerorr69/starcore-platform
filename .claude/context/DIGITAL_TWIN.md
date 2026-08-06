@@ -110,6 +110,17 @@ ses_documents:
   SPOS-003: ACTIVE
   SPOS-004: ACTIVE
   SPOS-005: ACTIVE
+  SPOS-006: ACTIVE
+
+documentation_health:
+  total_documents: 126
+  by_location: {platform_docs: 56, claude: 36, platform_starcore: 16, knowledge: 8, platform_reports: 10}
+  mkdocs_build_strict: "PASS (exit 0, 1 INFO: ADR-017 missing from nav)"
+  findings_total: 9
+  outdated_docs: 3
+  missing_docs: 5
+  duplicate_docs: 1
+  last_validation: "2026-08-06"
 
 intelligence_status:
   health_score: "88.2% (15/17, FULL mode, superseded the 77.8% provisional quick-mode figure)"
@@ -135,6 +146,16 @@ audit_status:
   open_findings: 4
   resolved_findings: 1
   domains_covered: "7/7 (A01-A07), 3 fully automated, 4 partial"
+
+spos_006_status:
+  approach: "Audited platform/docs/ (56 files, mkdocs-based, already well-maintained) — no new documentation system built"
+  verified: "mkdocs build --strict live-ran -> PASS (exit 0)"
+  added:
+    - ".claude/context/DOCUMENTATION_MAP.md (§4/§18) -- 126 docs normalized into 6 types"
+    - ".claude/reports/DOCUMENTATION_HEALTH_REPORT.md (§6/§18) -- D001-D006 checks, 9 findings"
+  new_finding: "D004 duplicate-naming risk: platform/docs/ses/SES-0000-MASTER-INDEX.md (ChatGPT-authored, 4-digit numbering) vs .claude/ses/SES-000-*.md (this session, 3-digit) -- documented, not deleted (P010)"
+  gaps: "STARCORE Installation Manual (§10) and USER_GUIDE (§13) not created -- large scope, deferred to future step"
+  no_files_deleted_or_modified_outside_claude: true
 
 prompt_status:
   total_prompts: 15
@@ -270,3 +291,4 @@ knowledge_base:
 | 2026-08-06 | SPOS-003 — 7 governance promptů (SES/SAKB/SPOS) zaregistrováno do existujícího prompts/registry.yaml, propojeno se session, PROMPT_REGISTRY vytvořen | Claude Code |
 | 2026-08-06 | SPOS-004 — Objeveny existující QC engines (impact_analyzer, sentinel, release_readiness, qc_engine) jako hotová PIE, INTELLIGENCE_REGISTRY + Health Report (77.8%) vytvořeny, zjištěn reálný Alembic sync problém | Claude Code |
 | 2026-08-06 | SPOS-005 — `uv sync --extra dev` + plný toolchain (pytest/ruff/pyright/bandit/pip-audit) živě spuštěn, Alembic FAIL opraven (lokální DB), health score 88.2%, AUDIT_REGISTRY + FIRST_FULL_AUDIT_REPORT vytvořeny | Claude Code |
+| 2026-08-06 | SPOS-006 — `mkdocs build --strict` živě ověřen (PASS), DOCUMENTATION_MAP (126 dokumentů) + Health Report (9 nálezů) vytvořeny, objevena SES-0000 vs SES-000 duplicita | Claude Code |

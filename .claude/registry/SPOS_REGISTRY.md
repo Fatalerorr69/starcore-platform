@@ -1,6 +1,6 @@
 # SPOS REGISTRY
 
-Aktualizováno: 2026-08-06 | Standard: SPOS-005
+Aktualizováno: 2026-08-06 | Standard: SPOS-006
 
 Registr operačních modulů Project Operating System. Fyzická implementace primárně v `platform/.starcore/` (viz SPOS-000 rozhodnutí — adoptováno, ne duplikováno).
 
@@ -13,7 +13,7 @@ Registr operačních modulů Project Operating System. Fyzická implementace pri
 | SPOS-003 | Prompt Registry | `platform/.starcore/prompts/registry.yaml` + `scripts/registry.py` (+ nově `.claude/registry/PROMPT_REGISTRY.md`, 7 SES/SAKB/SPOS promptů zaregistrováno) | ✅ AKTIVNÍ — ROZŠÍŘENO, ŽIVĚ OTESTOVÁNO |
 | SPOS-004 | Project Intelligence | `scripts/impact_analyzer.py` + `regression_sentinel.py` + `release_readiness.py` + `qc_engine.py` (sdíleno s SPOS-005) + nově `.claude/registry/INTELLIGENCE_REGISTRY.md` | ✅ AKTIVNÍ — ROZŠÍŘENO, ŽIVĚ OTESTOVÁNO |
 | SPOS-005 | Audit Engine | `scripts/qc_engine.py`, `regression_sentinel.py`, `release_readiness.py`, plný CI toolchain (pytest/ruff/pyright/bandit/pip-audit) + nově `.claude/registry/AUDIT_REGISTRY.md` (7 domén A01-A07) | ✅ AKTIVNÍ — ROZŠÍŘENO, ŽIVĚ OTESTOVÁNO (plný `uv sync --extra dev` + 6 nástrojů) |
-| SPOS-006 | Documentation Engine | manuální (`.claude/registry/DOCUMENTATION_REGISTRY.md`) | ❌ NEAUTOMATIZOVÁNO |
+| SPOS-006 | Documentation Engine | `.claude/context/DOCUMENTATION_MAP.md` + `.claude/reports/DOCUMENTATION_HEALTH_REPORT.md` + `mkdocs build --strict` (živě ověřeno) | ✅ AKTIVNÍ — ROZŠÍŘENO, ŽIVĚ OTESTOVÁNO |
 | SPOS-007 | Infrastructure Control | rozptýleno (`platform/packages/providers`) | ❌ NENÍ SAMOSTATNÝ MODUL |
 | SPOS-008 | AI Orchestration | částečně (`scripts/decision_engine.py`) | ⚠️ ČÁSTEČNÉ |
 | SPOS-009 | Evolution Engine | — | ❌ NEEXISTUJE |
@@ -133,3 +133,20 @@ Mezery: §12 Automatic Reporting (daily/weekly/milestone) neimplementováno — 
 Vytvořeny: `.claude/registry/AUDIT_REGISTRY.md` (§5, 7 domén A01-A07), `.claude/reports/FIRST_FULL_AUDIT_REPORT.md` (§15, 5 findings, AUDIT_RUN_ID AR-2026-08-06-001).
 
 Žádný Python skript nebyl změněn — pouze spuštěn existující, nyní kompletní CI toolchain.
+
+---
+
+## SPOS-006 IMPLEMENTACE (2026-08-06)
+
+Audit nalezl 126 Markdown dokumentů napříč repozitářem, `platform/docs/` (56 souborů, mkdocs-based) je již velmi dobře udržovaný systém — žádný nový dokumentační systém nevytvořen.
+
+Provedeno:
+1. `mkdocs build --strict` živě spuštěn → PASS (exit 0), 1 INFO nález (ADR-017 chybí v nav)
+2. Vytvořen `.claude/context/DOCUMENTATION_MAP.md` (§4, §18) — normalizace dle 6 typů (Architecture/Development/Operations/Infrastructure/AI/Knowledge)
+3. Vytvořen `.claude/reports/DOCUMENTATION_HEALTH_REPORT.md` (§6, §18) — D001-D006 kontroly, 9 nálezů
+4. **Nový nález (D004):** `platform/docs/ses/SES-0000-MASTER-INDEX.md` (ChatGPT-generovaný, 4místné číslování) vs. `.claude/ses/SES-000-*.md` (tato session, 3místné číslování) — riziko záměny, nezmazáno (P010), jen zdokumentováno
+5. Code↔Doc sync (§8) ověřen pro MOD-001..015 — potvrzuje existující SES-001 mezeru (MOD-010..015 bez testů/dokumentace)
+
+Mezery: STARCORE Installation Manual (§10) a USER_GUIDE (§13) nevytvořeny — velký rozsah, vyžadují samostatný implementační krok, ne součást tohoto auditu. Automatická generace dokumentace (§7) neimplementována — mimo scope.
+
+Žádný Python/MkDocs konfigurační soubor nebyl změněn — pouze spuštěn existující build.

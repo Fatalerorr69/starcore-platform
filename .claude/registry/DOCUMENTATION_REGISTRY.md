@@ -1,6 +1,8 @@
 # DOCUMENTATION REGISTRY
 
-Aktualizováno: 2026-08-06 | Standard: SPOS-001
+Aktualizováno: 2026-08-06 | Standard: SPOS-006
+
+Formát dle SPOS-006 §3: DOCUMENT_ID/TITLE/TYPE/VERSION/STATUS/OWNER/RELATED_COMPONENTS/RELATED_CODE/RELATED_REGISTRY/LAST_VALIDATION — plně aplikováno na governance dokumenty (SES/SAKB/SPOS níže); pro `platform/docs/` (56 souborů, existující, dobře udržované) viz zjednodušený přehled a `DOCUMENTATION_MAP.md` pro plnou mapu podle typu (§4).
 
 ---
 
@@ -17,6 +19,7 @@ Aktualizováno: 2026-08-06 | Standard: SPOS-001
 | SPOS-003 | Prompt Registry Engine | implementováno v `platform/.starcore/prompts/` + `.claude/registry/PROMPT_REGISTRY.md` | ✅ AKTIVNÍ | 1.0.0 |
 | SPOS-004 | Project Intelligence Engine | `.claude/registry/INTELLIGENCE_REGISTRY.md` + `.claude/reports/SPOS-004-HEALTH-REPORT.md` | ✅ AKTIVNÍ | 1.0.0 |
 | SPOS-005 | Audit Engine | `.claude/registry/AUDIT_REGISTRY.md` + `.claude/reports/FIRST_FULL_AUDIT_REPORT.md` | ✅ AKTIVNÍ | 1.0.0 |
+| SPOS-006 | Documentation Engine | `.claude/context/DOCUMENTATION_MAP.md` + `.claude/reports/DOCUMENTATION_HEALTH_REPORT.md` | ✅ AKTIVNÍ | 1.0.0 |
 
 ---
 
@@ -40,6 +43,8 @@ Aktualizováno: 2026-08-06 | Standard: SPOS-001
 | DR-014 | SPOS-004 Implementation Report | `.claude/reports/SPOS-004-IMPLEMENTATION-REPORT.md` | ✅ HOTOVO |
 | DR-015 | First Full Audit Report | `.claude/reports/FIRST_FULL_AUDIT_REPORT.md` | ✅ HOTOVO |
 | DR-016 | SPOS-005 Implementation Report | `.claude/reports/SPOS-005-IMPLEMENTATION-REPORT.md` | ✅ HOTOVO |
+| DR-017 | Documentation Health Report | `.claude/reports/DOCUMENTATION_HEALTH_REPORT.md` | ✅ HOTOVO |
+| DR-018 | SPOS-006 Implementation Report | `.claude/reports/SPOS-006-IMPLEMENTATION-REPORT.md` | ✅ HOTOVO |
 
 ---
 
@@ -75,13 +80,20 @@ Detail: `.claude/registry/KNOWLEDGE_REGISTRY.md`
 
 ---
 
+## DOCUMENTATION MAP A HEALTH (SPOS-006)
+
+Plná mapa dokumentace dle typu (Architecture/Development/Operations/Infrastructure/AI/Knowledge): `.claude/context/DOCUMENTATION_MAP.md` (126 dokumentů celkem).
+Audit D001-D006: `.claude/reports/DOCUMENTATION_HEALTH_REPORT.md` (9 nálezů).
+
 ## CHYBĚJÍCÍ DOKUMENTACE (prioritní)
 
 | Dokument | Priorita | Status |
 |---|---|---|
+| STARCORE Installation Manual (SPOS-006 §10) | VYSOKÁ | ❌ CHYBÍ |
 | `INSTALL_SCRIPTS_REGISTRY.md` | KRITICKÁ | ❌ CHYBÍ |
 | `docker/ai-stack/README.md` | VYSOKÁ | ❌ CHYBÍ |
+| USER_GUIDE (SPOS-006 §13) | STŘEDNÍ | ❌ CHYBÍ |
 | `ansible/README.md` | STŘEDNÍ | ❌ CHYBÍ |
 | `ECOSYSTEM_MAP.md` | STŘEDNÍ | ❌ CHYBÍ |
 | 16 zbývajících Technology Profiles | STŘEDNÍ | ⏳ PLÁNOVÁNO |
-| SPOS-000 | VYSOKÁ | ⏳ ČEKÁ |
+| SPOS-007+ | VYSOKÁ | ⏳ ČEKÁ |
