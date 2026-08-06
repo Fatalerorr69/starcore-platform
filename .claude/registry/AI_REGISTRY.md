@@ -1,6 +1,8 @@
 # AI REGISTRY
 
-Aktualizováno: 2026-08-06 | Standard: SES-000
+Aktualizováno: 2026-08-06 | Standard: SES-001
+
+Formát dle SES-001 §13: MODEL, PROVIDER, PURPOSE, VERSION, RESOURCE REQUIREMENTS, INTEGRATION, STATUS.
 
 ---
 
@@ -27,12 +29,13 @@ Aktualizováno: 2026-08-06 | Standard: SES-000
 
 ## LLM MODELY (plánované)
 
-| Model | Zdroj | Použití | Status |
-|---|---|---|---|
-| llama3.2 | Ollama | Obecné AI úkoly | PLÁNOVÁNO |
-| mistral | Ollama | Kód a analýza | PLÁNOVÁNO |
-| nomic-embed-text | Ollama | Embedding pro Qdrant RAG | PLÁNOVÁNO |
-| codestral | Ollama | Code generation | PLÁNOVÁNO |
+| Model | Provider | Purpose | Version | Resource Req. | Integration | Status |
+|---|---|---|---|---|---|---|
+| Claude (Sonnet/Opus) | Anthropic | Blueprint generation, AI agent operator | claude-sonnet-4-6 | Cloud API, žádné lokální zdroje | `platform/packages/ai` (AIProvider ABC) | AKTIVNÍ |
+| llama3.2 | Ollama | Obecné AI úkoly | latest | ~4-8GB VRAM/RAM | OpenAI-compatible endpoint | PLÁNOVÁNO |
+| mistral | Ollama | Kód a analýza | latest | ~4-8GB VRAM/RAM | OpenAI-compatible endpoint | PLÁNOVÁNO |
+| nomic-embed-text | Ollama | Embedding pro Qdrant RAG | latest | ~1GB RAM | Qdrant integrace (MOD-102) | PLÁNOVÁNO |
+| codestral | Ollama | Code generation | latest | ~8-16GB VRAM | OpenAI-compatible endpoint | PLÁNOVÁNO |
 
 ---
 

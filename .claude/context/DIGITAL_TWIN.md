@@ -1,6 +1,6 @@
 # STARCORE DIGITAL TWIN
 
-Aktualizováno: 2026-08-06 | Standard: SES-000 P6
+Aktualizováno: 2026-08-06 | Standard: SES-001 §17
 
 Tento soubor je digitální obraz aktuálního stavu systému STARCORE.
 Musí být aktualizován po každé významné změně.
@@ -102,9 +102,19 @@ planned_modules:
 ```yaml
 ses_documents:
   SES-000: ACTIVE
-  SES-001: PENDING
+  SES-001: ACTIVE
   SAKB-000: PENDING
   SPOS-000: PENDING
+
+ses_001_compliance:
+  platform_layer: COMPLIANT
+  root_ecosystem_layer: PARTIAL — formal exception granted (SES-001 §2, Variant B)
+    known_gaps:
+      - API not versioned (/api/v1/ missing) — MAJOR change, awaiting approval
+      - No dependabot.yml / SBOM
+      - No documentation-check CI step
+      - MOD-010..015 (agents, knowledge, security, intelligence, control_center, ai_core) undocumented, untested
+  target_state: full migration to packages/apps/services layout (SES-001 §2 Variant A) — requires user approval before file moves
 ```
 
 ---
@@ -150,3 +160,4 @@ documentation_coverage:
 |---|---|---|
 | 2026-08-06 | Bootstrap 00 — Discovery reports, .claude/ struktura, root README | Claude Code |
 | 2026-08-06 | SES-000 — Engineering Constitution registrace, všechny registry | Claude Code |
+| 2026-08-06 | SES-001 — Technical Standard gap analýza, MODULE/AI registry rozšíření | Claude Code |
