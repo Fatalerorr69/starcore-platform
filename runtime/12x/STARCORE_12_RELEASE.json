@@ -1,0 +1,16 @@
+{
+  "release": "STARCORE 12 Cloud Network Fabric",
+  "version": "12.0.0",
+  "timestamp": "2026-08-06T00:48:58Z",
+  "layers": {
+    "12A": {"name": "Cloud Orchestrator", "status": "PRODUCTION"},
+    "12B": {"name": "Multi-Cloud Bridge", "status": "PRODUCTION"},
+    "12C": {"name": "Edge Network", "status": "PRODUCTION"},
+    "12D": {"name": "CDN Fabric", "status": "PRODUCTION"},
+    "12E": {"name": "Global Routing", "status": "PRODUCTION"}
+  },
+  "previous_release": "STARCORE_11_RELEASE",
+  "rollback": "runtime/11x/STARCORE_11_RELEASE.json",
+  "errors": 0,
+  "status": "PRODUCTION"
+}

@@ -1,7 +1,8 @@
 {
   "component": "Release Registry",
-  "version": "9.10.0",
-  "current": "9.10.0",
-  "previous": "8.10.0",
+  "version": "14.0.0",
+  "current": "14.0.0",
+  "previous": "9.10.0",
+  "phase": "STARCORE PHASE 1 COMPLETE",
   "status": "current"
 }
