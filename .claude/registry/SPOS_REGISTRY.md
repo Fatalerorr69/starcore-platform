@@ -1,6 +1,6 @@
 # SPOS REGISTRY
 
-Aktualizováno: 2026-08-06 | Standard: SPOS-002
+Aktualizováno: 2026-08-06 | Standard: SPOS-003
 
 Registr operačních modulů Project Operating System. Fyzická implementace primárně v `platform/.starcore/` (viz SPOS-000 rozhodnutí — adoptováno, ne duplikováno).
 
@@ -10,7 +10,7 @@ Registr operačních modulů Project Operating System. Fyzická implementace pri
 |---|---|---|---|
 | SPOS-001 | Project Memory | `platform/.starcore/memory/*.md` (+ nově `current_state.md`, `state/project_state.json`) | ✅ AKTIVNÍ — ROZŠÍŘENO |
 | SPOS-002 | Session Management | `platform/.starcore/sessions/` + `scripts/ledger.py` (+ nově `.claude/registry/SESSION_REGISTRY.md`, `.claude/context/SESSION_CONTEXT.md`) | ✅ AKTIVNÍ — ROZŠÍŘENO, ŽIVĚ OTESTOVÁNO |
-| SPOS-003 | Prompt Registry | `platform/.starcore/prompts/registry.yaml` + `scripts/registry.py` | ✅ AKTIVNÍ |
+| SPOS-003 | Prompt Registry | `platform/.starcore/prompts/registry.yaml` + `scripts/registry.py` (+ nově `.claude/registry/PROMPT_REGISTRY.md`, 7 SES/SAKB/SPOS promptů zaregistrováno) | ✅ AKTIVNÍ — ROZŠÍŘENO, ŽIVĚ OTESTOVÁNO |
 | SPOS-004 | Project Intelligence | `scripts/impact_analyzer.py` | ⚠️ ČÁSTEČNÉ |
 | SPOS-005 | Audit Engine | `scripts/qc_engine.py`, `regression_sentinel.py`, `release_readiness.py` | ✅ AKTIVNÍ |
 | SPOS-006 | Documentation Engine | manuální (`.claude/registry/DOCUMENTATION_REGISTRY.md`) | ❌ NEAUTOMATIZOVÁNO |
@@ -79,3 +79,19 @@ Provedeno (živě, ne jen navrženo):
 6. Vytvořeny `.claude/context/SESSION_CONTEXT.md` (§6) a `.claude/registry/SESSION_REGISTRY.md` (§18)
 
 Žádný Python skript nebyl změněn — pouze použit jeho existující CLI.
+
+---
+
+## SPOS-003 IMPLEMENTACE (2026-08-06)
+
+**Přístup:** Registr `prompts/registry.yaml` už existoval s 8 prompty (PROM-001..008) z předchozí session — ale **žádný SES/SAKB/SPOS prompt této bootstrap session nebyl registrován**. To byla hlavní mezera.
+
+Provedeno (živě, přes `registry.py` CLI, ne ruční YAML editace):
+1. `registry.py register` (×7) — zaregistrovány SES-000, SES-001, SAKB-000, SPOS-000, SPOS-001, SPOS-002, SPOS-003 s korektním dependency chainem (přesně dle §8 příkladu: SPOS-003 depends SPOS-000/001/002)
+2. `ledger.py add-prompt` (×7) — propojeny s aktuální session (§12 Prompt Memory Integration)
+3. `registry.py validate` — potvrzeno: 15 promptů, žádné chyby
+4. `registry.py list/search/get` — funkčně otestováno
+
+Nalezená mezera: `PromptEntry` model nemá `RELATED_FILES`/`RELATED_COMMITS`/`VALIDATION_STATUS`/`INPUTS`/`OUTPUTS` z §5 — zaznamenáno v `PROMPT_REGISTRY.md`, dataclass vědomě nerozšiřován (riziko zásahu do 384řádkového otestovaného skriptu).
+
+Vytvořeny: `.claude/registry/PROMPT_REGISTRY.md` (ekosystémový index, §19 povinný registr).

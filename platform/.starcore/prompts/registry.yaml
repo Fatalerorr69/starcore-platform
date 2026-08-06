@@ -169,3 +169,136 @@ prompts:
   session_id: null
   tags: []
   description: ''
+- id: SES-000
+  name: STARCORE Engineering Constitution
+  version: '1.0'
+  type: MASTER
+  purpose: Zakladni principy, 7-fazovy workflow, 4-vrstvy architektura, povinne registry
+  phase: null
+  status: ACTIVE
+  created_at: '2026-08-06T20:52:45Z'
+  updated_at: '2026-08-06T20:52:45Z'
+  source: USER
+  supersedes: null
+  superseded_by: null
+  dependencies: []
+  session_id: claude/starcore-ai-bootstrap-fkyb96
+  tags: []
+  description: Nejvyssi governance dokument projektu STARCORE. 10 principu (Architecture
+    First, Documentation First, ...), Digital Twin principle, change management klasifikace.
+- id: SES-001
+  name: STARCORE Technical Engineering Standard
+  version: '1.0'
+  type: MASTER
+  purpose: 'Technicky standard: repository struktura, module standard, naming, dependency
+    mgmt, API/testing/docs/CI-CD standard'
+  phase: null
+  status: ACTIVE
+  created_at: '2026-08-06T20:52:56Z'
+  updated_at: '2026-08-06T20:52:56Z'
+  source: USER
+  supersedes: null
+  superseded_by: null
+  dependencies:
+  - SES-000
+  session_id: claude/starcore-ai-bootstrap-fkyb96
+  tags: []
+  description: Gap analyza platform/ vs SES-001. Objevil orphaned Dependabot/SBOM
+    config v platform/.github/.
+- id: SAKB-000
+  name: STARCORE AI Knowledge Base Model
+  version: '1.0'
+  type: MASTER
+  purpose: 'Znalostni architektura: SOURCE->COLLECTION->VALIDATION->PACKAGE->REGISTRY->AI_CONTEXT'
+  phase: null
+  status: ACTIVE
+  created_at: '2026-08-06T20:52:56Z'
+  updated_at: '2026-08-06T20:52:56Z'
+  source: USER
+  supersedes: null
+  superseded_by: null
+  dependencies:
+  - SES-000
+  - SES-001
+  session_id: claude/starcore-ai-bootstrap-fkyb96
+  tags: []
+  description: Vytvoril knowledge/ strukturu, SOURCE_REGISTRY (9 zdroju), 6 Technology
+    Profiles, 1 Knowledge Package.
+- id: SPOS-000
+  name: STARCORE Project Operating System — Runtime Bootstrap
+  version: '1.0'
+  type: MASTER
+  purpose: Objev a formalni adopce existujiciho platform/.starcore/ jako kanonicke
+    SPOS implementace
+  phase: null
+  status: ACTIVE
+  created_at: '2026-08-06T20:52:56Z'
+  updated_at: '2026-08-06T20:52:56Z'
+  source: USER
+  supersedes: null
+  superseded_by: null
+  dependencies:
+  - SES-000
+  - SES-001
+  - SAKB-000
+  session_id: claude/starcore-ai-bootstrap-fkyb96
+  tags: []
+  description: 'Klicovy nalez: platform/.starcore/ uz existoval (3843 radku, 171 testu).
+    Zadna duplicita nevytvorena.'
+- id: SPOS-001
+  name: Project Memory Engine
+  version: '1.0'
+  type: IMPLEMENTATION
+  purpose: Rozsireni existujici platform/.starcore/memory o current_state.md a project_state.json
+  phase: null
+  status: ACTIVE
+  created_at: '2026-08-06T20:53:08Z'
+  updated_at: '2026-08-06T20:53:08Z'
+  source: USER
+  supersedes: null
+  superseded_by: null
+  dependencies:
+  - SPOS-000
+  session_id: claude/starcore-ai-bootstrap-fkyb96
+  tags: []
+  description: Context Restoration Protocol propojuje .claude/ s platform/.starcore/.
+    Zadny existujici Python skript nezmenen.
+- id: SPOS-002
+  name: Session Management Engine
+  version: '1.0'
+  type: IMPLEMENTATION
+  purpose: 'Zive otestovani session lifecycle: uzavreni osirele session, registrace
+    bootstrap session'
+  phase: null
+  status: ACTIVE
+  created_at: '2026-08-06T20:53:08Z'
+  updated_at: '2026-08-06T20:53:08Z'
+  source: USER
+  supersedes: null
+  superseded_by: null
+  dependencies:
+  - SPOS-001
+  session_id: claude/starcore-ai-bootstrap-fkyb96
+  tags: []
+  description: ledger.py end/start/add-* pouzity naostro. Nalezena a opravena osirela
+    session (end_time null od 2026-07-26).
+- id: SPOS-003
+  name: Prompt Registry Engine
+  version: '1.0'
+  type: IMPLEMENTATION
+  purpose: Registrace SES/SAKB/SPOS promptu do existujiciho platform/.starcore/prompts/registry.yaml
+  phase: null
+  status: ACTIVE
+  created_at: '2026-08-06T20:53:08Z'
+  updated_at: '2026-08-06T20:53:08Z'
+  source: USER
+  supersedes: null
+  superseded_by: null
+  dependencies:
+  - SPOS-000
+  - SPOS-001
+  - SPOS-002
+  session_id: claude/starcore-ai-bootstrap-fkyb96
+  tags: []
+  description: 'Zjisteno: zadny SES/SAKB/SPOS prompt z teto bootstrap session nebyl
+    v registry.yaml. Doplneno zivou registraci pres CLI.'

@@ -136,7 +136,14 @@ sessions:
   - SPOS-000 Runtime Bootstrap
   - SPOS-001 Project Memory Engine
   - SPOS-002 Session Management Engine
-  prompts_used: []
+  prompts_used:
+  - SES-000
+  - SES-001
+  - SAKB-000
+  - SPOS-000
+  - SPOS-001
+  - SPOS-002
+  - SPOS-003
   files_read: []
   files_created:
   - .claude/ses/SES-000-ENGINEERING-CONSTITUTION.md

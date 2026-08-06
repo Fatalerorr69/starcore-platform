@@ -107,6 +107,15 @@ ses_documents:
   SPOS-000: ACTIVE
   SPOS-001: ACTIVE
   SPOS-002: ACTIVE
+  SPOS-003: ACTIVE
+
+prompt_status:
+  total_prompts: 15
+  active: 12
+  archived: 1
+  rejected: 2
+  latest_executed: SPOS-003
+  governance_prompts_registered_this_session: [SES-000, SES-001, SAKB-000, SPOS-000, SPOS-001, SPOS-002, SPOS-003]
 
 spos_status:
   discovery: "platform/.starcore/ already exists — mature runtime (3843 lines Python, 171 tests)"
@@ -135,6 +144,14 @@ spos_002_status:
     - ".claude/context/SESSION_CONTEXT.md (§6 SESSION CONTEXT REPORT)"
     - ".claude/registry/SESSION_REGISTRY.md (§18 required registry, ecosystem-level index)"
     - "sessions/current.md manually refreshed (ledger.py does not auto-update this human-readable file)"
+  no_scripts_modified: true
+
+spos_003_status:
+  approach: "Existing prompts/registry.yaml had 8 prompts (PROM-001..008) from prior session, but zero SES/SAKB/SPOS prompts from this bootstrap session were registered — that was the main gap"
+  action: "registry.py register x7 (SES-000, SES-001, SAKB-000, SPOS-000, SPOS-001, SPOS-002, SPOS-003) with correct dependency chain matching spec example exactly"
+  linked: "ledger.py add-prompt x7 to bind prompts to this session (§12 Prompt Memory Integration)"
+  verified: "registry.py validate -> 15 prompts, no errors; list/search/get all functional"
+  gap: "PromptEntry model lacks RELATED_FILES/RELATED_COMMITS/VALIDATION_STATUS/INPUTS/OUTPUTS fields from spec §5 — documented, dataclass not extended (avoid touching tested 384-line script)"
   no_scripts_modified: true
 
 ses_001_compliance:
@@ -213,3 +230,4 @@ knowledge_base:
 | 2026-08-06 | SPOS-000 — Discovery existujícího platform/.starcore/ runtime, formální adopce, SPOS_REGISTRY, oprava SES-001 (Dependabot/SBOM orphaned) | Claude Code |
 | 2026-08-06 | SPOS-001 — current_state.md + project_state.json doplněny, Context Restoration Protocol propojuje .claude/ s platform/.starcore/ | Claude Code |
 | 2026-08-06 | SPOS-002 — Uzavřena osiřelá session (end_time null), zaregistrována aktuální session v ledgeru, SESSION_CONTEXT + SESSION_REGISTRY vytvořeny | Claude Code |
+| 2026-08-06 | SPOS-003 — 7 governance promptů (SES/SAKB/SPOS) zaregistrováno do existujícího prompts/registry.yaml, propojeno se session, PROMPT_REGISTRY vytvořen | Claude Code |

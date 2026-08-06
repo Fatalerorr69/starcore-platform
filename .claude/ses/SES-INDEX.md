@@ -14,7 +14,8 @@ Aktualizováno: 2026-08-06
 | SPOS-000 | Runtime Bootstrap | ✅ AKTIVNÍ | `../spos/SPOS-000-RUNTIME-BOOTSTRAP.md` |
 | SPOS-001 | Project Memory Engine | ✅ AKTIVNÍ | (implementováno přímo v `platform/.starcore/`, viz SPOS_REGISTRY.md) |
 | SPOS-002 | Session Management Engine | ✅ AKTIVNÍ | (implementováno přímo v `platform/.starcore/sessions/`, viz SPOS_REGISTRY.md) |
-| SPOS-003+ | SPOS Modules | ⏳ ČEKÁ | TBD |
+| SPOS-003 | Prompt Registry Engine | ✅ AKTIVNÍ | (implementováno přímo v `platform/.starcore/prompts/`, viz SPOS_REGISTRY.md) |
+| SPOS-004+ | SPOS Modules | ⏳ ČEKÁ | TBD |
 
 ---
 
