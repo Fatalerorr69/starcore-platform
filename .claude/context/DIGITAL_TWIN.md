@@ -109,15 +109,32 @@ ses_documents:
   SPOS-002: ACTIVE
   SPOS-003: ACTIVE
   SPOS-004: ACTIVE
+  SPOS-005: ACTIVE
 
 intelligence_status:
-  health_score: "77.8% (14/18 checks PASS, provisional — 3 UNKNOWN due to --quick mode, not failures)"
+  health_score: "88.2% (15/17, FULL mode, superseded the 77.8% provisional quick-mode figure)"
   active_risks:
-    - "PACKAGE gate FAIL — Alembic migrations not in sync (P1, real pre-existing issue)"
-    - "test_count probe UNKNOWN in Regression Sentinel"
-    - "BUILD, SECURITY gates UNKNOWN (skipped in --quick mode)"
-  recommendations_open: 3
+    - "test_count drift 801->805 vs baseline (LOW, open, needs human decision on baseline update)"
+    - "MOD-010..015 still undocumented/untested (MEDIUM, pre-existing from SES-001)"
+    - "Dependabot/SBOM orphaned in platform/.github/ (MEDIUM, pre-existing from SES-001)"
+    - "BUILD, SECURITY gates remain UNKNOWN even in FULL mode (LOW, needs investigation)"
+  recommendations_open: 4
   engines_registered: 7
+
+audit_status:
+  last_full_audit: "2026-08-06 (AR-2026-08-06-001)"
+  audit_run_type: FULL
+  toolchain_synced: "uv sync --extra dev succeeded — pytest/ruff/pyright/pip-audit now available in platform/.venv"
+  results:
+    pytest: "796 passed, 9 skipped (postgres, expected), 0 failed"
+    ruff: "All checks passed"
+    pyright: "0 errors"
+    bandit: "0 findings"
+    pip_audit: "0 vulnerabilities"
+    alembic: "FAILED then FIXED (local DB was unmigrated, not a real code issue) -- no tracked files changed"
+  open_findings: 4
+  resolved_findings: 1
+  domains_covered: "7/7 (A01-A07), 3 fully automated, 4 partial"
 
 prompt_status:
   total_prompts: 15
@@ -252,3 +269,4 @@ knowledge_base:
 | 2026-08-06 | SPOS-002 — Uzavřena osiřelá session (end_time null), zaregistrována aktuální session v ledgeru, SESSION_CONTEXT + SESSION_REGISTRY vytvořeny | Claude Code |
 | 2026-08-06 | SPOS-003 — 7 governance promptů (SES/SAKB/SPOS) zaregistrováno do existujícího prompts/registry.yaml, propojeno se session, PROMPT_REGISTRY vytvořen | Claude Code |
 | 2026-08-06 | SPOS-004 — Objeveny existující QC engines (impact_analyzer, sentinel, release_readiness, qc_engine) jako hotová PIE, INTELLIGENCE_REGISTRY + Health Report (77.8%) vytvořeny, zjištěn reálný Alembic sync problém | Claude Code |
+| 2026-08-06 | SPOS-005 — `uv sync --extra dev` + plný toolchain (pytest/ruff/pyright/bandit/pip-audit) živě spuštěn, Alembic FAIL opraven (lokální DB), health score 88.2%, AUDIT_REGISTRY + FIRST_FULL_AUDIT_REPORT vytvořeny | Claude Code |

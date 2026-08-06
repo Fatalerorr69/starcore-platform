@@ -2,6 +2,12 @@
 
 Standard: SPOS-004 §6 | Datum: 2026-08-06 | Zdroj: živé spuštění `qc_engine.py run --quick` v `platform/`
 
+> ⚠️ **AKTUALIZACE (SPOS-005, 2026-08-06):** Tento report byl vytvořen v `--quick` módu s neúplnými daty.
+> Plný audit s reálným `uv sync --extra dev` toolchainem viz **`.claude/reports/FIRST_FULL_AUDIT_REPORT.md`**.
+> Klíčová oprava: PACKAGE gate (Alembic) níže uvedený jako FAIL byl ve skutečnosti jen lokálně
+> nemigrovaná SQLite databáze, ne skutečný nesoulad — vyřešeno, viz FINDING-003 v novém reportu.
+> Aktualizované skóre: **88.2 %** (bylo 77,8 % provizorně).
+
 ---
 
 ## METODIKA

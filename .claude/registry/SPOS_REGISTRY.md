@@ -1,6 +1,6 @@
 # SPOS REGISTRY
 
-Aktualizováno: 2026-08-06 | Standard: SPOS-004
+Aktualizováno: 2026-08-06 | Standard: SPOS-005
 
 Registr operačních modulů Project Operating System. Fyzická implementace primárně v `platform/.starcore/` (viz SPOS-000 rozhodnutí — adoptováno, ne duplikováno).
 
@@ -12,7 +12,7 @@ Registr operačních modulů Project Operating System. Fyzická implementace pri
 | SPOS-002 | Session Management | `platform/.starcore/sessions/` + `scripts/ledger.py` (+ nově `.claude/registry/SESSION_REGISTRY.md`, `.claude/context/SESSION_CONTEXT.md`) | ✅ AKTIVNÍ — ROZŠÍŘENO, ŽIVĚ OTESTOVÁNO |
 | SPOS-003 | Prompt Registry | `platform/.starcore/prompts/registry.yaml` + `scripts/registry.py` (+ nově `.claude/registry/PROMPT_REGISTRY.md`, 7 SES/SAKB/SPOS promptů zaregistrováno) | ✅ AKTIVNÍ — ROZŠÍŘENO, ŽIVĚ OTESTOVÁNO |
 | SPOS-004 | Project Intelligence | `scripts/impact_analyzer.py` + `regression_sentinel.py` + `release_readiness.py` + `qc_engine.py` (sdíleno s SPOS-005) + nově `.claude/registry/INTELLIGENCE_REGISTRY.md` | ✅ AKTIVNÍ — ROZŠÍŘENO, ŽIVĚ OTESTOVÁNO |
-| SPOS-005 | Audit Engine | `scripts/qc_engine.py`, `regression_sentinel.py`, `release_readiness.py` | ✅ AKTIVNÍ |
+| SPOS-005 | Audit Engine | `scripts/qc_engine.py`, `regression_sentinel.py`, `release_readiness.py`, plný CI toolchain (pytest/ruff/pyright/bandit/pip-audit) + nově `.claude/registry/AUDIT_REGISTRY.md` (7 domén A01-A07) | ✅ AKTIVNÍ — ROZŠÍŘENO, ŽIVĚ OTESTOVÁNO (plný `uv sync --extra dev` + 6 nástrojů) |
 | SPOS-006 | Documentation Engine | manuální (`.claude/registry/DOCUMENTATION_REGISTRY.md`) | ❌ NEAUTOMATIZOVÁNO |
 | SPOS-007 | Infrastructure Control | rozptýleno (`platform/packages/providers`) | ❌ NENÍ SAMOSTATNÝ MODUL |
 | SPOS-008 | AI Orchestration | částečně (`scripts/decision_engine.py`) | ⚠️ ČÁSTEČNÉ |
@@ -112,3 +112,24 @@ Provedeno:
 Mezery: §12 Automatic Reporting (daily/weekly/milestone) neimplementováno — vyžaduje scheduler infrastrukturu, mimo scope. §6 numerický health score neexistuje v kódu — nahrazeno manuální agregací v reportu.
 
 Žádný Python skript nebyl změněn.
+
+---
+
+## SPOS-005 IMPLEMENTACE (2026-08-06)
+
+**Klíčový rozdíl oproti SPOS-004:** Poprvé byl spuštěn **plný toolchain**, ne jen `--quick` mód. `uv sync --extra dev` doplnil chybějící dev závislosti (pytest, ruff, pyright, pip-audit) do `platform/.venv/` (dosud obsahoval jen bandit/alembic/fastapi).
+
+Živě spuštěno a ověřeno:
+1. `pytest -q` → 796 passed, 9 skipped (postgres, očekávaně), 0 selhání
+2. `ruff check .` → All checks passed
+3. `pyright` → 0 errors
+4. `bandit -r packages/ apps/ scripts/ -ll -q` → 0 nálezů
+5. `pip-audit` → 0 zranitelností
+6. `alembic check` → FAILED → `alembic upgrade head` → OPRAVENO (lokální DB, ne kód)
+7. `qc_engine.py run` (full mód) → RELEASE_READY_WITH_WARNINGS, žádný blocker
+
+**Oprava SPOS-004:** PACKAGE gate FAIL byl nesprávně interpretován jako kódový problém — ve skutečnosti šlo o nemigrovanou lokální SQLite DB. Po `alembic upgrade head` gate PASSuje. Health score přepočten: 77,8 % → **88,2 %**.
+
+Vytvořeny: `.claude/registry/AUDIT_REGISTRY.md` (§5, 7 domén A01-A07), `.claude/reports/FIRST_FULL_AUDIT_REPORT.md` (§15, 5 findings, AUDIT_RUN_ID AR-2026-08-06-001).
+
+Žádný Python skript nebyl změněn — pouze spuštěn existující, nyní kompletní CI toolchain.
