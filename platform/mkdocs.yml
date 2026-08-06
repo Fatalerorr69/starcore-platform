@@ -9,6 +9,7 @@ nav:
   - Home: index.md
   - Architecture: architecture.md
   - Current State: architecture/current-state.md
+  - Edge Node Architecture: architecture/edge-node.md
   - Installation: installation.md
   - Development: development.md
   - CLI Reference: cli.md
@@ -18,6 +19,7 @@ nav:
   - Test Matrix: test-matrix.md
   - Test Strategy: testing/test-strategy.md
   - Operations Runbook: operations/repository-stabilization.md
+  - Roadmap: ROADMAP.md
   - Changelog:
       - Sprint 001: changelog/sprint-001.md
       - Sprint 002: changelog/sprint-002.md
