@@ -1,6 +1,7 @@
 {
-    "component": "Release Registry",
-    "version": "7.10.01",
-    "current": "7.10.10",
-    "status": "current"
+  "component": "Release Registry",
+  "version": "9.10.0",
+  "current": "9.10.0",
+  "previous": "8.10.0",
+  "status": "current"
 }

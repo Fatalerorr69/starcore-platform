@@ -1,0 +1,15 @@
+{
+  "layer": "8J",
+  "name": "STARCORE 8 OS Release",
+  "version": "8.10.0",
+  "timestamp": "2026-08-06T00:42:14Z",
+  "modules": [
+    "kernel_layer",
+    "boot_sequence",
+    "system_orchestrator",
+    "release_manager",
+    "upgrade_path"
+  ],
+  "dependencies": ["8A", "8B", "8C", "8D", "8E", "8F", "8G", "8H", "8I"],
+  "status": "PRODUCTION"
+}

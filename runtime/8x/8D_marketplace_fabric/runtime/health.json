@@ -1,0 +1,15 @@
+{
+  "layer": "8D",
+  "component": "Marketplace Fabric",
+  "version": "8.4.0",
+  "timestamp": "2026-08-06T00:42:14Z",
+  "checks": {
+    "plugin_registry": "ok",
+    "package_resolver": "ok",
+    "dependency_graph": "ok",
+    "version_manager": "ok",
+    "marketplace_api": "ok"
+  },
+  "errors": 0,
+  "status": "healthy"
+}

@@ -1,0 +1,9 @@
+{
+  "layer": "9A",
+  "component": "Intelligence Kernel",
+  "version": "9.1.0",
+  "timestamp": "2026-08-06T00:45:05Z",
+  "checks": {"reasoning_engine":"ok","belief_updater":"ok","goal_planner":"ok","hypothesis_generator":"ok","cognitive_kernel":"ok"},
+  "errors": 0,
+  "status": "healthy"
+}
