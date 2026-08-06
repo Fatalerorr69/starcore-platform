@@ -13,6 +13,7 @@ pro okamžité převzetí práce bez re-derivace kontextu.
     risks.md                   — kanonický risk register
     user_preferences.md        — preference uživatele a pravidla pro approval
     project_snapshot.md        — klíčová fakta pro cold start
+    current_state.md           — lehký, často aktualizovaný "kde právě jsme" pointer (SPOS-001)
     architecture.md            — referenční přehled architektury
     decisions.md               — pracovní rozhodnutí (pre-ADR)
     known_issues.md            — aktivní známé problémy
@@ -45,7 +46,12 @@ pro okamžité převzetí práce bez re-derivace kontextu.
   state/
     regression_baseline.json   — sentinel baseline (testy, coverage, vulns, sentinel)
     release.md                 — stav release readiness
+    project_state.json         — strojově čitelný VERSION/PHASE/BLOCKERS/RISKS/NEXT_ACTIONS (SPOS-001)
 ```
+
+**Ekosystémová governance vrstva:** `.starcore/` je scoped na `platform/`. Kořen repozitáře má
+navíc `.claude/` — SES/SAKB/SPOS governance vrstvu pro celý STARCORE ekosystém. Viz
+`.claude/context/CONTEXT_RESTORATION_PROTOCOL.md` pro vztah obou vrstev.
 
 ## Pravidla pro práci s tímto adresářem
 

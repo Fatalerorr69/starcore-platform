@@ -296,6 +296,7 @@ The `.starcore/` directory is a cross-session state layer for the STARCORE Auton
   README.md                  — overview and cold-start protocol
   memory/
     project_snapshot.md      — key facts for cold start (metrics, architecture)
+    current_state.md         — lightweight, frequently-updated "where we are now" pointer (SPOS-001)
     risks.md                 — canonical risk register (source of truth)
     user_preferences.md      — communication rules, approval gates
     architecture.md          — architecture reference
@@ -323,7 +324,14 @@ The `.starcore/` directory is a cross-session state layer for the STARCORE Auton
   state/
     regression_baseline.json — test/coverage/vulnerability + sentinel baseline
     release.md               — release readiness gate status
+    project_state.json       — machine-readable VERSION/PHASE/BLOCKERS/RISKS/NEXT_ACTIONS (SPOS-001)
 ```
+
+**Ecosystem governance layer:** `.starcore/` is platform-scoped. The repository root also has
+`.claude/` — the SES (Engineering Standard) / SAKB (Knowledge Base) / SPOS (Project OS) governance
+layer covering the whole STARCORE ecosystem (not just `platform/`). See
+`.claude/context/CONTEXT_RESTORATION_PROTOCOL.md` for how the two layers relate and how a new
+session should read both.
 
 **Cold-start protocol for new sessions:** read `memory/project_snapshot.md`, then run `uv run python .starcore/scripts/ledger.py current`, then `memory/pending_work.md` before any other action. Never store secrets or credentials in `.starcore/`.
 

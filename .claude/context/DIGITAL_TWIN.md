@@ -105,6 +105,7 @@ ses_documents:
   SES-001: ACTIVE
   SAKB-000: ACTIVE
   SPOS-000: ACTIVE
+  SPOS-001: ACTIVE
 
 spos_status:
   discovery: "platform/.starcore/ already exists — mature runtime (3843 lines Python, 171 tests)"
@@ -114,6 +115,15 @@ spos_status:
   modules_missing: [SPOS-006, SPOS-007, SPOS-009]
   duplicate_concept: "SPOS-010 — two digital twin docs with different scope (ecosystem vs platform); platform snapshot STALE (v0.4.0 vs actual v0.6.0)"
   correction_to_ses_001: "Dependabot + SBOM configs DO exist (platform/.github/) but are orphaned — GitHub only reads root .github/, not nested platform/.github/"
+
+spos_001_status:
+  approach: "Extended existing platform/.starcore/memory/, did not replace"
+  added:
+    - "platform/.starcore/memory/current_state.md (was missing per spec §4/§8)"
+    - "platform/.starcore/state/project_state.json (machine-readable PROJECT_STATE ENGINE)"
+    - ".claude/context/CONTEXT_RESTORATION_PROTOCOL.md (bridges .claude/ governance with platform/.starcore/ runtime, spec §12)"
+  verified: "startup_protocol.py --quick --json still runs correctly after additions (no existing script modified)"
+  change_memory_gap: "not built as separate structure — spec explicitly defers to git history/GitHub/ADR, already covered"
 
 ses_001_compliance:
   platform_layer: COMPLIANT
@@ -189,3 +199,4 @@ knowledge_base:
 | 2026-08-06 | SES-001 — Technical Standard gap analýza, MODULE/AI registry rozšíření | Claude Code |
 | 2026-08-06 | SAKB-000 — Knowledge Base struktura, 6 Technology Profiles, Source/Knowledge Registry | Claude Code |
 | 2026-08-06 | SPOS-000 — Discovery existujícího platform/.starcore/ runtime, formální adopce, SPOS_REGISTRY, oprava SES-001 (Dependabot/SBOM orphaned) | Claude Code |
+| 2026-08-06 | SPOS-001 — current_state.md + project_state.json doplněny, Context Restoration Protocol propojuje .claude/ s platform/.starcore/ | Claude Code |

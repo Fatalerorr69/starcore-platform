@@ -1,6 +1,8 @@
 # PROJECT REGISTRY
 
-Aktualizováno: 2026-08-06
+Aktualizováno: 2026-08-06 | Standard: SPOS-001
+
+Governance stav: SES-000/001 ✅, SAKB-000 ✅, SPOS-000/001 ✅ — viz `.claude/ses/SES-INDEX.md`
 
 ---
 
