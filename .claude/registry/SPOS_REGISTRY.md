@@ -1,6 +1,6 @@
 # SPOS REGISTRY
 
-Aktualizováno: 2026-08-06 | Standard: SPOS-001
+Aktualizováno: 2026-08-06 | Standard: SPOS-002
 
 Registr operačních modulů Project Operating System. Fyzická implementace primárně v `platform/.starcore/` (viz SPOS-000 rozhodnutí — adoptováno, ne duplikováno).
 
@@ -9,7 +9,7 @@ Registr operačních modulů Project Operating System. Fyzická implementace pri
 | Modul | Název | Implementace | Status |
 |---|---|---|---|
 | SPOS-001 | Project Memory | `platform/.starcore/memory/*.md` (+ nově `current_state.md`, `state/project_state.json`) | ✅ AKTIVNÍ — ROZŠÍŘENO |
-| SPOS-002 | Session Management | `platform/.starcore/sessions/` + `scripts/ledger.py` | ✅ AKTIVNÍ |
+| SPOS-002 | Session Management | `platform/.starcore/sessions/` + `scripts/ledger.py` (+ nově `.claude/registry/SESSION_REGISTRY.md`, `.claude/context/SESSION_CONTEXT.md`) | ✅ AKTIVNÍ — ROZŠÍŘENO, ŽIVĚ OTESTOVÁNO |
 | SPOS-003 | Prompt Registry | `platform/.starcore/prompts/registry.yaml` + `scripts/registry.py` | ✅ AKTIVNÍ |
 | SPOS-004 | Project Intelligence | `scripts/impact_analyzer.py` | ⚠️ ČÁSTEČNÉ |
 | SPOS-005 | Audit Engine | `scripts/qc_engine.py`, `regression_sentinel.py`, `release_readiness.py` | ✅ AKTIVNÍ |
@@ -58,3 +58,24 @@ Doplněno:
 Funkčně ověřeno: `startup_protocol.py --quick --json` běží bez chyby po přidání nových souborů (žádný existující kód nebyl změněn).
 
 CHANGE MEMORY (§7): nebyla vytvořena samostatná struktura — spec explicitně odkazuje na Git history/GitHub/ADR jako zdroj, což už je pokryto (`git log`, ADR-001..017). Nejde o mezeru.
+
+---
+
+## SPOS-002 IMPLEMENTACE (2026-08-06)
+
+**Přístup:** Audit → adopce → živé otestování (ne jen statická analýza).
+
+Zjištění:
+- `platform/.starcore/sessions/ledger.yaml` obsahoval 1 session s `end_time: null` od 2026-07-26 — **nikdy neuzavřena** (porušení §3 lifecycle, session zůstala navždy v ACTIVE stavu)
+- `_archive_session()` v `ledger.py` **již plně implementuje** §8 HANDOVER REPORT formát (Summary, Decisions, Files, Tests, Next Action) — žádná mezera
+- `sessions/current.md` je **manuálně** udržovaný soubor — `ledger.py` ho needituje automaticky
+
+Provedeno (živě, ne jen navrženo):
+1. `ledger.py end` — retroaktivně uzavřena osiřelá session, archivována do `sessions/archive/2026-07-26-*.md`
+2. `ledger.py start` — zaregistrována aktuální bootstrap session (`claude/starcore-ai-bootstrap-fkyb96`)
+3. `ledger.py add-request/add-decision/add-risk/add-file` (×16 volání) — naplněn session record dle §4
+4. `ledger.py validate` — potvrzeno: 2 sezení, 1 aktivní, 1 uzavřeno, žádná chyba integrity
+5. `sessions/current.md` ručně aktualizován (mimo automatizaci skriptu)
+6. Vytvořeny `.claude/context/SESSION_CONTEXT.md` (§6) a `.claude/registry/SESSION_REGISTRY.md` (§18)
+
+Žádný Python skript nebyl změněn — pouze použit jeho existující CLI.

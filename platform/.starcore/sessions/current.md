@@ -1,9 +1,9 @@
 # Session Ledger — Current
 
 > Aktivní session ledger. Archivovat do `sessions/archive/` na konci sezení.
-> **Sezení ID:** starcore-autonomous-engineering-4p3tlj
-> **Datum:** 2026-07-27
-> **Větev:** claude/starcore-autonomous-engineering-4p3tlj
+> **Sezení ID:** claude/starcore-ai-bootstrap-fkyb96
+> **Datum:** 2026-08-06
+> **Větev:** claude/starcore-ai-bootstrap-fkyb96
 
 ---
 
@@ -11,66 +11,64 @@
 
 | Pole | Hodnota |
 |------|---------|
-| Status | MEMORY_IMPLEMENTATION_COMPLETE |
-| Fáze | Post-Phase 9 (FINAL OPERATING MODE) |
-| Poslední commit | `134a939` — fix(timeout): replace coroutine reuse with asyncio.create_task + shield |
-| Testy | 569 passed / 100% coverage |
-| CI gates | Všechny zelené |
+| Status | SES_SAKB_SPOS_GOVERNANCE_BOOTSTRAP_IN_PROGRESS |
+| Fáze | SPOS-002 — Session Management Engine |
+| Poslední commit | `799a614` — Implement SPOS-001 Project Memory Engine |
+| Governance stav | SES-000 ✅, SES-001 ✅, SAKB-000 ✅, SPOS-000 ✅, SPOS-001 ✅, SPOS-002 (probíhá) |
 
 ---
 
 ## Co bylo provedeno v tomto sezení
 
-### Phase 8 (6 batchů) — committed, pushed
-- Viz `memory/completed_work.md` pro detaily
+1. **Bootstrap 00** — discovery reports (5), `.claude/` struktura, root `README.md`
+2. **SES-000** — Engineering Constitution (principy, workflow, registry)
+3. **SES-001** — Technical Standard, gap analýza platform vs. root vrstvy
+4. **SAKB-000** — Knowledge Model, SOURCE_REGISTRY (9 zdrojů), 6 Technology Profiles
+5. **SPOS-000** — Discovery `platform/.starcore/` (existoval už dříve!), formální adopce místo duplicity
+6. **SPOS-001** — Doplněny `current_state.md` + `project_state.json`, Context Restoration Protocol
+7. **SPOS-002** (probíhá) — Audit session systému, uzavření osiřelé session, registrace této session
 
-### Phase 9 — Final Validation
-- Status: READY_WITH_WARNINGS
-- Warning: R-001 (SHA pinning) — OPEN, neblokující
+## Nalezené a opravené problémy
 
-### STARCORE WORKSPACE MEMORY IMPLEMENTATION v1.0
-- Vytvořena celá `.starcore/` struktura
-- Populovány všechny memory soubory aktuálním stavem
-- **Stav:** V PRŮBĚHU → COMPLETE (po tomto souboru)
-- **NECOMMITOVÁNO — per user instructions**
+- **Osiřelá session** `starcore-autonomous-engineering-4p3tlj` (od 2026-07-26) nikdy neměla `end_time` — retroaktivně uzavřena a archivována do `sessions/archive/2026-07-26-*.md`
+- **Oprava SES-001**: Dependabot/SBOM existují, ale jsou orphaned v `platform/.github/`
+- **Zastaralost**: `project_snapshot.md` (v0.4.0) a `release.md` (v0.2.0) neodpovídají realitě (v0.6.0)
 
 ---
 
 ## Otevřené položky pro příští sezení
 
-1. **R-001** (SHA pinning) — P1, nejdůležitější zbývající riziko
-2. Commit + push `.starcore/` struktury (pokud user schválí)
-3. R-007, R-008 — vyžadují operator decision
-4. R-012 (assert guards) — rychlá win, 30 minut
-5. README "What's Planned, Not Built Yet" cleanup — 15 minut
+1. SPOS-003 — Prompt Registry Engine (očekává se další prompt)
+2. Rozhodnutí uživatele: přesunout orphaned Dependabot/SBOM config do root `.github/`?
+3. Rozhodnutí uživatele: obnovit `project_snapshot.md`/`release.md` reálným CI během (vyžaduje `uv sync`)
 
 ## Kde sezení skončilo
 
-Implementace `.starcore/` memory layer — všechny soubory vytvořeny.
-Returning czech report per user instructions.
-Čekám na volbu uživatele: [1]-[4] ACTION_REQUIRED menu.
+Governance bootstrap probíhá postupně, prompt po promptu (SES-000 → SES-001 → SAKB-000 → SPOS-000 → SPOS-001 → SPOS-002). Čeká se na další prompt od uživatele (očekává se SPOS-003).
 
 ---
 
 ## Startup instrukce pro nové sezení
 
+Viz `.claude/context/CONTEXT_RESTORATION_PROTOCOL.md` — kombinovaný postup pro `.claude/` governance vrstvu i `platform/.starcore/` runtime.
+
 ```bash
-# 1. Ověř git stav
+# 1. Ekosystémový stav
+cat .claude/context/DIGITAL_TWIN.md
+
+# 2. Ověř git stav
 git status
 git log --oneline -5
-git branch -vv
 
-# 2. Ověř testy
-uv run pytest -q --tb=no 2>&1 | tail -3
+# 3. Poslední session (machine-readable)
+cd platform && python3 .starcore/scripts/ledger.py current
 
-# 3. Přečti pending work
+# 4. Pending work
+cat .claude/registry/SPOS_REGISTRY.md
 cat .starcore/memory/pending_work.md
-
-# 4. Pokračuj dle instrukcí uživatele
 ```
 
 **Kritické připomenutí:**
-- Branch: `claude/starcore-autonomous-engineering-4p3tlj` — veškerá práce sem
-- Push vyžaduje souhlas uživatele
-- Czech language pro komunikaci
+- Branch: `claude/starcore-ai-bootstrap-fkyb96` — veškerá práce sem
+- Czech language pro governance komunikaci (SES/SAKB/SPOS dokumenty)
 - Viz `memory/user_preferences.md` pro kompletní pravidla

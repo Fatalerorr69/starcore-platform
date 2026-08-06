@@ -2,7 +2,7 @@ schema_version: '1.0'
 sessions:
 - session_id: starcore-autonomous-engineering-4p3tlj
   start_time: '2026-07-26T00:00:00Z'
-  end_time: null
+  end_time: '2026-08-06T20:38:28Z'
   branch: claude/starcore-autonomous-engineering-4p3tlj
   head: a446965
   user_requests:
@@ -121,5 +121,43 @@ sessions:
     stop-hook)
   - commit .starcore/ memory layer schválen (implicitně přes stop-hook)
   blockers: []
-  next_action: v0.4.0 VYDÁN (2026-08-01T18:40:07Z) — timeout_strategy ADR-016 dokončena;
-    601 testů, 100% coverage; příští sezení zahájit výběrem nové funkce z P2 nebo Product Roadmap
+  next_action: Session orphaned (end_time byl null) — retroaktivně uzavřeno SPOS-002
+    auditem (2026-08-06) z důvodu hygieny ledgeru. Skutečný výsledek práce viz memory/completed_work.md
+    a historické commity branch claude/starcore-autonomous-engineering-4p3tlj.
+- session_id: claude/starcore-ai-bootstrap-fkyb96
+  start_time: '2026-08-06T20:38:35Z'
+  end_time: null
+  branch: claude/starcore-ai-bootstrap-fkyb96
+  head: 799a614
+  user_requests:
+  - SES-000 Engineering Constitution bootstrap
+  - SES-001 Technical Engineering Standard
+  - SAKB-000 Knowledge Model
+  - SPOS-000 Runtime Bootstrap
+  - SPOS-001 Project Memory Engine
+  - SPOS-002 Session Management Engine
+  prompts_used: []
+  files_read: []
+  files_created:
+  - .claude/ses/SES-000-ENGINEERING-CONSTITUTION.md
+  - .claude/ses/SES-001-TECHNICAL-STANDARD.md
+  - .claude/sakb/SAKB-000-KNOWLEDGE-MODEL.md
+  - .claude/spos/SPOS-000-RUNTIME-BOOTSTRAP.md
+  - .claude/context/CONTEXT_RESTORATION_PROTOCOL.md
+  - .starcore/memory/current_state.md
+  - .starcore/state/project_state.json
+  files_modified: []
+  commands_executed: []
+  tests_executed: []
+  decisions:
+  - Adopt existing platform/.starcore/ as canonical SPOS implementation (SPOS-000)
+    — do not duplicate at root
+  - Extend memory with current_state.md + project_state.json, no replacement (SPOS-001)
+  - Close orphaned session starcore-autonomous-engineering-4p3tlj retroactively for
+    ledger hygiene, then register this bootstrap session (SPOS-002)
+  risks:
+  - project_snapshot.md and release.md stale (v0.4.0/v0.2.0 vs actual v0.6.0)
+  - Dependabot/SBOM config orphaned in platform/.github/ (GitHub reads only root .github/)
+  approvals: []
+  blockers: []
+  next_action: ''

@@ -13,6 +13,7 @@ Aktualizováno: 2026-08-06 | Standard: SPOS-001
 | SAKB-000 | Knowledge Model | `.claude/sakb/SAKB-000-KNOWLEDGE-MODEL.md` | ✅ AKTIVNÍ | 1.0.0 |
 | SPOS-000 | Runtime Bootstrap | `.claude/spos/SPOS-000-RUNTIME-BOOTSTRAP.md` | ✅ AKTIVNÍ | 1.0.0 |
 | SPOS-001 | Project Memory Engine | implementováno v `platform/.starcore/` + `.claude/context/CONTEXT_RESTORATION_PROTOCOL.md` | ✅ AKTIVNÍ | 1.0.0 |
+| SPOS-002 | Session Management Engine | implementováno v `platform/.starcore/sessions/` + `.claude/registry/SESSION_REGISTRY.md` + `.claude/context/SESSION_CONTEXT.md` | ✅ AKTIVNÍ | 1.0.0 |
 
 ---
 
@@ -30,6 +31,7 @@ Aktualizováno: 2026-08-06 | Standard: SPOS-001
 | DR-008 | SAKB-000 Implementation Report | `.claude/reports/SAKB-000-IMPLEMENTATION-REPORT.md` | ✅ HOTOVO |
 | DR-009 | SPOS-000 Implementation Report | `.claude/reports/SPOS-000-IMPLEMENTATION-REPORT.md` | ✅ HOTOVO |
 | DR-010 | SPOS-001 Implementation Report | `.claude/reports/SPOS-001-IMPLEMENTATION-REPORT.md` | ✅ HOTOVO |
+| DR-011 | SPOS-002 Implementation Report | `.claude/reports/SPOS-002-IMPLEMENTATION-REPORT.md` | ✅ HOTOVO |
 
 ---
 

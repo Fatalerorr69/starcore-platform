@@ -106,6 +106,7 @@ ses_documents:
   SAKB-000: ACTIVE
   SPOS-000: ACTIVE
   SPOS-001: ACTIVE
+  SPOS-002: ACTIVE
 
 spos_status:
   discovery: "platform/.starcore/ already exists — mature runtime (3843 lines Python, 171 tests)"
@@ -124,6 +125,17 @@ spos_001_status:
     - ".claude/context/CONTEXT_RESTORATION_PROTOCOL.md (bridges .claude/ governance with platform/.starcore/ runtime, spec §12)"
   verified: "startup_protocol.py --quick --json still runs correctly after additions (no existing script modified)"
   change_memory_gap: "not built as separate structure — spec explicitly defers to git history/GitHub/ADR, already covered"
+
+spos_002_status:
+  approach: "Audit existing sessions/ledger.yaml + ledger.py, then live-test via actual CLI usage (not just static analysis)"
+  finding: "Session starcore-autonomous-engineering-4p3tlj had end_time: null since 2026-07-26 — never formally closed"
+  action: "Closed orphaned session via ledger.py end (archived to sessions/archive/), then registered this bootstrap session via ledger.py start"
+  verified: "_archive_session() in ledger.py already fully implements SPOS-002 §8 HANDOVER REPORT format — no gap found there"
+  added:
+    - ".claude/context/SESSION_CONTEXT.md (§6 SESSION CONTEXT REPORT)"
+    - ".claude/registry/SESSION_REGISTRY.md (§18 required registry, ecosystem-level index)"
+    - "sessions/current.md manually refreshed (ledger.py does not auto-update this human-readable file)"
+  no_scripts_modified: true
 
 ses_001_compliance:
   platform_layer: COMPLIANT
@@ -200,3 +212,4 @@ knowledge_base:
 | 2026-08-06 | SAKB-000 — Knowledge Base struktura, 6 Technology Profiles, Source/Knowledge Registry | Claude Code |
 | 2026-08-06 | SPOS-000 — Discovery existujícího platform/.starcore/ runtime, formální adopce, SPOS_REGISTRY, oprava SES-001 (Dependabot/SBOM orphaned) | Claude Code |
 | 2026-08-06 | SPOS-001 — current_state.md + project_state.json doplněny, Context Restoration Protocol propojuje .claude/ s platform/.starcore/ | Claude Code |
+| 2026-08-06 | SPOS-002 — Uzavřena osiřelá session (end_time null), zaregistrována aktuální session v ledgeru, SESSION_CONTEXT + SESSION_REGISTRY vytvořeny | Claude Code |
