@@ -16,7 +16,7 @@ Registr operačních modulů Project Operating System. Fyzická implementace pri
 | SPOS-006 | Documentation Engine | `.claude/context/DOCUMENTATION_MAP.md` + `.claude/reports/DOCUMENTATION_HEALTH_REPORT.md` + `mkdocs build --strict` (živě ověřeno) | ✅ AKTIVNÍ — ROZŠÍŘENO, ŽIVĚ OTESTOVÁNO |
 | SPOS-007 | Infrastructure Control | `platform/packages/providers` + nově `.claude/context/INFRASTRUCTURE_MAP.md` + 4 registry (HARDWARE/COMPUTE/CONTAINER/REMOTE_SERVICE) | ✅ AKTIVNÍ — ROZŠÍŘENO, ŽIVĚ OTESTOVÁNO |
 | SPOS-008 | Deployment Automation Engine (skutečné pořadí promptů — viz poznámka níže) | `.claude/context/DEPLOYMENT_ARCHITECTURE.md` + `DEPLOYMENT_REGISTRY.md` + `INSTALLER_STUDIO_PLAN.md` | ✅ AKTIVNÍ — ŽIVĚ OTESTOVÁNO |
-| SPOS-008-ORIG | AI Orchestration (původní SPOS-000 mapování, nyní bez vlastního promptu) | částečně (`scripts/decision_engine.py`) | ⚠️ ČÁSTEČNÉ, ČEKÁ NA VLASTNÍ PROMPT |
+| SPOS-010 | AI Orchestration Engine (původní SPOS-000 mapování — dle promptu číslován SPOS-011, viz poznámka) | `.claude/registry/AGENT_REGISTRY.md` + `WORKFLOW_REGISTRY.md` + `AI_ORCHESTRATION_MODEL.md` + 8 dalších souborů | ✅ AKTIVNÍ — DISCOVERY + DOKUMENTACE |
 | SPOS-009 | Security & Compliance Engine (dle SPOS-008 §19, skutečné pořadí — ne "Evolution Engine" z původní SPOS-000 mapy) | `.claude/registry/SECURITY_REGISTRY.md` + `SECURITY_BASELINE.md` + `VULNERABILITY_REGISTRY.md` | ✅ AKTIVNÍ — ŽIVĚ AUDITOVÁNO |
 | SPOS-010 | Digital Twin Runtime | `.claude/context/DIGITAL_TWIN.md` (ekosystém) + `platform/.starcore/memory/project_snapshot.md` (platform, ZASTARALÉ) | ⚠️ DUPLICITNÍ SCOPE |
 

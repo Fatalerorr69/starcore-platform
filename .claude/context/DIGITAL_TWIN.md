@@ -114,6 +114,7 @@ ses_documents:
   SPOS-007: ACTIVE
   SPOS-008: ACTIVE
   SPOS-009: ACTIVE
+  SPOS-010/011: ACTIVE
 
 deployment_status:
   installed_components: "platform/ (CI-tested), Docker Compose (defined, not run here)"
@@ -208,7 +209,7 @@ spos_status:
   decision: "Adopted existing platform/.starcore/ as canonical SPOS implementation; no duplicate created at root"
   modules_fully_covered: [SPOS-001, SPOS-002, SPOS-003, SPOS-005]
   modules_partial: [SPOS-004, SPOS-008]
-  modules_missing: [SPOS-010]
+  modules_missing: [SPOS-012]
   duplicate_concept: "SPOS-010 — two digital twin docs with different scope (ecosystem vs platform); platform snapshot STALE (v0.4.0 vs actual v0.6.0)"
   correction_to_ses_001: "Dependabot + SBOM configs DO exist (platform/.github/) but are orphaned — GitHub only reads root .github/, not nested platform/.github/"
 
@@ -274,6 +275,33 @@ security:
   rbac: none (ADR-012, single key)
   plugin_sandbox: none (ADR-011, dokumentováno)
   tls: doporučeno v produkci
+
+spos_011_ai_orchestration_status:
+  audit_date: "2026-08-07"
+  approach: "Discovery first — žádná nová implementace před auditem"
+  major_finding: "Reálná AI orchestrace je v platform/packages/orchestrator/ + packages/ai/ (Scheduler, TaskGraph, AIProvider ABC, AnthropicProvider, OpenAICompatProvider). Všechny root-level dirs (agents/, ai_runtime/, autonomous/, distributed/, runtime/android/) jsou Termux stubs nebo JSON print stubs."
+  real_components:
+    - "AGENT-001: Blueprint Generator (AnthropicProvider + OpenAICompatProvider)"
+    - "AGENT-002: Scheduler (async TaskGraph, asyncio.gather, success-gate depends_on)"
+    - "AGENT-003: QC Engine (CI orchestration)"
+    - "AGENT-004: Impact Analyzer"
+    - "Provider Router: AIProvider ABC + 2 concrete providers"
+    - "Tool Router: ProviderRegistry (Docker, Proxmox, Kubernetes — offline)"
+  numbering_drift: "Prompt označen SPOS-011; SES-INDEX očekával SPOS-010. Zaznamenáno jako governance drift (stejný vzorec jako SPOS-008)."
+  added:
+    - ".claude/registry/AGENT_REGISTRY.md (SPOS-011 §3)"
+    - ".claude/registry/WORKFLOW_REGISTRY.md (SPOS-011 §4)"
+    - ".claude/context/AI_ORCHESTRATION_MODEL.md (SPOS-011 §2)"
+    - ".claude/context/TASK_PLANNER.md (SPOS-011 §5)"
+    - ".claude/context/PROVIDER_ROUTER.md (SPOS-011 §6)"
+    - ".claude/context/TOOL_ROUTER.md (SPOS-011 §7)"
+    - ".claude/context/MEMORY_ORCHESTRATION.md (SPOS-011 §8)"
+    - ".claude/context/KNOWLEDGE_ORCHESTRATION.md (SPOS-011 §9)"
+    - ".claude/context/AI_COMMUNICATION_PROTOCOL.md (SPOS-011 §10)"
+    - ".claude/context/AI_PIPELINES.md (SPOS-011 §11)"
+    - ".claude/reports/AI_HEALTH_REPORT.md (SPOS-011 §13)"
+  ai_health_score: "70% (kód OK, AI providers offline)"
+  no_code_created_or_modified: true
 
 spos_009_security_status:
   audit_date: "2026-08-07"

@@ -43,9 +43,14 @@ Formát dle SES-001 §13: MODEL, PROVIDER, PURPOSE, VERSION, RESOURCE REQUIREMEN
 
 | Agent | Adresář | Účel | Status |
 |---|---|---|---|
-| Blueprint Generator | `platform/packages/ai` | YAML blueprint z přirozeného jazyka | AKTIVNÍ |
-| Kernel Agent | `agents/kernel/` | Základní agent kernel | AKTIVNÍ |
-| Mission Planner | `agents/missions/` | Plánování misí | AKTIVNÍ |
+| Blueprint Generator (AGENT-001) | `platform/packages/ai` | YAML blueprint z přirozeného jazyka | AKTIVNÍ |
+| Task Scheduler (AGENT-002) | `platform/packages/orchestrator` | Async TaskGraph execution | AKTIVNÍ |
+| QC Engine (AGENT-003) | `platform/.starcore/scripts/qc_engine.py` | CI orchestration + Project Intelligence | AKTIVNÍ |
+| Impact Analyzer (AGENT-004) | `platform/.starcore/scripts/impact_analyzer.py` | Code change impact analysis | AKTIVNÍ |
+| Kernel Agent (AGENT-S02) | `agents/kernel/` | JSON stub (ne reálný agent) | STUB |
+| Mission Planner (AGENT-S03) | `agents/missions/` | JSON stub (ne reálný agent) | STUB |
+
+Detail: `.claude/registry/AGENT_REGISTRY.md` (SPOS-011)
 
 ---
 

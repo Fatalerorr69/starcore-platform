@@ -21,7 +21,8 @@ Aktualizováno: 2026-08-06
 | SPOS-007 | Infrastructure Control Engine | ✅ AKTIVNÍ | (starcore diagnose živě ověřen, viz INFRASTRUCTURE_MAP.md a 4 nové registry) |
 | SPOS-008 | Deployment Automation Engine | ✅ AKTIVNÍ | (65 install skriptů auditováno — Termux stub, ne produkce; viz DEPLOYMENT_ARCHITECTURE.md) |
 | SPOS-009 | Security & Compliance Engine | ✅ AKTIVNÍ | (bandit/pip-audit/gitleaks CI živě ověřeno; viz SECURITY_REGISTRY.md, SECURITY_BASELINE.md, VULNERABILITY_REGISTRY.md) |
-| SPOS-010+ | SPOS Modules | ⏳ ČEKÁ | TBD (další prompt: AI Orchestration Engine) |
+| SPOS-010/011 | AI Orchestration Engine (prompt označen SPOS-011, viz SPOS_REGISTRY poznámka) | ✅ AKTIVNÍ | (existující orchestrator/ai packages auditovány; viz AGENT_REGISTRY.md, AI_ORCHESTRATION_MODEL.md) |
+| SPOS-012+ | SPOS Modules | ⏳ ČEKÁ | TBD (další prompt: Automation Engine dle §18 SPOS-011) |
 
 ---
 
