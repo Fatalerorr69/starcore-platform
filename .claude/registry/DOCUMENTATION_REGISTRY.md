@@ -86,6 +86,14 @@ Formát dle SPOS-006 §3: DOCUMENT_ID/TITLE/TYPE/VERSION/STATUS/OWNER/RELATED_CO
 | DR-051 | AAOS Gap Analysis | `.claude/context/AAOS_GAP_ANALYSIS.md` | ✅ HOTOVO |
 | DR-052 | AAOS Recommendations | `.claude/context/AAOS_RECOMMENDATIONS.md` | ✅ HOTOVO |
 | DR-053 | SPOS-014 Implementation Report | `.claude/reports/SPOS-014-IMPLEMENTATION-REPORT.md` | ✅ HOTOVO |
+| DR-054 | SPOS-015 Discovery Report | `.claude/reports/SPOS-015-DISCOVERY-REPORT.md` | ✅ HOTOVO |
+| DR-055 | Ecosystem Map | `.claude/context/ECOSYSTEM_MAP.md` | ✅ HOTOVO |
+| DR-056 | Legacy Registry | `.claude/registry/LEGACY_REGISTRY.md` | ✅ HOTOVO |
+| DR-057 | Duplicate Registry | `.claude/registry/DUPLICATE_REGISTRY.md` | ✅ HOTOVO |
+| DR-058 | Ecosystem Health | `.claude/context/ECOSYSTEM_HEALTH.md` | ✅ HOTOVO |
+| DR-059 | Ecosystem Gap Analysis | `.claude/context/ECOSYSTEM_GAP_ANALYSIS.md` | ✅ HOTOVO |
+| DR-060 | Ecosystem Recommendations | `.claude/context/ECOSYSTEM_RECOMMENDATIONS.md` | ✅ HOTOVO |
+| DR-061 | SPOS-015 Implementation Report | `.claude/reports/SPOS-015-IMPLEMENTATION-REPORT.md` | ✅ HOTOVO |
 
 ---
 

@@ -1,6 +1,6 @@
 # SPOS REGISTRY
 
-Aktualizováno: 2026-08-07 | Standard: SPOS-014
+Aktualizováno: 2026-08-07 | Standard: SPOS-015
 
 Registr operačních modulů Project Operating System. Fyzická implementace primárně v `platform/.starcore/` (viz SPOS-000 rozhodnutí — adoptováno, ne duplikováno).
 
@@ -22,6 +22,7 @@ Registr operačních modulů Project Operating System. Fyzická implementace pri
 | SPOS-012 | Integration Engine | `.claude/registry/COMPONENT_REGISTRY.md` + `API_REGISTRY.md` + `.claude/context/INTERFACE_REGISTRY.md` + `DEPENDENCY_GRAPH.md` + `EVENT_BUS.md` + `DATA_FLOW.md` + `INTEGRATION_MAP.md` + `INTEGRATION_HEALTH.md` + `INTEGRATION_RECOMMENDATIONS.md` | ✅ AKTIVNÍ — DISCOVERY + DOKUMENTACE |
 | SPOS-013 | Automation Engine | `.claude/registry/AUTOMATION_REGISTRY.md` + `.claude/context/AUTOMATION_ENGINE.md` + `TRIGGER_REGISTRY.md` + `WORKFLOW_AUTOMATION.md` + `AUTOMATION_PIPELINES.md` + `SELF_MAINTENANCE.md` + `AUTOMATION_HEALTH.md` + `AUTOMATION_GAP_ANALYSIS.md` + `AUTOMATION_RECOMMENDATIONS.md` | ✅ AKTIVNÍ — DISCOVERY + DOKUMENTACE |
 | SPOS-014 | AI Agent Operating System (AAOS) | `.claude/context/AAOS_ARCHITECTURE.md` + `AGENT_LIFECYCLE.md` + `MULTI_AGENT_MODEL.md` + `PROVIDER_ROUTER_V2.md` + `CONTEXT_ENGINE.md` + `PROMPT_ENGINE.md` + `AAOS_HEALTH.md` + `AAOS_GAP_ANALYSIS.md` + `AAOS_RECOMMENDATIONS.md` + rozšířený `AGENT_REGISTRY.md` | ✅ AKTIVNÍ — DISCOVERY + DOKUMENTACE |
+| SPOS-015 | Ecosystem Hygiene Engine | `.claude/context/ECOSYSTEM_MAP.md` + `ECOSYSTEM_HEALTH.md` + `ECOSYSTEM_GAP_ANALYSIS.md` + `ECOSYSTEM_RECOMMENDATIONS.md` + `.claude/registry/LEGACY_REGISTRY.md` + `DUPLICATE_REGISTRY.md` + discovery + implementation reports | ✅ AKTIVNÍ — DISCOVERY + DOKUMENTACE |
 
 ---
 

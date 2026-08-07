@@ -209,7 +209,7 @@ spos_status:
   decision: "Adopted existing platform/.starcore/ as canonical SPOS implementation; no duplicate created at root"
   modules_fully_covered: [SPOS-001, SPOS-002, SPOS-003, SPOS-005, SPOS-012, SPOS-013, SPOS-014]
   modules_partial: [SPOS-004, SPOS-008]
-  modules_missing: [SPOS-015+]
+  modules_missing: [SPOS-016+]
   duplicate_concept: "SPOS-010 — two digital twin docs with different scope (ecosystem vs platform); platform snapshot STALE (v0.4.0 vs actual v0.6.0)"
   correction_to_ses_001: "Dependabot + SBOM configs DO exist (platform/.github/) but are orphaned — GitHub only reads root .github/, not nested platform/.github/"
 
@@ -464,6 +464,36 @@ spos_014_aaos_status:
   no_code_created_or_modified: true
 ```
 
+### SPOS-015 — Ecosystem Hygiene Engine
+
+```yaml
+spos_015_ecosystem_status:
+  audit_date: "2026-08-07"
+  ecosystem_health_score: "58% (ČÁSTEČNĚ_ZDRAVÝ)"
+  platform_health: "77% (DOBRÝ)"
+  ecosystem_maturity: "33% (KRITICKÝ)"
+  discovery:
+    root_directories_audited: 35+
+    legacy_identified: 18
+    stubs_identified: 5
+    dead_code_identified: 4
+    empty_registries: 3
+    duplicates: 3
+  gaps: "15 (3 kritických, 5 vysokých, 4 středních, 3 nízké)"
+  recommendations: "12 (5 XS, 4 S, 2 M, 1 L) — projected 58% → 75%+"
+  key_finding: "Živý kód výhradně v platform/ (v0.6.0). 18+ root-level adresářů je legacy z 6.x/7.x/8.x."
+  added:
+    - ".claude/context/ECOSYSTEM_MAP.md"
+    - ".claude/registry/LEGACY_REGISTRY.md"
+    - ".claude/registry/DUPLICATE_REGISTRY.md"
+    - ".claude/context/ECOSYSTEM_HEALTH.md"
+    - ".claude/context/ECOSYSTEM_GAP_ANALYSIS.md"
+    - ".claude/context/ECOSYSTEM_RECOMMENDATIONS.md"
+    - ".claude/reports/SPOS-015-DISCOVERY-REPORT.md"
+    - ".claude/reports/SPOS-015-IMPLEMENTATION-REPORT.md"
+  no_code_created_or_modified: true
+```
+
 ---
 
 ## DOKUMENTACE
@@ -507,6 +537,7 @@ knowledge_base:
 
 | Datum | Změna | Autor |
 |---|---|---|
+| 2026-08-07 | SPOS-015 — Ecosystem Hygiene Engine: 35+ root dirs auditováno, ecosystem health score 58%, 18 legacy + 4 dead code identifikováno, 15 gaps, 12 doporučení, 8 výstupních souborů | Claude Code |
 | 2026-08-07 | SPOS-014 — AI Agent Operating System (AAOS): 4 aktivní agenti + 27 stubs katalogizováno, AAOS health score 38%, 22 gaps identifikováno, 16 doporučení, 11 výstupních souborů | Claude Code |
 | 2026-08-07 | SPOS-013 — Automation Engine: 51 automatizací katalogizováno, health score 61%, 18 gaps identifikováno, 16 doporučení, 10 výstupních souborů | Claude Code |
 | 2026-08-06 | Bootstrap 00 — Discovery reports, .claude/ struktura, root README | Claude Code |

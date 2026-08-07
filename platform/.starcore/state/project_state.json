@@ -3,7 +3,7 @@
   "updated_at": "2026-08-07",
   "version": "0.6.0",
   "current_phase": "SES/SAKB/SPOS governance bootstrap",
-  "active_task": "SPOS-014 — AI Agent Operating System (DOKONČENO)",
+  "active_task": "SPOS-016+ — čeká na další governance moduly",
   "completed_tasks": [
     "Bootstrap 00 — discovery reports + .claude/ structure",
     "SES-000 — Engineering Constitution",
@@ -22,7 +22,8 @@
     "SPOS-010/011 — AI Orchestration Engine",
     "SPOS-012 — Integration Engine (health score: 64%)",
     "SPOS-013 — Automation Engine (health score: 61%, 51 automations catalogued)",
-    "SPOS-014 — AI Agent Operating System (AAOS health score: 38%, 4 active agents, 22 gaps)"
+    "SPOS-014 — AI Agent Operating System (AAOS health score: 38%, 4 active agents, 22 gaps)",
+    "SPOS-015 — Ecosystem Hygiene Engine (ecosystem health: 58%, 18 legacy dirs, 4 dead code, 15 gaps)"
   ],
   "blockers": [],
   "risks": [
@@ -35,16 +36,21 @@
     "AAOS maturity Level 2/5 — multi-agent, RAG, runtime routing missing"
   ],
   "next_actions": [
-    "SPOS-015+ — další governance moduly",
+    "SPOS-016+ — další governance moduly",
+    "REC-ECO-01: Smazat dead code dirs (XS, < 30 min)",
+    "REC-ECO-02: Smazat prázdné registry soubory (XS, < 15 min)",
+    "REC-ECO-03: Opravit broken symlink bin/control-center (XS, < 5 min)",
+    "REC-ECO-04: Přidat .gitkeep nebo README do prázdných dirs (XS, < 15 min)",
+    "REC-ECO-05: Deduplikovat _persist_run() (XS, < 30 min)",
     "REC-AAOS-01: max_tokens env var (XS, < 30 min)",
-    "REC-AAOS-04: RetryConfig napojení na AI providers (S)",
-    "Fix starcore-integrity.yml (REC-A01 — 30 min)",
-    "Přesunout klíčové workflows z platform/.github/ do root .github/ (REC-A04)"
+    "Fix starcore-integrity.yml (REC-A01 — 30 min)"
   ],
   "integration_health_score": "64%",
   "automation_health_score": "61%",
   "aaos_health_score": "38%",
+  "ecosystem_health_score": "58%",
   "automation_maturity": "Level 3.5 / 5",
   "aaos_maturity": "Level 2 / 5",
+  "ecosystem_maturity": "33%",
   "notes": "This file is the machine-readable counterpart to memory/current_state.md. It is scoped to platform/, complementing the ecosystem-wide .claude/context/DIGITAL_TWIN.md."
 }

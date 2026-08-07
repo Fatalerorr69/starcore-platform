@@ -264,19 +264,72 @@ sessions:
   next_action: SPOS-014 DOKONČENO. Commit d4340db pushed. Pokračuje SPOS-015.
 - session_id: spos-015-20260807
   start_time: '2026-08-07T12:00:01Z'
-  end_time: null
+  end_time: '2026-08-07T18:00:00Z'
   branch: claude/starcore-ai-bootstrap-fkyb96
-  head: d4340db
+  head: pending
   user_requests:
-  - SPOS-015 — Discovery a příprava dalšího governance modulu
-  prompts_used: []
-  files_read: []
-  files_created: []
-  files_modified: []
-  commands_executed: []
-  tests_executed: []
-  decisions: []
-  risks: []
+  - SPOS-015 Ecosystem Hygiene Engine — plný audit ekosystému, legacy/dead code/duplicity
+  prompts_used:
+  - PROM-011
+  files_read:
+  - platform/core/ (43 .py files)
+  - platform/control_center/ (21 files)
+  - platform/mission_engine/ (3 files)
+  - platform/studio/ (3 files)
+  - platform/sdk/ (4 files)
+  - platform/github_intelligence/ (5 files)
+  - platform/knowledge_engine/ (4 files)
+  - platform/performance/ (3 files)
+  - platform/api_gateway/ (2 files)
+  - platform/tools/ (18 shell stubs)
+  - platform/registry/ (3 JSON files)
+  - platform/bin/control-center (broken symlink)
+  files_created:
+  - .claude/context/ECOSYSTEM_MAP.md
+  - .claude/registry/LEGACY_REGISTRY.md
+  - .claude/registry/DUPLICATE_REGISTRY.md
+  - .claude/context/ECOSYSTEM_HEALTH.md
+  - .claude/context/ECOSYSTEM_GAP_ANALYSIS.md
+  - .claude/context/ECOSYSTEM_RECOMMENDATIONS.md
+  - .claude/reports/SPOS-015-DISCOVERY-REPORT.md
+  - .claude/reports/SPOS-015-IMPLEMENTATION-REPORT.md
+  files_modified:
+  - .claude/ses/SES-INDEX.md
+  - .claude/registry/SPOS_REGISTRY.md
+  - .claude/registry/DOCUMENTATION_REGISTRY.md
+  - .claude/context/DIGITAL_TWIN.md
+  - platform/.starcore/memory/current_state.md
+  - platform/.starcore/memory/project_snapshot.md
+  - platform/.starcore/state/project_state.json
+  - platform/.starcore/sessions/ledger.yaml
+  - platform/.starcore/prompts/registry.yaml
+  commands_executed:
+  - uv run pytest -q --cov --cov-report=term-missing --cov-fail-under=100
+  - uv run ruff check .
+  - uv run pyright
+  - uv run bandit -r packages/ apps/ scripts/ -ll -q
+  - uv run pip-audit
+  - uv run mkdocs build --strict
+  - uv run python .starcore/scripts/regression_sentinel.py check
+  - uv run python .starcore/scripts/release_readiness.py evaluate --quick
+  tests_executed:
+  - timestamp: '2026-08-07T14:00:00Z'
+    passed: 796
+    failed: 0
+    coverage: 100.0
+    command: uv run pytest -q --cov --cov-report=term-missing --cov-fail-under=100
+  decisions:
+  - 'SPOS-015 Ecosystem Hygiene Engine dokončen. Ecosystem health score: 58%, 25
+    undocumented dirs klasifikovány, 18 legacy, 4 dead code, 3 empty registries, 3
+    duplicity, 15 gaps, 12 doporučení.'
+  - Legacy dirs klasifikovány ale NEMAZÁNY — vyžadují uživatelské schválení
+  - Dead code dirs dokumentovány s DELETE doporučením, ale ponechány
+  - DUP-003 (get_settings opakované volání) klasifikován jako STYLISTIC — @lru_cache
+    zajišťuje výkon
+  risks:
+  - 18 legacy dirs nemají governance (GAP-ECO-001 CRITICAL)
+  - 4 dead code dirs zabírají prostor a matou nové vývojáře (GAP-ECO-002 CRITICAL)
+  - Broken symlink bin/control-center (GAP-ECO-005 HIGH)
   approvals: []
   blockers: []
-  next_action: ''
+  next_action: SPOS-015 DOKONČENO. Pokračuje SPOS-016+.
