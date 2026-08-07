@@ -1,6 +1,6 @@
 # SPOS REGISTRY
 
-Aktualizováno: 2026-08-06 | Standard: SPOS-008
+Aktualizováno: 2026-08-07 | Standard: SPOS-012
 
 Registr operačních modulů Project Operating System. Fyzická implementace primárně v `platform/.starcore/` (viz SPOS-000 rozhodnutí — adoptováno, ne duplikováno).
 
@@ -19,6 +19,7 @@ Registr operačních modulů Project Operating System. Fyzická implementace pri
 | SPOS-010 | AI Orchestration Engine (původní SPOS-000 mapování — dle promptu číslován SPOS-011, viz poznámka) | `.claude/registry/AGENT_REGISTRY.md` + `WORKFLOW_REGISTRY.md` + `AI_ORCHESTRATION_MODEL.md` + 8 dalších souborů | ✅ AKTIVNÍ — DISCOVERY + DOKUMENTACE |
 | SPOS-009 | Security & Compliance Engine (dle SPOS-008 §19, skutečné pořadí — ne "Evolution Engine" z původní SPOS-000 mapy) | `.claude/registry/SECURITY_REGISTRY.md` + `SECURITY_BASELINE.md` + `VULNERABILITY_REGISTRY.md` | ✅ AKTIVNÍ — ŽIVĚ AUDITOVÁNO |
 | SPOS-010 | Digital Twin Runtime | `.claude/context/DIGITAL_TWIN.md` (ekosystém) + `platform/.starcore/memory/project_snapshot.md` (platform, ZASTARALÉ) | ⚠️ DUPLICITNÍ SCOPE |
+| SPOS-012 | Integration Engine | `.claude/registry/COMPONENT_REGISTRY.md` + `API_REGISTRY.md` + `.claude/context/INTERFACE_REGISTRY.md` + `DEPENDENCY_GRAPH.md` + `EVENT_BUS.md` + `DATA_FLOW.md` + `INTEGRATION_MAP.md` + `INTEGRATION_HEALTH.md` + `INTEGRATION_RECOMMENDATIONS.md` | ✅ AKTIVNÍ — DISCOVERY + DOKUMENTACE |
 
 ---
 

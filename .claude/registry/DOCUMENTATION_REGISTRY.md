@@ -24,6 +24,7 @@ Formát dle SPOS-006 §3: DOCUMENT_ID/TITLE/TYPE/VERSION/STATUS/OWNER/RELATED_CO
 | SPOS-008 | Deployment Automation Engine | `.claude/context/DEPLOYMENT_ARCHITECTURE.md` + `DEPLOYMENT_REGISTRY.md` + `INSTALLER_STUDIO_PLAN.md` | ✅ AKTIVNÍ | 1.0.0 |
 | SPOS-009 | Security & Compliance Engine | `.claude/registry/SECURITY_REGISTRY.md` + `SECURITY_BASELINE.md` + `VULNERABILITY_REGISTRY.md` | ✅ AKTIVNÍ | 1.0.0 |
 | SPOS-010/011 | AI Orchestration Engine | `.claude/registry/AGENT_REGISTRY.md` + `WORKFLOW_REGISTRY.md` + `.claude/context/AI_ORCHESTRATION_MODEL.md` + 7 dalších | ✅ AKTIVNÍ | 1.0.0 |
+| SPOS-012 | Integration Engine | `.claude/registry/COMPONENT_REGISTRY.md` + `API_REGISTRY.md` + `.claude/context/INTERFACE_REGISTRY.md` + 6 dalších | ✅ AKTIVNÍ | 1.0.0 |
 
 ---
 
@@ -54,6 +55,16 @@ Formát dle SPOS-006 §3: DOCUMENT_ID/TITLE/TYPE/VERSION/STATUS/OWNER/RELATED_CO
 | DR-021 | SPOS-009 Implementation Report | `.claude/reports/SPOS-009-IMPLEMENTATION-REPORT.md` | ✅ HOTOVO |
 | DR-022 | SPOS-011 Implementation Report | `.claude/reports/SPOS-011-IMPLEMENTATION-REPORT.md` | ✅ HOTOVO |
 | DR-023 | AI Health Report | `.claude/reports/AI_HEALTH_REPORT.md` | ✅ HOTOVO |
+| DR-024 | SPOS-012 Implementation Report | `.claude/reports/SPOS-012-IMPLEMENTATION-REPORT.md` | ✅ HOTOVO |
+| DR-025 | Component Registry | `.claude/registry/COMPONENT_REGISTRY.md` | ✅ HOTOVO |
+| DR-026 | API Registry | `.claude/registry/API_REGISTRY.md` | ✅ HOTOVO |
+| DR-027 | Interface Registry | `.claude/context/INTERFACE_REGISTRY.md` | ✅ HOTOVO |
+| DR-028 | Dependency Graph | `.claude/context/DEPENDENCY_GRAPH.md` | ✅ HOTOVO |
+| DR-029 | Event Bus | `.claude/context/EVENT_BUS.md` | ✅ HOTOVO |
+| DR-030 | Data Flow | `.claude/context/DATA_FLOW.md` | ✅ HOTOVO |
+| DR-031 | Integration Map | `.claude/context/INTEGRATION_MAP.md` | ✅ HOTOVO |
+| DR-032 | Integration Health | `.claude/context/INTEGRATION_HEALTH.md` | ✅ HOTOVO |
+| DR-033 | Integration Recommendations | `.claude/context/INTEGRATION_RECOMMENDATIONS.md` | ✅ HOTOVO |
 
 ---
 

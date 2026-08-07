@@ -1,6 +1,6 @@
 # STARCORE DIGITAL TWIN
 
-Aktualizováno: 2026-08-06 | Standard: SES-001 §17
+Aktualizováno: 2026-08-07 | Standard: SES-001 §17
 
 Tento soubor je digitální obraz aktuálního stavu systému STARCORE.
 Musí být aktualizován po každé významné změně.
@@ -209,7 +209,7 @@ spos_status:
   decision: "Adopted existing platform/.starcore/ as canonical SPOS implementation; no duplicate created at root"
   modules_fully_covered: [SPOS-001, SPOS-002, SPOS-003, SPOS-005]
   modules_partial: [SPOS-004, SPOS-008]
-  modules_missing: [SPOS-012]
+  modules_missing: [SPOS-013]
   duplicate_concept: "SPOS-010 — two digital twin docs with different scope (ecosystem vs platform); platform snapshot STALE (v0.4.0 vs actual v0.6.0)"
   correction_to_ses_001: "Dependabot + SBOM configs DO exist (platform/.github/) but are orphaned — GitHub only reads root .github/, not nested platform/.github/"
 
@@ -339,6 +339,44 @@ spos_009_security_status:
     - ".claude/registry/SECURITY_REGISTRY.md (S01-S05 + GitHub Security)"
     - ".claude/registry/VULNERABILITY_REGISTRY.md (0 CVE, 5 non-CVE findings)"
     - ".claude/registry/SECURITY_BASELINE.md (8 controls, compliance score)"
+
+spos_012_integration_status:
+  audit_date: "2026-08-07"
+  approach: "Discovery first — úplný audit 150+ adresářů, čtení FastAPI routes, EventBus, docker-compose.yml"
+  integration_health_score: "64% (ČÁSTEČNĚ_ZDRAVÝ)"
+  score_breakdown:
+    integration: "70% (16/23 active interfaces)"
+    dependency: "95% (0 circular deps, pyright 0 errors)"
+    architecture: "75% (platform full SES-001 compliance, ecosystem Variant B)"
+    interface: "70% (16/23 active)"
+    provider: "33% (2/6 online: Anthropic + GitHub)"
+    tool: "74% (14/19 active)"
+    infrastructure: "14% (1/7: pouze SQLite)"
+  major_finding: "Kódová báze je zdravá — nízké skóre způsobeno offline infrastructure (Docker/Proxmox/NATS/Redis). Blueprint execution end-to-end nefunkční v tomto prostředí."
+  components_catalogued: "83+"
+  interfaces_total: 23
+  interfaces_active: 16
+  interfaces_broken: 7
+  circular_dependencies: 0
+  critical_risks:
+    - "RISK-001: 3/3 infra providers offline — blueprint execution nefunkční (STŘEDNÍ)"
+    - "RISK-002: starcore-integrity.yml broken — CI noise (STŘEDNÍ)"
+  top_recommendations:
+    - "REC-001: DockerProvider v CI (CRITICAL — unblocks end-to-end)"
+    - "REC-002: Fix starcore-integrity.yml (CRITICAL — CI noise)"
+    - "REC-003: Merge platform/.github/ do root (HIGH — Dependabot)"
+  added:
+    - ".claude/registry/COMPONENT_REGISTRY.md (SPOS-012 §3)"
+    - ".claude/registry/API_REGISTRY.md (SPOS-012 §9)"
+    - ".claude/context/INTERFACE_REGISTRY.md (SPOS-012 §4)"
+    - ".claude/context/DEPENDENCY_GRAPH.md (SPOS-012 §6)"
+    - ".claude/context/EVENT_BUS.md (SPOS-012 §7)"
+    - ".claude/context/DATA_FLOW.md (SPOS-012 §8)"
+    - ".claude/context/INTEGRATION_MAP.md (SPOS-012 §17)"
+    - ".claude/context/INTEGRATION_HEALTH.md (SPOS-012 §14)"
+    - ".claude/context/INTEGRATION_RECOMMENDATIONS.md (SPOS-012 §15)"
+    - ".claude/reports/SPOS-012-IMPLEMENTATION-REPORT.md (SPOS-012 §20)"
+  no_code_created_or_modified: true
 ```
 
 ---
