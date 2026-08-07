@@ -25,6 +25,7 @@ Formát dle SPOS-006 §3: DOCUMENT_ID/TITLE/TYPE/VERSION/STATUS/OWNER/RELATED_CO
 | SPOS-009 | Security & Compliance Engine | `.claude/registry/SECURITY_REGISTRY.md` + `SECURITY_BASELINE.md` + `VULNERABILITY_REGISTRY.md` | ✅ AKTIVNÍ | 1.0.0 |
 | SPOS-010/011 | AI Orchestration Engine | `.claude/registry/AGENT_REGISTRY.md` + `WORKFLOW_REGISTRY.md` + `.claude/context/AI_ORCHESTRATION_MODEL.md` + 7 dalších | ✅ AKTIVNÍ | 1.0.0 |
 | SPOS-012 | Integration Engine | `.claude/registry/COMPONENT_REGISTRY.md` + `API_REGISTRY.md` + `.claude/context/INTERFACE_REGISTRY.md` + 6 dalších | ✅ AKTIVNÍ | 1.0.0 |
+| SPOS-013 | Automation Engine | `.claude/registry/AUTOMATION_REGISTRY.md` + `.claude/context/AUTOMATION_ENGINE.md` + `TRIGGER_REGISTRY.md` + `WORKFLOW_AUTOMATION.md` + `AUTOMATION_PIPELINES.md` + 4 dalších | ✅ AKTIVNÍ | 1.0.0 |
 
 ---
 
@@ -65,6 +66,16 @@ Formát dle SPOS-006 §3: DOCUMENT_ID/TITLE/TYPE/VERSION/STATUS/OWNER/RELATED_CO
 | DR-031 | Integration Map | `.claude/context/INTEGRATION_MAP.md` | ✅ HOTOVO |
 | DR-032 | Integration Health | `.claude/context/INTEGRATION_HEALTH.md` | ✅ HOTOVO |
 | DR-033 | Integration Recommendations | `.claude/context/INTEGRATION_RECOMMENDATIONS.md` | ✅ HOTOVO |
+| DR-034 | SPOS-013 Implementation Report | `.claude/reports/SPOS-013-IMPLEMENTATION-REPORT.md` | ✅ HOTOVO |
+| DR-035 | Automation Registry | `.claude/registry/AUTOMATION_REGISTRY.md` | ✅ HOTOVO |
+| DR-036 | Automation Engine | `.claude/context/AUTOMATION_ENGINE.md` | ✅ HOTOVO |
+| DR-037 | Trigger Registry | `.claude/context/TRIGGER_REGISTRY.md` | ✅ HOTOVO |
+| DR-038 | Workflow Automation | `.claude/context/WORKFLOW_AUTOMATION.md` | ✅ HOTOVO |
+| DR-039 | Automation Pipelines | `.claude/context/AUTOMATION_PIPELINES.md` | ✅ HOTOVO |
+| DR-040 | Self Maintenance Engine | `.claude/context/SELF_MAINTENANCE.md` | ✅ HOTOVO |
+| DR-041 | Automation Health | `.claude/context/AUTOMATION_HEALTH.md` | ✅ HOTOVO |
+| DR-042 | Automation Gap Analysis | `.claude/context/AUTOMATION_GAP_ANALYSIS.md` | ✅ HOTOVO |
+| DR-043 | Automation Recommendations | `.claude/context/AUTOMATION_RECOMMENDATIONS.md` | ✅ HOTOVO |
 
 ---
 

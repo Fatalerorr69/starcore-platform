@@ -209,7 +209,7 @@ spos_status:
   decision: "Adopted existing platform/.starcore/ as canonical SPOS implementation; no duplicate created at root"
   modules_fully_covered: [SPOS-001, SPOS-002, SPOS-003, SPOS-005]
   modules_partial: [SPOS-004, SPOS-008]
-  modules_missing: [SPOS-013]
+  modules_missing: [SPOS-014]
   duplicate_concept: "SPOS-010 — two digital twin docs with different scope (ecosystem vs platform); platform snapshot STALE (v0.4.0 vs actual v0.6.0)"
   correction_to_ses_001: "Dependabot + SBOM configs DO exist (platform/.github/) but are orphaned — GitHub only reads root .github/, not nested platform/.github/"
 
@@ -377,6 +377,45 @@ spos_012_integration_status:
     - ".claude/context/INTEGRATION_RECOMMENDATIONS.md (SPOS-012 §15)"
     - ".claude/reports/SPOS-012-IMPLEMENTATION-REPORT.md (SPOS-012 §20)"
   no_code_created_or_modified: true
+
+spos_013_automation_status:
+  audit_date: "2026-08-07"
+  approach: "Discovery first — inventář všech automatizací (GitHub Actions, Makefile, pre-commit, .starcore scripts, platform packages)"
+  automation_health_score: "61% (ČÁSTEČNĚ_ZDRAVÝ)"
+  score_breakdown:
+    ci_cd_coverage: "75% (3 aktivní CI jobs, 7 ORPHANED)"
+    security_automation: "80% (pip-audit + bandit + gitleaks v CI, nightly scan)"
+    test_automation: "95% (100% coverage gate, 805+ testů)"
+    governance_automation: "45% (QC scripts MANUÁLNÍ)"
+    self_maintenance: "20% (téměř žádný self-repair)"
+    observability: "50% (in-process EventBus)"
+  total_automations_catalogued: 51
+  active: 29
+  manual: 16
+  orphaned: 7
+  broken: 1
+  legacy_stubs: "~70 (Termux)"
+  automation_maturity: "Level 3.5 / 5"
+  critical_gaps:
+    - "GAP-001: starcore-integrity.yml BROKEN (CI noise)"
+    - "GAP-002: Všechny 3 infra providers offline (DEGRADED runtime)"
+    - "GAP-003: Nulová self-maintenance automation"
+  top_recommendations:
+    - "REC-A01: Fix/smazat starcore-integrity.yml"
+    - "REC-A04: Přesunout klíčové workflows z platform/.github/"
+    - "REC-A03: Scheduled QC automation"
+  added:
+    - ".claude/registry/AUTOMATION_REGISTRY.md (SPOS-013 §3)"
+    - ".claude/context/AUTOMATION_ENGINE.md (SPOS-013 §5)"
+    - ".claude/context/TRIGGER_REGISTRY.md (SPOS-013 §6)"
+    - ".claude/context/WORKFLOW_AUTOMATION.md (SPOS-013 §7)"
+    - ".claude/context/AUTOMATION_PIPELINES.md (SPOS-013 §4)"
+    - ".claude/context/SELF_MAINTENANCE.md (SPOS-013 §8)"
+    - ".claude/context/AUTOMATION_HEALTH.md (SPOS-013 §9)"
+    - ".claude/context/AUTOMATION_GAP_ANALYSIS.md (SPOS-013 §10)"
+    - ".claude/context/AUTOMATION_RECOMMENDATIONS.md (SPOS-013 §11)"
+    - ".claude/reports/SPOS-013-IMPLEMENTATION-REPORT.md (SPOS-013 §15)"
+  no_code_created_or_modified: true
 ```
 
 ---
@@ -422,6 +461,7 @@ knowledge_base:
 
 | Datum | Změna | Autor |
 |---|---|---|
+| 2026-08-07 | SPOS-013 — Automation Engine: 51 automatizací katalogizováno, health score 61%, 18 gaps identifikováno, 16 doporučení, 10 výstupních souborů | Claude Code |
 | 2026-08-06 | Bootstrap 00 — Discovery reports, .claude/ struktura, root README | Claude Code |
 | 2026-08-06 | SES-000 — Engineering Constitution registrace, všechny registry | Claude Code |
 | 2026-08-06 | SES-001 — Technical Standard gap analýza, MODULE/AI registry rozšíření | Claude Code |
