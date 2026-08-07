@@ -1,27 +1,44 @@
 {
   "schema": "SPOS-001 PROJECT_STATE_ENGINE",
-  "updated_at": "2026-08-06",
+  "updated_at": "2026-08-07",
   "version": "0.6.0",
   "current_phase": "SES/SAKB/SPOS governance bootstrap",
-  "active_task": "SPOS-001 — Project Memory Engine",
+  "active_task": "SPOS-014 — AI Agent Operating System (ČEKÁ)",
   "completed_tasks": [
     "Bootstrap 00 — discovery reports + .claude/ structure",
     "SES-000 — Engineering Constitution",
     "SES-001 — Technical Engineering Standard (gap analysis)",
     "SAKB-000 — Knowledge Model (source registry, 6 technology profiles)",
-    "SPOS-000 — Runtime Bootstrap (adopted platform/.starcore/, did not duplicate)"
+    "SPOS-000 — Runtime Bootstrap (adopted platform/.starcore/, did not duplicate)",
+    "SPOS-001 — Project Memory Engine",
+    "SPOS-002 — Session Management Engine",
+    "SPOS-003 — Prompt Registry Engine",
+    "SPOS-004 — Project Intelligence Engine",
+    "SPOS-005 — Audit Engine",
+    "SPOS-006 — Documentation Engine",
+    "SPOS-007 — Infrastructure Control Engine",
+    "SPOS-008 — Deployment Automation Engine",
+    "SPOS-009 — Security & Compliance Engine",
+    "SPOS-010/011 — AI Orchestration Engine",
+    "SPOS-012 — Integration Engine (health score: 64%)",
+    "SPOS-013 — Automation Engine (health score: 61%, 51 automations catalogued)"
   ],
   "blockers": [],
   "risks": [
     "memory/project_snapshot.md stale (v0.4.0 vs actual v0.6.0)",
     "state/release.md stale (v0.2.0 vs actual v0.6.0)",
-    "Dependabot/SBOM config orphaned in platform/.github/ (GitHub only reads root .github/)",
-    "SPOS-006 (Documentation Engine), SPOS-007 (Infrastructure Control), SPOS-009 (Evolution Engine) have no formal implementation"
+    "7 workflows ORPHANED in platform/.github/ (GitHub only reads root .github/)",
+    "starcore-integrity.yml BROKEN (CI noise)",
+    "All 3 infra providers offline (DockerProvider, ProxmoxProvider, KubernetesProvider)",
+    "Nulová self-maintenance automation (governance drift undetected)"
   ],
   "next_actions": [
-    "SPOS-002 — Session Management Engine",
-    "Refresh project_snapshot.md and release.md by running actual platform toolchain (uv sync + pytest)",
-    "Decide on relocating orphaned Dependabot/SBOM config to root .github/"
+    "SPOS-014 — AI Agent Operating System",
+    "Fix starcore-integrity.yml (REC-A01 — 30 min)",
+    "Přesunout klíčové workflows z platform/.github/ do root .github/ (REC-A04)"
   ],
+  "automation_health_score": "61%",
+  "integration_health_score": "64%",
+  "automation_maturity": "Level 3.5 / 5",
   "notes": "This file is the machine-readable counterpart to memory/current_state.md. It is scoped to platform/, complementing the ecosystem-wide .claude/context/DIGITAL_TWIN.md."
 }
