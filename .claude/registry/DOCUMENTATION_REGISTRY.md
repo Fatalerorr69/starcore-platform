@@ -22,6 +22,7 @@ Formát dle SPOS-006 §3: DOCUMENT_ID/TITLE/TYPE/VERSION/STATUS/OWNER/RELATED_CO
 | SPOS-006 | Documentation Engine | `.claude/context/DOCUMENTATION_MAP.md` + `.claude/reports/DOCUMENTATION_HEALTH_REPORT.md` | ✅ AKTIVNÍ | 1.0.0 |
 | SPOS-007 | Infrastructure Control Engine | `.claude/context/INFRASTRUCTURE_MAP.md` + HARDWARE/COMPUTE/CONTAINER/REMOTE_SERVICE_REGISTRY | ✅ AKTIVNÍ | 1.0.0 |
 | SPOS-008 | Deployment Automation Engine | `.claude/context/DEPLOYMENT_ARCHITECTURE.md` + `DEPLOYMENT_REGISTRY.md` + `INSTALLER_STUDIO_PLAN.md` | ✅ AKTIVNÍ | 1.0.0 |
+| SPOS-009 | Security & Compliance Engine | `.claude/registry/SECURITY_REGISTRY.md` + `SECURITY_BASELINE.md` + `VULNERABILITY_REGISTRY.md` | ✅ AKTIVNÍ | 1.0.0 |
 
 ---
 
@@ -49,6 +50,7 @@ Formát dle SPOS-006 §3: DOCUMENT_ID/TITLE/TYPE/VERSION/STATUS/OWNER/RELATED_CO
 | DR-018 | SPOS-006 Implementation Report | `.claude/reports/SPOS-006-IMPLEMENTATION-REPORT.md` | ✅ HOTOVO |
 | DR-019 | SPOS-007 Implementation Report | `.claude/reports/SPOS-007-IMPLEMENTATION-REPORT.md` | ✅ HOTOVO |
 | DR-020 | SPOS-008 Implementation Report | `.claude/reports/SPOS-008-IMPLEMENTATION-REPORT.md` | ✅ HOTOVO |
+| DR-021 | SPOS-009 Implementation Report | `.claude/reports/SPOS-009-IMPLEMENTATION-REPORT.md` | ✅ HOTOVO |
 
 ---
 

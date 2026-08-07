@@ -113,6 +113,7 @@ ses_documents:
   SPOS-006: ACTIVE
   SPOS-007: ACTIVE
   SPOS-008: ACTIVE
+  SPOS-009: ACTIVE
 
 deployment_status:
   installed_components: "platform/ (CI-tested), Docker Compose (defined, not run here)"
@@ -207,7 +208,7 @@ spos_status:
   decision: "Adopted existing platform/.starcore/ as canonical SPOS implementation; no duplicate created at root"
   modules_fully_covered: [SPOS-001, SPOS-002, SPOS-003, SPOS-005]
   modules_partial: [SPOS-004, SPOS-008]
-  modules_missing: [SPOS-006, SPOS-007, SPOS-009]
+  modules_missing: [SPOS-010]
   duplicate_concept: "SPOS-010 — two digital twin docs with different scope (ecosystem vs platform); platform snapshot STALE (v0.4.0 vs actual v0.6.0)"
   correction_to_ses_001: "Dependabot + SBOM configs DO exist (platform/.github/) but are orphaned — GitHub only reads root .github/, not nested platform/.github/"
 
@@ -273,6 +274,43 @@ security:
   rbac: none (ADR-012, single key)
   plugin_sandbox: none (ADR-011, dokumentováno)
   tls: doporučeno v produkci
+
+spos_009_security_status:
+  audit_date: "2026-08-07"
+  compliance_score: "62.5% fully compliant (5/8 controls), 87.5% partially compliant (7/8)"
+  overall_assessment: ČÁSTEČNĚ_VYHOVUJÍCÍ
+  controls_passed: [C01_secrets, C03_bandit_ruff, C04_pyright, C05_api_auth, C06_ai_credentials]
+  controls_partial: [C02_dependabot, C07_branch_protection]
+  controls_failed: [C08_workflow_permissions]
+
+  open_risks:
+    - id: SFIND-001
+      severity: STŘEDNÍ
+      description: "11/16 workflow souborů bez explicitního permissions bloku (GITHUB_TOKEN s implicitními právy)"
+    - id: SFIND-002
+      severity: NÍZKÁ
+      description: "SBOM config orphaned v platform/.github/ — negeneruje se"
+    - id: SFIND-003
+      severity: NÍZKÁ
+      description: "starcore-integrity.yml odkazuje na neexistující root core/ adresář"
+
+  cve_open: 0
+  cve_resolved: 0
+  last_bandit: "0 findings (2026-08-07)"
+  last_pip_audit: "0 vulnerabilities (2026-08-07)"
+  last_gitleaks: "CI-only, lokálně neověřeno"
+
+  domains:
+    S01_code_security: AKTIVNÍ
+    S02_supply_chain: ČÁSTEČNÉ
+    S03_infrastructure: NEOVĚŘITELNÉ (no infra access)
+    S04_access_control: AKTIVNÍ (aplikační vrstva)
+    S05_ai_security: AKTIVNÍ
+
+  registries:
+    - ".claude/registry/SECURITY_REGISTRY.md (S01-S05 + GitHub Security)"
+    - ".claude/registry/VULNERABILITY_REGISTRY.md (0 CVE, 5 non-CVE findings)"
+    - ".claude/registry/SECURITY_BASELINE.md (8 controls, compliance score)"
 ```
 
 ---

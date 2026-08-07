@@ -17,7 +17,7 @@ Registr operačních modulů Project Operating System. Fyzická implementace pri
 | SPOS-007 | Infrastructure Control | `platform/packages/providers` + nově `.claude/context/INFRASTRUCTURE_MAP.md` + 4 registry (HARDWARE/COMPUTE/CONTAINER/REMOTE_SERVICE) | ✅ AKTIVNÍ — ROZŠÍŘENO, ŽIVĚ OTESTOVÁNO |
 | SPOS-008 | Deployment Automation Engine (skutečné pořadí promptů — viz poznámka níže) | `.claude/context/DEPLOYMENT_ARCHITECTURE.md` + `DEPLOYMENT_REGISTRY.md` + `INSTALLER_STUDIO_PLAN.md` | ✅ AKTIVNÍ — ŽIVĚ OTESTOVÁNO |
 | SPOS-008-ORIG | AI Orchestration (původní SPOS-000 mapování, nyní bez vlastního promptu) | částečně (`scripts/decision_engine.py`) | ⚠️ ČÁSTEČNÉ, ČEKÁ NA VLASTNÍ PROMPT |
-| SPOS-009 | Security & Compliance Engine (dle SPOS-008 §19, skutečné pořadí — ne "Evolution Engine" z původní SPOS-000 mapy) | — | ⏳ ČEKÁ NA PROMPT |
+| SPOS-009 | Security & Compliance Engine (dle SPOS-008 §19, skutečné pořadí — ne "Evolution Engine" z původní SPOS-000 mapy) | `.claude/registry/SECURITY_REGISTRY.md` + `SECURITY_BASELINE.md` + `VULNERABILITY_REGISTRY.md` | ✅ AKTIVNÍ — ŽIVĚ AUDITOVÁNO |
 | SPOS-010 | Digital Twin Runtime | `.claude/context/DIGITAL_TWIN.md` (ekosystém) + `platform/.starcore/memory/project_snapshot.md` (platform, ZASTARALÉ) | ⚠️ DUPLICITNÍ SCOPE |
 
 ---
