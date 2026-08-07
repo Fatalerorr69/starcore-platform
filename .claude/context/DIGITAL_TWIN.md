@@ -207,9 +207,9 @@ prompt_status:
 spos_status:
   discovery: "platform/.starcore/ already exists — mature runtime (3843 lines Python, 171 tests)"
   decision: "Adopted existing platform/.starcore/ as canonical SPOS implementation; no duplicate created at root"
-  modules_fully_covered: [SPOS-001, SPOS-002, SPOS-003, SPOS-005]
+  modules_fully_covered: [SPOS-001, SPOS-002, SPOS-003, SPOS-005, SPOS-012, SPOS-013, SPOS-014]
   modules_partial: [SPOS-004, SPOS-008]
-  modules_missing: [SPOS-014]
+  modules_missing: [SPOS-015+]
   duplicate_concept: "SPOS-010 — two digital twin docs with different scope (ecosystem vs platform); platform snapshot STALE (v0.4.0 vs actual v0.6.0)"
   correction_to_ses_001: "Dependabot + SBOM configs DO exist (platform/.github/) but are orphaned — GitHub only reads root .github/, not nested platform/.github/"
 
