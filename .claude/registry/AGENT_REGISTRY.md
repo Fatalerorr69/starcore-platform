@@ -1,6 +1,6 @@
 # AGENT REGISTRY
 
-Standard: SPOS-011 §3 | Aktualizováno: 2026-08-07
+Standard: SPOS-014 §3 | Aktualizováno: 2026-08-07
 
 Registr AI agentů STARCORE ekosystému. Záznamy vycházejí z živého auditu — označeny jako AKTIVNÍ (existující kód), PLÁNOVANÝ (navrženo, kód chybí), nebo STUB (existuje jen placeholder).
 
@@ -211,22 +211,73 @@ status: PLÁNOVANÝ
 
 ## STUB AGENTI (placeholder, ne reálná implementace)
 
+### agents/ (JSON print — bez ~/STARCORE path)
+
 | ID | Soubor | Typ | Poznámka |
 |---|---|---|---|
 | AGENT-S01 | `agents/planner/task_planner.py` | JSON print | create_task() → {"task": name, "status": "queued"} |
-| AGENT-S02 | `agents/kernel/agent_kernel.py` | JSON print | state = {"component": "Agent Kernel", "agents": "ready"} |
-| AGENT-S03 | `agents/missions/mission_executor.py` | JSON print | {"component": "Mission Executor", "state": "ready"} |
+| AGENT-S02 | `agents/kernel/agent_kernel.py` | JSON print (11 řádků) | {"component": "Agent Kernel", "agents": "ready"} |
+| AGENT-S03 | `agents/missions/mission_executor.py` | JSON print (8 řádků) | {"component": "Mission Executor", "state": "ready"} |
 | AGENT-S04 | `ai_core/kernel/ai_kernel.py` | JSON print | {"component": "AI Runtime Kernel", "version": "8A.01"} |
-| AGENT-S05 | `ai_runtime/` | Termux stub | ~/STARCORE path, 3 soubory |
+
+### ai_runtime/ (Termux stubs — ~/STARCORE path)
+
+| ID | Soubor | Řádky | Výstup |
+|---|---|---|---|
+| AGENT-S05 | `ai_runtime/agents/agent_registry.py` | 25 | ~/STARCORE/runtime/ai/agent_registry.json |
+| AGENT-S06 | `ai_runtime/inference/inference_engine.py` | 29 | ~/STARCORE/runtime/ai/inference_state.json |
+| AGENT-S07 | `ai_runtime/models/model_registry.py` | 25 | ~/STARCORE/runtime/ai/model_registry.json |
+
+### autonomous/ (Termux stubs — ~/STARCORE path, 9 souborů)
+
+| ID | Soubor | Řádky | Výstup |
+|---|---|---|---|
+| AGENT-S08 | `autonomous/agents/orchestrator.py` | 18 | ~/STARCORE/runtime/autonomous/agent_registry.json |
+| AGENT-S09 | `autonomous/runtime/runtime.py` | 16 | ~/STARCORE/runtime/autonomous/runtime_state.json |
+| AGENT-S10 | `autonomous/scheduler/scheduler.py` | 16 | ~/STARCORE/runtime/autonomous/scheduler.json |
+| AGENT-S11 | `autonomous/mesh/node_mesh.py` | 16 | ~/STARCORE/runtime/autonomous/node_mesh.json |
+| AGENT-S12 | `autonomous/health/health_loop.py` | 17 | ~/STARCORE/runtime/autonomous/health_loop.json |
+| AGENT-S13 | `autonomous/connectors/ai_core_bridge.py` | 16 | ~/STARCORE/runtime/autonomous/ai_core_bridge.json |
+| AGENT-S14 | `autonomous/connectors/ollama_connector.py` | 16 | localhost:11434 ref + print |
+| AGENT-S15 | `autonomous/connectors/rag_bridge.py` | 16 | ~/STARCORE/runtime/autonomous/rag_bridge.json |
+| AGENT-S16 | `autonomous/connectors/proxmox_controller.py` | 16 | ~/STARCORE/runtime/autonomous/proxmox.json |
+
+### distributed/ (Termux stubs — ~/STARCORE path, 9 souborů)
+
+| ID | Soubor | Řádky | Výstup |
+|---|---|---|---|
+| AGENT-S17 | `distributed/agents/network.py` | 14 | ~/STARCORE/runtime/agent_network.json |
+| AGENT-S18 | `distributed/bus/bus.py` | 14 | ~/STARCORE/runtime/agent_bus.json |
+| AGENT-S19 | `distributed/memory/memory_sync.py` | 14 | ~/STARCORE/runtime/memory_sync.json |
+| AGENT-S20 | `distributed/events/events.py` | 14 | ~/STARCORE/runtime/events.json |
+| AGENT-S21 | `distributed/workflows/federation.py` | 14 | ~/STARCORE/runtime/federation.json |
+| AGENT-S22 | `distributed/vector/vector_sync.py` | 14 | ~/STARCORE/runtime/vector_sync.json |
+| AGENT-S23 | `distributed/auth/auth.py` | 15 | ~/STARCORE/runtime/auth.json |
+| AGENT-S24 | `distributed/execution/execution.py` | 14 | ~/STARCORE/runtime/execution.json |
+| AGENT-S25 | `distributed/recovery/recovery.py` | 14 | ~/STARCORE/runtime/recovery.json |
+
+### knowledge/ (JSON print stubs)
+
+| ID | Soubor | Řádky | Výstup |
+|---|---|---|---|
+| AGENT-S26 | `knowledge/rag/rag_engine.py` | 7 | {"component": "RAG Engine", "status": "ready"} |
+| AGENT-S27 | `knowledge/core/knowledge_core.py` | 9 | {"component": "Knowledge Core", "version": "8C.01"} |
 
 ---
 
 ## STATISTIKY
 
 ```yaml
-total_agents: 12 (4 aktivní + 3 plánovaní + 5 stub)
+total_agents: 30 (4 aktivní + 3 plánovaní + 27 stub)
 active_code: 4 (AGENT-001..004)
 planned: 3 (AGENT-010..012)
-stubs: 5 (AGENT-S01..S05, nezapočítávají root ~/STARCORE dirs)
+stubs: 27 (AGENT-S01..S27)
+  agents/: 4 stubs (JSON print, bez ~/STARCORE path)
+  ai_runtime/: 3 stubs (Termux)
+  autonomous/: 9 stubs (Termux)
+  distributed/: 9 stubs (Termux)
+  knowledge/: 2 stubs (JSON print)
 health_score: "4/4 aktivní = OK"
+aaos_maturity: "Level 2 / 5"
+aaos_health: "38% (SPOS-014 baseline)"
 ```

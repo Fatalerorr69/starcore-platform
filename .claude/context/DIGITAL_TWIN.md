@@ -418,6 +418,52 @@ spos_013_automation_status:
   no_code_created_or_modified: true
 ```
 
+### SPOS-014 — AI Agent Operating System (AAOS)
+
+```yaml
+spos_014_aaos_status:
+  audit_date: "2026-08-07"
+  aaos_health_score: "38% (KRITICKÝ)"
+  aaos_maturity: "Level 2 / 5"
+  score_breakdown:
+    agent_coverage: "35% KRITICKÝ"
+    provider_routing: "40% SLABÝ"
+    tool_routing: "50% USPOKOJIVÝ"
+    memory_engine: "60% DOBRÝ"
+    knowledge_engine: "30% KRITICKÝ"
+    workflow_orchestration: "55% USPOKOJIVÝ"
+    agent_communication: "10% KRITICKÝ"
+    self_optimization: "5% KRITICKÝ"
+    security_sandboxing: "45% SLABÝ"
+    observability: "50% USPOKOJIVÝ"
+  agents:
+    active: 4 (Blueprint Generator, Task Scheduler, QC Engine, Impact Analyzer)
+    planned: 3 (RAG Knowledge, Model Router, Automation Pipeline)
+    stubs: 27 (agents/ 4, ai_runtime/ 3, autonomous/ 9, distributed/ 9, knowledge/ 2)
+  gaps: "22 (5 kritických, 8 vysokých, 6 středních, 3 nízké)"
+  recommendations: "16 (3 XS, 5 S, 5 M, 3 L) — odhad 40-80h → Level 4/5"
+  critical_gaps:
+    - "GAP-AAOS-001: Multi-agent komunikace neexistuje"
+    - "GAP-AAOS-002: RAG pipeline neexistuje"
+    - "GAP-AAOS-003: 3/3 infra providers offline"
+    - "GAP-AAOS-004: Provider Router statický"
+    - "GAP-AAOS-005: 27 stub agentů (false maturity)"
+  added:
+    - ".claude/context/AAOS_ARCHITECTURE.md (SPOS-014 §3)"
+    - ".claude/context/AGENT_LIFECYCLE.md (SPOS-014 §4)"
+    - ".claude/context/MULTI_AGENT_MODEL.md (SPOS-014 §5)"
+    - ".claude/context/PROVIDER_ROUTER_V2.md (SPOS-014 §6)"
+    - ".claude/context/CONTEXT_ENGINE.md (SPOS-014 §7)"
+    - ".claude/context/PROMPT_ENGINE.md (SPOS-014 §8)"
+    - ".claude/context/AAOS_HEALTH.md (SPOS-014 §9)"
+    - ".claude/context/AAOS_GAP_ANALYSIS.md (SPOS-014 §10)"
+    - ".claude/context/AAOS_RECOMMENDATIONS.md (SPOS-014 §11)"
+    - ".claude/reports/SPOS-014-IMPLEMENTATION-REPORT.md (SPOS-014 §15)"
+  updated:
+    - ".claude/registry/AGENT_REGISTRY.md (rozšířen: 4 aktivní + 27 stubs)"
+  no_code_created_or_modified: true
+```
+
 ---
 
 ## DOKUMENTACE
@@ -461,6 +507,7 @@ knowledge_base:
 
 | Datum | Změna | Autor |
 |---|---|---|
+| 2026-08-07 | SPOS-014 — AI Agent Operating System (AAOS): 4 aktivní agenti + 27 stubs katalogizováno, AAOS health score 38%, 22 gaps identifikováno, 16 doporučení, 11 výstupních souborů | Claude Code |
 | 2026-08-07 | SPOS-013 — Automation Engine: 51 automatizací katalogizováno, health score 61%, 18 gaps identifikováno, 16 doporučení, 10 výstupních souborů | Claude Code |
 | 2026-08-06 | Bootstrap 00 — Discovery reports, .claude/ struktura, root README | Claude Code |
 | 2026-08-06 | SES-000 — Engineering Constitution registrace, všechny registry | Claude Code |

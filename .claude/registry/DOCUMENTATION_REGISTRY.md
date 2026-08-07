@@ -1,6 +1,6 @@
 # DOCUMENTATION REGISTRY
 
-Aktualizováno: 2026-08-06 | Standard: SPOS-006
+Aktualizováno: 2026-08-07 | Standard: SPOS-006
 
 Formát dle SPOS-006 §3: DOCUMENT_ID/TITLE/TYPE/VERSION/STATUS/OWNER/RELATED_COMPONENTS/RELATED_CODE/RELATED_REGISTRY/LAST_VALIDATION — plně aplikováno na governance dokumenty (SES/SAKB/SPOS níže); pro `platform/docs/` (56 souborů, existující, dobře udržované) viz zjednodušený přehled a `DOCUMENTATION_MAP.md` pro plnou mapu podle typu (§4).
 
@@ -76,6 +76,16 @@ Formát dle SPOS-006 §3: DOCUMENT_ID/TITLE/TYPE/VERSION/STATUS/OWNER/RELATED_CO
 | DR-041 | Automation Health | `.claude/context/AUTOMATION_HEALTH.md` | ✅ HOTOVO |
 | DR-042 | Automation Gap Analysis | `.claude/context/AUTOMATION_GAP_ANALYSIS.md` | ✅ HOTOVO |
 | DR-043 | Automation Recommendations | `.claude/context/AUTOMATION_RECOMMENDATIONS.md` | ✅ HOTOVO |
+| DR-044 | AAOS Architecture | `.claude/context/AAOS_ARCHITECTURE.md` | ✅ HOTOVO |
+| DR-045 | Agent Lifecycle | `.claude/context/AGENT_LIFECYCLE.md` | ✅ HOTOVO |
+| DR-046 | Multi-Agent Model | `.claude/context/MULTI_AGENT_MODEL.md` | ✅ HOTOVO |
+| DR-047 | Provider Router V2 | `.claude/context/PROVIDER_ROUTER_V2.md` | ✅ HOTOVO |
+| DR-048 | Context Engine | `.claude/context/CONTEXT_ENGINE.md` | ✅ HOTOVO |
+| DR-049 | Prompt Engine | `.claude/context/PROMPT_ENGINE.md` | ✅ HOTOVO |
+| DR-050 | AAOS Health | `.claude/context/AAOS_HEALTH.md` | ✅ HOTOVO |
+| DR-051 | AAOS Gap Analysis | `.claude/context/AAOS_GAP_ANALYSIS.md` | ✅ HOTOVO |
+| DR-052 | AAOS Recommendations | `.claude/context/AAOS_RECOMMENDATIONS.md` | ✅ HOTOVO |
+| DR-053 | SPOS-014 Implementation Report | `.claude/reports/SPOS-014-IMPLEMENTATION-REPORT.md` | ✅ HOTOVO |
 
 ---
 
