@@ -13,9 +13,13 @@
 
 ```yaml
 governance_layer: SES/SAKB/SPOS bootstrap (probíhá přes .claude/)
-active_document: SPOS-001 — Project Memory Engine
+active_document: SPOS-012 — Integration Engine (DOKONČENO)
+next_document: SPOS-013 — Automation Engine (ČEKÁ)
 branch: claude/starcore-ai-bootstrap-fkyb96
-last_governance_commit: "viz .claude/context/DIGITAL_TWIN.md → repository_state"
+last_governance_commit: "01715e9 feat(spos): implement SPOS-012 Integration Engine"
+last_updated: "2026-08-07"
+spos_completed: [SPOS-001, SPOS-002, SPOS-003, SPOS-004, SPOS-005, SPOS-006, SPOS-007, SPOS-008, SPOS-009, SPOS-010/011, SPOS-012]
+integration_health_score: "64% (ČÁSTEČNĚ_ZDRAVÝ)"
 ```
 
 ## Platform runtime stav (ke dni poslední aktualizace tohoto souboru)
