@@ -16,7 +16,7 @@ governance_layer: SES/SAKB/SPOS bootstrap (probíhá přes .claude/)
 active_document: SPOS-014 — AI Agent Operating System (DOKONČENO)
 next_document: SPOS-015+ (ČEKÁ)
 branch: claude/starcore-ai-bootstrap-fkyb96
-last_governance_commit: "pending — SPOS-014 AAOS"
+last_governance_commit: "d4340db feat(spos): implement SPOS-014 AI Agent Operating System (AAOS)"
 last_updated: "2026-08-07"
 spos_completed: [SPOS-001, SPOS-002, SPOS-003, SPOS-004, SPOS-005, SPOS-006, SPOS-007, SPOS-008, SPOS-009, SPOS-010/011, SPOS-012, SPOS-013, SPOS-014]
 integration_health_score: "64% (ČÁSTEČNĚ_ZDRAVÝ)"

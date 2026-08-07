@@ -1,34 +1,55 @@
 # Project Snapshot — STARCORE Platform
 
 > Kanonická referenční karta pro cold-start. Aktualizovat při každé strukturální změně.
-> **Poslední aktualizace:** 2026-08-05 (sezení: starcore-autonomous-engineering-4p3tlj)
+> **Poslední aktualizace:** 2026-08-07 (sezení: spos-014-20260807)
 
 ## Identita projektu
 
 | Pole | Hodnota |
 |------|---------|
 | Název | starcore-platform |
-| Verze | 0.4.0 |
+| Verze | 0.6.0 |
 | Popis | AI-powered infrastructure orchestration for homelabs |
 | Licence | Apache-2.0 |
 | Python | >=3.12 (vývoj na 3.12.3) |
 | Package manager | uv |
 | Repo | github.com/Fatalerorr69/starcore-platform |
 | Výchozí větev | main |
-| Dev větev | claude/starcore-autonomous-engineering-4p3tlj |
+| Dev větev | claude/starcore-ai-bootstrap-fkyb96 |
 
-## Klíčové metriky (stav 2026-08-05)
+## Klíčové metriky (stav 2026-08-07)
 
 | Metrika | Hodnota |
 |---------|---------|
-| Testy | 792 passed, 0 failed (9 skipped — postgres) |
+| Testy | 796 passed, 0 failed (9 skipped — postgres) |
 | Coverage | 100.00% |
 | Ruff | 0 chyb |
 | Pyright | 0 chyb |
 | pip-audit | 0 zranitelností |
 | Bandit | čistý |
+| mkdocs | --strict PASS |
 | ADR záznamy | ADR-001 až ADR-017 |
-| Regression sentinel | PASS (baseline: 801 testy, 21 routes, 32 config fields, 17 ADRs) |
+| Regression sentinel | PASS (baseline: 805 testy, 21 routes, 32 config fields, 17 ADRs) |
+
+## Health Scores (stav 2026-08-07)
+
+| Dimenze | Score | Stav |
+|---------|-------|------|
+| Integration | 64% | ČÁSTEČNĚ_ZDRAVÝ |
+| Automation | 61% | ČÁSTEČNĚ_ZDRAVÝ |
+| AAOS (AI) | 38% | KRITICKÝ |
+| Security | CI clean (bandit/pip-audit/gitleaks) | DOBRÝ |
+| Documentation | 126 docs, mkdocs PASS | DOBRÝ |
+| Intelligence (QC) | 88.2% (4 engines) | DOBRÝ |
+| **Overall Project Maturity** | **~64%** | **ČÁSTEČNĚ_ZDRAVÝ** |
+
+## SPOS Governance (stav 2026-08-07)
+
+| Module | Status |
+|--------|--------|
+| SPOS-001..013 | DOKONČENO |
+| SPOS-014 (AAOS) | DOKONČENO |
+| SPOS-015+ | ČEKÁ |
 
 ## Architektura (přehled)
 
