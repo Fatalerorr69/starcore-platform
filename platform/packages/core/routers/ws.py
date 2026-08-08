@@ -20,9 +20,8 @@ from pydantic import ValidationError
 
 from core.auth import UserPrincipal, UserRole, decode_token
 from core.config import get_settings
-from core.database import get_session
 from core.events import _STREAM_CTX, event_bus
-from core.repository import save_run
+from core.repository import persist_run
 
 router = APIRouter()
 
@@ -182,7 +181,7 @@ async def _ws_run_blueprint(websocket: WebSocket, parallel: bool) -> None:
                     return
 
         await exec_task
-        run_id = await asyncio.to_thread(lambda: _persist_run(blueprint, parallel, completed_tasks))
+        run_id = await asyncio.to_thread(lambda: persist_run(blueprint, parallel, completed_tasks))
         await websocket.send_text(json.dumps({"event": "run.persisted", "run_id": run_id}))
         await websocket.close()
     except WebSocketDisconnect:
@@ -199,10 +198,3 @@ async def _ws_run_blueprint(websocket: WebSocket, parallel: bool) -> None:
         queue_getter.cancel()
 
 
-def _persist_run(blueprint: Blueprint, parallel: bool, tasks: list[Task]) -> str:
-    session = get_session()
-    try:
-        record = save_run(session, blueprint.name, blueprint.version, parallel, tasks)
-        return record.id
-    finally:
-        session.close()

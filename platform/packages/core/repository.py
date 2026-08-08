@@ -4,10 +4,21 @@ Run History Repository
 
 from __future__ import annotations
 
+from blueprints.models import Blueprint
 from orchestrator.task import Task
 from sqlalchemy.orm import Session
 
+from .database import get_session
 from .models_db import BlueprintRunRecord, TaskRunRecord
+
+
+def persist_run(blueprint: Blueprint, parallel: bool, tasks: list[Task]) -> str:
+    session = get_session()
+    try:
+        record = save_run(session, blueprint.name, blueprint.version, parallel, tasks)
+        return record.id
+    finally:
+        session.close()
 
 
 def save_run(

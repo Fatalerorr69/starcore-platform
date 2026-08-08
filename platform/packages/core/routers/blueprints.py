@@ -16,10 +16,9 @@ from orchestrator.task import Task
 from pydantic import BaseModel
 
 from core.auth import UserRole, require_role
-from core.database import get_session
 from core.events import _STREAM_CTX, event_bus
 from core.models_api import TaskResult
-from core.repository import save_run
+from core.repository import persist_run
 
 router = APIRouter(dependencies=[Depends(require_role(UserRole.operator))])
 
@@ -59,7 +58,7 @@ async def run_blueprint(blueprint: Blueprint, parallel: bool = False):
     else:
         tasks = await BlueprintExecutor().execute(blueprint)
 
-    run_id = await asyncio.to_thread(lambda: _persist_run(blueprint, parallel, tasks))
+    run_id = await asyncio.to_thread(lambda: persist_run(blueprint, parallel, tasks))
 
     return RunResponse(
         name=blueprint.name,
@@ -160,7 +159,7 @@ async def _sse_generator(blueprint: Blueprint, parallel: bool) -> AsyncGenerator
 
         await exec_task
 
-        run_id = await asyncio.to_thread(lambda: _persist_run(blueprint, parallel, completed_tasks))
+        run_id = await asyncio.to_thread(lambda: persist_run(blueprint, parallel, completed_tasks))
         yield f"data: {json.dumps({'event': 'run.persisted', 'run_id': run_id})}\n\n"
     finally:
         for name, handler in subscribed.items():
@@ -174,10 +173,3 @@ async def _sse_generator(blueprint: Blueprint, parallel: bool) -> AsyncGenerator
         queue_getter.cancel()
 
 
-def _persist_run(blueprint: Blueprint, parallel: bool, tasks: list[Task]) -> str:
-    session = get_session()
-    try:
-        record = save_run(session, blueprint.name, blueprint.version, parallel, tasks)
-        return record.id
-    finally:
-        session.close()
