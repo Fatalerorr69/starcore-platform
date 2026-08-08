@@ -20,16 +20,10 @@ starcore-platform/
 │   ├── tests/          ← 601 testů
 │   └── docs/           ← Kompletní dokumentace
 │
-├── agents/             ← Agent framework
-├── runtime/            ← Runtime state
-├── knowledge/          ← Knowledge base (RAG)
-├── security/           ← Bezpečnostní vrstva
-├── intelligence/       ← Intelligence layer
-├── ai_core/            ← AI core
-├── automation/         ← Automation
-│
-├── install_*.sh        ← Instalační skripty (64 skriptů)
-└── .claude/            ← AI Engineering context
+├── knowledge/          ← Knowledge base (SAKB)
+├── legacy/             ← Archivované komponenty v6.x-8.x
+├── .claude/            ← AI Engineering governance
+└── .github/            ← CI/CD workflows
 ```
 
 ---

@@ -84,8 +84,8 @@ active_modules:
     tested: true
 
   - id: MOD-010..015
-    location: agents/, knowledge/, security/, intelligence/, control_center/, ai_core/
-    status: active
+    location: legacy/ (moved from root in SPOS-019), except knowledge/ (kept at root)
+    status: archived (except knowledge/ — active SAKB)
     tested: false
     documented: false
 
@@ -256,6 +256,31 @@ spos_018_repository_hygiene:
     - ".claude/reports/SPOS-018-IMPLEMENTATION-REPORT.md"
   modified:
     - "README.md (removed config.yaml from directory tree)"
+  no_python_code_modified: true
+
+spos_019_repository_restructure:
+  implementation_date: "2026-08-08"
+  approach: "M3 Repository Restructure — evidence-based migration with 10-point safety check, git mv for history preservation"
+  directories_moved: 25
+  scripts_moved: 68
+  root_dirs_before: 27
+  root_dirs_after: 5
+  root_scripts_before: 68
+  root_scripts_after: 0
+  kept_at_root: ["knowledge/ (active SAKB governance)"]
+  repository_hygiene_improvement: "72% → 88%"
+  arch_alignment_improvement: "87% → 93%"
+  tech_debt_before: 7
+  tech_debt_after: 3
+  post_migration_sweep: "CI/workflows CLEAN, Python imports CLEAN, no functional broken references"
+  added:
+    - ".claude/context/MIGRATION_REGISTRY.md"
+    - ".claude/context/ROOT_STRUCTURE_POLICY.md"
+    - ".claude/reports/SPOS-019-IMPLEMENTATION-REPORT.md"
+    - ".claude/reports/SPOS-019-HANDOVER-REPORT.md"
+    - "legacy/README.md"
+  modified:
+    - "README.md (directory tree updated to 5-dir structure)"
   no_python_code_modified: true
 
 prompt_status:

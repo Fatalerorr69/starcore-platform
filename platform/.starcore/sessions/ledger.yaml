@@ -530,3 +530,55 @@ sessions:
   blockers: []
   end_time: '2026-08-08T16:00:00Z'
   next_action: SPOS-018 DOKONCENO. Commit 70186bc pushed.
+- session_id: spos-019-20260808
+  start_time: '2026-08-08T17:00:00Z'
+  end_time: null
+  branch: claude/starcore-ai-bootstrap-fkyb96
+  head: pending
+  user_requests:
+  - SPOS-019 Repository Restructure Engine — M3 Repository Restructure
+  prompts_used: []
+  files_read:
+  - .claude/context/CONSOLIDATION_ROADMAP.md
+  - .claude/context/ROOT_DIRECTORY_AUDIT.md
+  - .claude/context/LEGACY_MIGRATION_PLAN.md
+  - 27 root legacy directories (inventory + reference analysis)
+  - 68 root shell scripts (shebang analysis)
+  files_created:
+  - legacy/README.md
+  - .claude/context/MIGRATION_REGISTRY.md
+  - .claude/context/ROOT_STRUCTURE_POLICY.md
+  - .claude/reports/SPOS-019-IMPLEMENTATION-REPORT.md
+  - .claude/reports/SPOS-019-HANDOVER-REPORT.md
+  files_modified:
+  - README.md (directory tree updated)
+  - .claude/registry/SPOS_REGISTRY.md
+  - .claude/ses/SES-INDEX.md
+  - .claude/context/DIGITAL_TWIN.md
+  - platform/.starcore/memory/current_state.md
+  - platform/.starcore/memory/project_snapshot.md
+  - platform/.starcore/state/project_state.json
+  - platform/.starcore/sessions/ledger.yaml
+  files_moved:
+  - 25 directories from root to legacy/ (git mv)
+  - 68 shell scripts from root to legacy/termux-scripts/ (git mv)
+  commands_executed:
+  - uv run pytest (796 passed, 9 skipped)
+  - uv run ruff check . (all passed)
+  - uv run ruff format --check . (138 formatted)
+  - uv run pyright (0 errors, 0 warnings)
+  - uv run mkdocs build --strict (OK)
+  - uv run bandit -r packages/ apps/ scripts/ -ll -q (clean)
+  tests_executed:
+  - pytest 796 passed, 9 skipped, 0 failed
+  decisions:
+  - 25 legacy directories moved to legacy/ via git mv (history preserved)
+  - 68 Termux scripts moved to legacy/termux-scripts/ via git mv
+  - knowledge/ kept at root (active SAKB governance role)
+  - 10-point safety check applied to every candidate
+  - Post-migration reference sweep clean (no functional broken references)
+  risks:
+  - No new risks introduced
+  approvals: []
+  blockers: []
+  next_action: SPOS-019 PENDING APPROVAL. Awaiting commit & push authorization.

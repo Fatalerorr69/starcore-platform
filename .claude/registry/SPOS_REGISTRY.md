@@ -26,6 +26,7 @@ Registr operačních modulů Project Operating System. Fyzická implementace pri
 | SPOS-016 | Repository Consolidation Engine | `.claude/context/REPOSITORY_CONSOLIDATION.md` + `LEGACY_MIGRATION_PLAN.md` + `MODULE_CLASSIFICATION.md` + `DEPENDENCY_ANALYSIS.md` + `CODE_DUPLICATION_REPORT.md` + `ARCHITECTURE_ALIGNMENT.md` + `ROOT_DIRECTORY_AUDIT.md` + `TECHNICAL_DEBT_REGISTER.md` + `CONSOLIDATION_ROADMAP.md` + implementation report | ✅ AKTIVNÍ — PLNÝ AUDIT + KONSOLIDAČNÍ PLÁN |
 | SPOS-017 | CI/CD Consolidation & Hardening Engine | `.claude/reports/SPOS-017-IMPLEMENTATION-REPORT.md` + aktualizovaný `WORKFLOW_AUTOMATION.md` | ✅ AKTIVNÍ — IMPLEMENTOVÁNO (P0 CI/CD konsolidace) |
 | SPOS-018 | Repository Hygiene Engine | `.claude/reports/SPOS-018-IMPLEMENTATION-REPORT.md` + `HYGIENE_REGISTRY.md` + `DELETION_MANIFEST.md` + `REPOSITORY_HYGIENE_REPORT.md` + `HYGIENE_HEALTH.md` + `HYGIENE_RECOMMENDATIONS.md` | ✅ AKTIVNÍ — IMPLEMENTOVÁNO (M2 Dead Code Removal) |
+| SPOS-019 | Repository Restructure Engine | `.claude/reports/SPOS-019-IMPLEMENTATION-REPORT.md` + `MIGRATION_REGISTRY.md` + `ROOT_STRUCTURE_POLICY.md` + `SPOS-019-HANDOVER-REPORT.md` | ✅ AKTIVNÍ — IMPLEMENTOVÁNO (M3 Repository Restructure) |
 
 ---
 
