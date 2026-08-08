@@ -387,3 +387,71 @@ sessions:
   approvals: []
   blockers: []
   next_action: SPOS-016 DOKONČENO. Konsolidace dle CONSOLIDATION_ROADMAP.md.
+- session_id: spos-017-20260808
+  start_time: '2026-08-08T12:00:01Z'
+  end_time: null
+  branch: claude/starcore-ai-bootstrap-fkyb96
+  head: pending
+  user_requests:
+  - SPOS-017 CI/CD Consolidation & Hardening Engine — P0 konsolidace CI/CD workflows
+  prompts_used:
+  - PROM-013
+  files_read:
+  - .github/workflows/ (6 files)
+  - platform/.github/workflows/ (7 files)
+  - platform/.github/dependabot.yml
+  - platform/.github/pull_request_template.md
+  files_created:
+  - .github/workflows/codeql.yml
+  - .github/workflows/dependabot-auto-merge.yml
+  - .github/workflows/docker-publish.yml
+  - .github/workflows/security-nightly.yml
+  - .github/dependabot.yml
+  - .claude/reports/SPOS-017-IMPLEMENTATION-REPORT.md
+  files_modified:
+  - .github/workflows/ci.yml
+  - .claude/context/WORKFLOW_AUTOMATION.md
+  - .claude/registry/SPOS_REGISTRY.md
+  - .claude/registry/DOCUMENTATION_REGISTRY.md
+  - .claude/context/DIGITAL_TWIN.md
+  - platform/.starcore/memory/current_state.md
+  - platform/.starcore/memory/project_snapshot.md
+  - platform/.starcore/state/project_state.json
+  - platform/.starcore/sessions/ledger.yaml
+  - platform/.starcore/prompts/registry.yaml
+  files_deleted:
+  - .github/workflows/starcore-integrity.yml
+  - .github/workflows/starcore-release.yml
+  - .github/workflows/starcore-security.yml
+  - platform/.github/workflows/ci.yml
+  - platform/.github/workflows/manual-tag.yml
+  - platform/.github/workflows/release.yml
+  - platform/.github/workflows/codeql.yml
+  - platform/.github/workflows/dependabot-auto-merge.yml
+  - platform/.github/workflows/docker-publish.yml
+  - platform/.github/workflows/security-nightly.yml
+  - platform/.github/dependabot.yml
+  - platform/.github/pull_request_template.md
+  commands_executed:
+  - uv run pytest -q --cov --cov-report=term-missing --cov-fail-under=100
+  - uv run ruff check .
+  - uv run ruff format --check .
+  - uv run pyright
+  - uv run bandit -r packages/ apps/ scripts/ -ll -q
+  - uv run pip-audit
+  - uv run mkdocs build --strict
+  - uv run alembic upgrade head && uv run alembic check
+  tests_executed:
+  - pytest 796 passed, 9 skipped, 0 failed
+  decisions:
+  - 4 orphaned workflows přesunuty z platform/.github/ do root .github/ s opravami
+  - 3 broken/obsolete workflows smazány (starcore-integrity, starcore-release, starcore-security)
+  - 5 duplicátních souborů smazáno z platform/.github/
+  - ci.yml hardened s permissions block
+  - dependabot.yml opraven (directory /platform)
+  - Všech 7 aktivních workflows má SHA-pinned actions + explicit permissions
+  risks:
+  - Žádná nová rizika zavedena
+  approvals: []
+  blockers: []
+  next_action: SPOS-017 IMPLEMENTOVÁNO. Čeká na commit approval.

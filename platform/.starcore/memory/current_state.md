@@ -13,18 +13,18 @@
 
 ```yaml
 governance_layer: SES/SAKB/SPOS bootstrap (probíhá přes .claude/)
-active_document: SPOS-016 — Repository Consolidation Engine (DOKONČENO)
-next_document: SPOS-017+ (ČEKÁ)
+active_document: SPOS-017 — CI/CD Consolidation & Hardening Engine (DOKONČENO)
+next_document: SPOS-018+ (ČEKÁ)
 branch: claude/starcore-ai-bootstrap-fkyb96
 last_governance_commit: "fc454e0 feat(spos): implement SPOS-016 Repository Consolidation Engine"
 last_updated: "2026-08-08"
-spos_completed: [SPOS-001, SPOS-002, SPOS-003, SPOS-004, SPOS-005, SPOS-006, SPOS-007, SPOS-008, SPOS-009, SPOS-010/011, SPOS-012, SPOS-013, SPOS-014, SPOS-015, SPOS-016]
+spos_completed: [SPOS-001, SPOS-002, SPOS-003, SPOS-004, SPOS-005, SPOS-006, SPOS-007, SPOS-008, SPOS-009, SPOS-010/011, SPOS-012, SPOS-013, SPOS-014, SPOS-015, SPOS-016, SPOS-017]
 integration_health_score: "64% (ČÁSTEČNĚ_ZDRAVÝ)"
 automation_health_score: "61% (ČÁSTEČNĚ_ZDRAVÝ)"
 aaos_health_score: "38% (KRITICKÝ)"
 ecosystem_health_score: "58% (ČÁSTEČNĚ_ZDRAVÝ)"
 architecture_alignment: "79% (ČÁSTEČNĚ_ALIGNED)"
-repository_hygiene: "35% (KRITICKÝ)"
+repository_hygiene: "65% (ČÁSTEČNĚ_ZDRAVÝ)"
 ```
 
 ## Platform runtime stav (ke dni poslední aktualizace tohoto souboru)

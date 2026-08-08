@@ -1,6 +1,6 @@
 # WORKFLOW AUTOMATION
 
-Standard: SPOS-013 §7 | Aktualizováno: 2026-08-07
+Standard: SPOS-013 §7 | Aktualizováno: 2026-08-08
 
 Popis Workflow Engine a jednotlivých automatizovaných workflows v STARCORE.
 
@@ -64,17 +64,21 @@ status: AKTIVNÍ
 ```yaml
 name: Nightly Security Workflow
 goal: "Denní bezpečnostní kontrola mimo PR cyklus"
-trigger: SCHEDULE (05:00 UTC daily)
-actors: [GitHub Actions Runner, gitleaks]
-inputs: [source_code, .gitleaks.toml]
+trigger: SCHEDULE (02:00 UTC daily), workflow_dispatch
+actors: [GitHub Actions Runner, uv, pip-audit, bandit, gitleaks]
+inputs: [source_code, .gitleaks.toml, uv.lock]
 outputs: [Workflow log, GitHub Actions result]
 steps:
   1. Checkout
-  2. gitleaks secret scan
-  3. find *.pyc/__pycache__ (file audit)
+  2. Install uv + Python 3.12
+  3. uv sync --extra dev
+  4. uv lock --check
+  5. pip-audit (dependency vulnerability scan)
+  6. bandit SAST (medium+ severity)
+  7. gitleaks secret scan
 failure_handling: "Alert via GitHub Actions notification"
 recovery: "Investigate finding, add to VULNERABILITY_REGISTRY"
-status: AKTIVNÍ
+status: AKTIVNÍ (SPOS-017: aktualizováno dle skutečného security-nightly.yml)
 ```
 
 ### WF-A03 — Release Workflow
@@ -206,7 +210,47 @@ inputs: [Dependabot PR, semver update type]
 outputs: [merged PR OR skipped (major updates)]
 condition: "package-ecosystem == pip AND update-type IN [patch, minor]"
 failure_handling: "Major updates → skip, require manual review"
-status: ORPHANED (platform/.github/ not read by GitHub)
+status: AKTIVNÍ (SPOS-017: přesunuto z platform/.github/ do root .github/)
+```
+
+### WF-A09 — CodeQL Security Analysis
+
+```yaml
+name: CodeQL Advanced
+goal: "Statická analýza kódu pro bezpečnostní zranitelnosti (GitHub Advanced Security)"
+trigger: GIT_PUSH (main), GIT_PR (main), SCHEDULE (Sunday 13:40 UTC)
+actors: [GitHub Actions Runner, CodeQL]
+inputs: [source_code (Python + Actions)]
+outputs: [Security alerts in GitHub Security tab]
+steps:
+  1. Checkout
+  2. CodeQL init (languages: python, actions)
+  3. CodeQL analyze
+permissions: security-events: write, packages: read, actions: read, contents: read
+status: AKTIVNÍ (SPOS-017: přesunuto z platform/.github/ do root .github/)
+```
+
+### WF-A10 — Docker Publish & Supply Chain
+
+```yaml
+name: Docker Publish
+goal: "Build, push, sign a attest Docker image při merge/tag"
+trigger: GIT_PUSH (main), GIT_TAG (v*.*.*)
+actors: [GitHub Actions Runner, Docker, cosign, anchore/sbom-action]
+inputs: [platform/Dockerfile, source_code]
+outputs: [GHCR image (tagged), cosign signature, SBOM attestation]
+steps:
+  1. Checkout
+  2. Compute lowercase image name
+  3. Login to GHCR
+  4. Compute image tags (version for tags, latest+sha for main)
+  5. Build and push (context: ./platform)
+  6. Install cosign
+  7. Generate SBOM (spdx-json)
+  8. Sign image (keyless cosign)
+  9. Attest SBOM
+permissions: contents: read, packages: write, id-token: write, attestations: write
+status: AKTIVNÍ (SPOS-017: přesunuto z platform/.github/ do root .github/, opraven context)
 ```
 
 ---

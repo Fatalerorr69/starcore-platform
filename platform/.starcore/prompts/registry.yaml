@@ -414,3 +414,29 @@ prompts:
     repozitáře. 35 root dirs, 73+ souborů, 6796+ modulů, 65 install skriptů, 13 workflows,
     24 závislostí auditováno. Architecture alignment 79%, repo hygiene 35%, 16 tech
     debt items, 4-milestone consolidation roadmap. 10 nových governance souborů.
+- id: PROM-013
+  name: STARCORE CI/CD Consolidation & Hardening Engine
+  version: '1.0'
+  type: IMPLEMENTATION
+  purpose: SPOS-017 — P0 CI/CD konsolidace, hardening workflows, odstranění orphaned/broken
+  phase: null
+  status: ACTIVE
+  created_at: '2026-08-08T12:00:01Z'
+  updated_at: '2026-08-08'
+  source: USER
+  supersedes: null
+  superseded_by: null
+  dependencies:
+  - SPOS-016
+  - PROM-012
+  session_id: spos-017-20260808
+  tags:
+  - cicd
+  - consolidation
+  - hardening
+  - security
+  - implementation
+  description: SPOS-017 CI/CD Consolidation & Hardening — přechod z DISCOVERY do CONTROLLED
+    IMPLEMENTATION. 4 workflows přesunuto z orphaned platform/.github/ do root, 3 broken
+    smazány, 5 duplikátů smazáno, ci.yml hardened, dependabot opraven. Workflow coverage
+    31%→100%, repo hygiene 35%→65%. SFIND-001/003/005 + TD-002/003 resolved.

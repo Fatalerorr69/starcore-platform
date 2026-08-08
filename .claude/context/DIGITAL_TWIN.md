@@ -217,6 +217,25 @@ spos_016_consolidation_status:
     - ".claude/reports/SPOS-016-IMPLEMENTATION-REPORT.md"
   no_code_created_or_modified: true
 
+spos_017_cicd_consolidation:
+  implementation_date: "2026-08-08"
+  approach: "P0 CI/CD consolidation — move orphaned workflows to root, delete broken/obsolete, harden permissions"
+  workflows_moved: 4
+  workflows_deleted_broken: 3
+  workflows_deleted_duplicate: 5
+  files_deleted_total: 12
+  workflow_coverage: "100% (7/7 active, 0 orphaned)"
+  repository_hygiene_improvement: "35% → 65%"
+  security_hardening: "All 7 workflows have explicit permissions + SHA-pinned actions"
+  resolved_findings: [SFIND-001, SFIND-003, SFIND-005, TD-002, TD-003]
+  added:
+    - ".claude/reports/SPOS-017-IMPLEMENTATION-REPORT.md"
+  modified:
+    - ".github/workflows/ci.yml (permissions added)"
+    - ".github/dependabot.yml (directories fixed)"
+    - ".claude/context/WORKFLOW_AUTOMATION.md (WF-A02, WF-A08 status + WF-A09, WF-A10 added)"
+  no_python_code_modified: true
+
 prompt_status:
   total_prompts: 16
   active: 13
@@ -228,11 +247,11 @@ prompt_status:
 spos_status:
   discovery: "platform/.starcore/ already exists — mature runtime (3843 lines Python, 171 tests)"
   decision: "Adopted existing platform/.starcore/ as canonical SPOS implementation; no duplicate created at root"
-  modules_fully_covered: [SPOS-001, SPOS-002, SPOS-003, SPOS-005, SPOS-012, SPOS-013, SPOS-014, SPOS-016]
+  modules_fully_covered: [SPOS-001, SPOS-002, SPOS-003, SPOS-005, SPOS-012, SPOS-013, SPOS-014, SPOS-016, SPOS-017]
   modules_partial: [SPOS-004, SPOS-008]
-  modules_missing: [SPOS-017+]
+  modules_missing: [SPOS-018+]
   duplicate_concept: "SPOS-010 — two digital twin docs with different scope (ecosystem vs platform); platform snapshot STALE (v0.4.0 vs actual v0.6.0)"
-  correction_to_ses_001: "Dependabot + SBOM configs DO exist (platform/.github/) but are orphaned — GitHub only reads root .github/, not nested platform/.github/"
+  correction_to_ses_001: "RESOLVED by SPOS-017 — Dependabot + SBOM configs moved from orphaned platform/.github/ to root .github/"
 
 spos_001_status:
   approach: "Extended existing platform/.starcore/memory/, did not replace"
@@ -558,6 +577,7 @@ knowledge_base:
 
 | Datum | Změna | Autor |
 |---|---|---|
+| 2026-08-08 | SPOS-017 — CI/CD Consolidation & Hardening: 4 workflows přesunuto z platform/.github/ do root, 3 broken smazány, 5 duplikátů smazáno, ci.yml hardened, dependabot opraven. Workflow coverage 31%→100%, repo hygiene 35%→65%. SFIND-001/003/005 + TD-002/003 resolved | Claude Code |
 | 2026-08-08 | SPOS-016 — Repository Consolidation Engine: 35 root dirs, 73+ soubory, 6796+ moduly auditovány. Architecture alignment 79%, repo hygiene 35%, 16 tech debt items, 4-milestone consolidation roadmap. 10 výstupních souborů | Claude Code |
 | 2026-08-07 | SPOS-015 — Ecosystem Hygiene Engine: 35+ root dirs auditováno, ecosystem health score 58%, 18 legacy + 4 dead code identifikováno, 15 gaps, 12 doporučení, 8 výstupních souborů | Claude Code |
 | 2026-08-07 | SPOS-014 — AI Agent Operating System (AAOS): 4 aktivní agenti + 27 stubs katalogizováno, AAOS health score 38%, 22 gaps identifikováno, 16 doporučení, 11 výstupních souborů | Claude Code |

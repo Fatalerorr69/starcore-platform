@@ -26,6 +26,7 @@ Formát dle SPOS-006 §3: DOCUMENT_ID/TITLE/TYPE/VERSION/STATUS/OWNER/RELATED_CO
 | SPOS-010/011 | AI Orchestration Engine | `.claude/registry/AGENT_REGISTRY.md` + `WORKFLOW_REGISTRY.md` + `.claude/context/AI_ORCHESTRATION_MODEL.md` + 7 dalších | ✅ AKTIVNÍ | 1.0.0 |
 | SPOS-012 | Integration Engine | `.claude/registry/COMPONENT_REGISTRY.md` + `API_REGISTRY.md` + `.claude/context/INTERFACE_REGISTRY.md` + 6 dalších | ✅ AKTIVNÍ | 1.0.0 |
 | SPOS-013 | Automation Engine | `.claude/registry/AUTOMATION_REGISTRY.md` + `.claude/context/AUTOMATION_ENGINE.md` + `TRIGGER_REGISTRY.md` + `WORKFLOW_AUTOMATION.md` + `AUTOMATION_PIPELINES.md` + 4 dalších | ✅ AKTIVNÍ | 1.0.0 |
+| SPOS-017 | CI/CD Consolidation & Hardening | `.claude/reports/SPOS-017-IMPLEMENTATION-REPORT.md` + aktualizovaný `WORKFLOW_AUTOMATION.md` | ✅ AKTIVNÍ | 1.0.0 |
 
 ---
 
@@ -104,6 +105,7 @@ Formát dle SPOS-006 §3: DOCUMENT_ID/TITLE/TYPE/VERSION/STATUS/OWNER/RELATED_CO
 | DR-069 | Technical Debt Register | `.claude/context/TECHNICAL_DEBT_REGISTER.md` | ✅ HOTOVO |
 | DR-070 | Consolidation Roadmap | `.claude/context/CONSOLIDATION_ROADMAP.md` | ✅ HOTOVO |
 | DR-071 | SPOS-016 Implementation Report | `.claude/reports/SPOS-016-IMPLEMENTATION-REPORT.md` | ✅ HOTOVO |
+| DR-072 | SPOS-017 Implementation Report | `.claude/reports/SPOS-017-IMPLEMENTATION-REPORT.md` | ✅ HOTOVO |
 
 ---
 

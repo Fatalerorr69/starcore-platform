@@ -6,14 +6,15 @@ on:
     tags:
       - 'v[0-9]+.[0-9]+.[0-9]+'
 
+permissions:
+  contents: read
+  packages: write
+  id-token: write
+  attestations: write
+
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
-      id-token: write      # keyless cosign signing via OIDC
-      attestations: write  # SBOM attestation upload
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
@@ -33,8 +34,6 @@ jobs:
         run: |
           IMAGE="ghcr.io/${{ steps.image.outputs.name }}"
           if [[ "${{ github.ref_type }}" == "tag" ]]; then
-            # Version tag push: publish as X.Y.Z only.
-            # latest stays tied to the main branch so it always reflects HEAD.
             VERSION="${{ github.ref_name }}"
             VERSION="${VERSION#v}"
             {
@@ -43,7 +42,6 @@ jobs:
               echo "EOF"
             } >> "$GITHUB_OUTPUT"
           else
-            # Branch push: publish as latest + commit SHA.
             {
               echo "value<<EOF"
               echo "${IMAGE}:latest"
@@ -56,7 +54,7 @@ jobs:
         id: build
         uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7
         with:
-          context: .
+          context: ./platform
           push: true
           tags: ${{ steps.tags.outputs.value }}
 

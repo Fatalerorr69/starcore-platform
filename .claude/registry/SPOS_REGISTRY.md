@@ -1,6 +1,6 @@
 # SPOS REGISTRY
 
-Aktualizováno: 2026-08-08 | Standard: SPOS-016
+Aktualizováno: 2026-08-08 | Standard: SPOS-017
 
 Registr operačních modulů Project Operating System. Fyzická implementace primárně v `platform/.starcore/` (viz SPOS-000 rozhodnutí — adoptováno, ne duplikováno).
 
@@ -24,6 +24,7 @@ Registr operačních modulů Project Operating System. Fyzická implementace pri
 | SPOS-014 | AI Agent Operating System (AAOS) | `.claude/context/AAOS_ARCHITECTURE.md` + `AGENT_LIFECYCLE.md` + `MULTI_AGENT_MODEL.md` + `PROVIDER_ROUTER_V2.md` + `CONTEXT_ENGINE.md` + `PROMPT_ENGINE.md` + `AAOS_HEALTH.md` + `AAOS_GAP_ANALYSIS.md` + `AAOS_RECOMMENDATIONS.md` + rozšířený `AGENT_REGISTRY.md` | ✅ AKTIVNÍ — DISCOVERY + DOKUMENTACE |
 | SPOS-015 | Ecosystem Hygiene Engine | `.claude/context/ECOSYSTEM_MAP.md` + `ECOSYSTEM_HEALTH.md` + `ECOSYSTEM_GAP_ANALYSIS.md` + `ECOSYSTEM_RECOMMENDATIONS.md` + `.claude/registry/LEGACY_REGISTRY.md` + `DUPLICATE_REGISTRY.md` + discovery + implementation reports | ✅ AKTIVNÍ — DISCOVERY + DOKUMENTACE |
 | SPOS-016 | Repository Consolidation Engine | `.claude/context/REPOSITORY_CONSOLIDATION.md` + `LEGACY_MIGRATION_PLAN.md` + `MODULE_CLASSIFICATION.md` + `DEPENDENCY_ANALYSIS.md` + `CODE_DUPLICATION_REPORT.md` + `ARCHITECTURE_ALIGNMENT.md` + `ROOT_DIRECTORY_AUDIT.md` + `TECHNICAL_DEBT_REGISTER.md` + `CONSOLIDATION_ROADMAP.md` + implementation report | ✅ AKTIVNÍ — PLNÝ AUDIT + KONSOLIDAČNÍ PLÁN |
+| SPOS-017 | CI/CD Consolidation & Hardening Engine | `.claude/reports/SPOS-017-IMPLEMENTATION-REPORT.md` + aktualizovaný `WORKFLOW_AUTOMATION.md` | ✅ AKTIVNÍ — IMPLEMENTOVÁNO (P0 CI/CD konsolidace) |
 
 ---
 
