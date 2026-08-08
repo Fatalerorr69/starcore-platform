@@ -460,6 +460,25 @@ prompts:
   tags:
   - hygiene
   - consolidation
+- id: PROM-015
+  name: STARCORE Repository Restructure Engine
+  version: '1.0'
+  type: IMPLEMENTATION
+  purpose: SPOS-019 — M3 Repository Restructure, evidence-based migration of 25 dirs + 68 scripts to legacy/
+  phase: null
+  status: ACTIVE
+  created_at: '2026-08-08T17:00:00Z'
+  updated_at: '2026-08-08'
+  source: USER
+  supersedes: null
+  superseded_by: null
+  dependencies:
+  - SPOS-018
+  - PROM-014
+  session_id: spos-019-20260808
+  tags:
+  - restructure
+  - consolidation
   - cleanup
   - implementation
   description: SPOS-018 Repository Hygiene Engine — M2 Dead Code Removal. 6 dirs + 3 stale

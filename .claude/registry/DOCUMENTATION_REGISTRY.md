@@ -113,6 +113,10 @@ Formát dle SPOS-006 §3: DOCUMENT_ID/TITLE/TYPE/VERSION/STATUS/OWNER/RELATED_CO
 | DR-077 | Repository Hygiene Report | `.claude/context/REPOSITORY_HYGIENE_REPORT.md` | ✅ HOTOVO |
 | DR-078 | Hygiene Health | `.claude/context/HYGIENE_HEALTH.md` | ✅ HOTOVO |
 | DR-079 | Hygiene Recommendations | `.claude/context/HYGIENE_RECOMMENDATIONS.md` | ✅ HOTOVO |
+| DR-080 | Migration Registry | `.claude/context/MIGRATION_REGISTRY.md` | ✅ HOTOVO |
+| DR-081 | Root Structure Policy | `.claude/context/ROOT_STRUCTURE_POLICY.md` | ✅ HOTOVO |
+| DR-082 | SPOS-019 Implementation Report | `.claude/reports/SPOS-019-IMPLEMENTATION-REPORT.md` | ✅ HOTOVO |
+| DR-083 | SPOS-019 Handover Report | `.claude/reports/SPOS-019-HANDOVER-REPORT.md` | ✅ HOTOVO |
 
 ---
 
