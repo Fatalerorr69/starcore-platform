@@ -481,6 +481,31 @@ prompts:
   - consolidation
   - cleanup
   - implementation
-  description: SPOS-018 Repository Hygiene Engine — M2 Dead Code Removal. 6 dirs + 3 stale
-    files removed (14 files total). 10-point safety check per candidate. Root dirs 35->27,
-    tech debt 13->7, repo hygiene 65%->72%. TD-011..TD-016 resolved.
+  description: SPOS-019 Repository Restructure Engine — M3 Repository Restructure. 25 dirs
+    + 68 scripts moved to legacy/ via git mv. Root dirs 27->5, tech debt 7->3, repo hygiene
+    72%->88%. knowledge/ kept at root (active SAKB).
+- id: PROM-016
+  name: STARCORE Code Quality Engine
+  version: '1.0'
+  type: IMPLEMENTATION
+  purpose: SPOS-020 — M4 Code Quality, _persist_run() deduplicate, psutil dependency remove
+  phase: null
+  status: ACTIVE
+  created_at: '2026-08-08T20:00:00Z'
+  updated_at: '2026-08-08'
+  source: USER
+  supersedes: null
+  superseded_by: null
+  dependencies:
+  - SPOS-019
+  - PROM-015
+  session_id: spos-020-20260808
+  tags:
+  - code-quality
+  - consolidation
+  - deduplication
+  - implementation
+  description: SPOS-020 Code Quality Engine — M4 Code Quality. _persist_run() deduplicated
+    (blueprints.py + ws.py -> repository.py). psutil removed from dependencies. Code
+    duplicates 1->0, dependencies 21->20, tech debt 3->1, repo hygiene 88%->90%. TD-008/TD-009
+    resolved. CONSOLIDATION_ROADMAP 100% complete.

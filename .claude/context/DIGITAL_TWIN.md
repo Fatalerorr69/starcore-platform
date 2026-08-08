@@ -13,7 +13,7 @@ Musí být aktualizován po každé významné změně.
 repository: Fatalerorr69/starcore-platform
 branch_main: main
 branch_active: claude/starcore-ai-bootstrap-fkyb96
-last_commit: c3c4924 (SPOS-019 Repository Restructure)
+last_commit: 87a0ede (SPOS-020 Code Quality Engine)
 status: clean
 platform_version: 0.6.0
 ```
@@ -283,6 +283,30 @@ spos_019_repository_restructure:
     - "README.md (directory tree updated to 5-dir structure)"
   no_python_code_modified: true
 
+spos_020_code_quality:
+  implementation_date: "2026-08-08"
+  approach: "M4 Code Quality — deduplicate _persist_run(), remove unused psutil dependency"
+  persist_run_deduplicated: true
+  psutil_removed: true
+  code_duplicates_before: 1
+  code_duplicates_after: 0
+  direct_dependencies_before: 21
+  direct_dependencies_after: 20
+  tech_debt_before: 3
+  tech_debt_after: 1
+  repository_hygiene_improvement: "88% → 90%"
+  resolved_findings: [TD-008, TD-009]
+  modified:
+    - "packages/core/repository.py (persist_run() added)"
+    - "packages/core/routers/blueprints.py (local _persist_run() removed, 3 call sites updated)"
+    - "packages/core/routers/ws.py (local _persist_run() removed, 1 call site updated)"
+    - "pyproject.toml (psutil removed)"
+    - "uv.lock (regenerated)"
+  added:
+    - ".claude/reports/SPOS-020-IMPLEMENTATION-REPORT.md"
+    - ".claude/reports/SPOS-020-HANDOVER-REPORT.md"
+  consolidation_roadmap_status: "M1+M2+M3+M4 = 100% COMPLETE"
+
 prompt_status:
   total_prompts: 16
   active: 13
@@ -294,9 +318,9 @@ prompt_status:
 spos_status:
   discovery: "platform/.starcore/ already exists — mature runtime (3843 lines Python, 171 tests)"
   decision: "Adopted existing platform/.starcore/ as canonical SPOS implementation; no duplicate created at root"
-  modules_fully_covered: [SPOS-001, SPOS-002, SPOS-003, SPOS-005, SPOS-012, SPOS-013, SPOS-014, SPOS-016, SPOS-017, SPOS-018]
+  modules_fully_covered: [SPOS-001, SPOS-002, SPOS-003, SPOS-005, SPOS-012, SPOS-013, SPOS-014, SPOS-016, SPOS-017, SPOS-018, SPOS-019, SPOS-020]
   modules_partial: [SPOS-004, SPOS-008]
-  modules_missing: [SPOS-019+]
+  modules_missing: [SPOS-021+]
   duplicate_concept: "SPOS-010 — two digital twin docs with different scope (ecosystem vs platform); platform snapshot STALE (v0.4.0 vs actual v0.6.0)"
   correction_to_ses_001: "RESOLVED by SPOS-017 — Dependabot + SBOM configs moved from orphaned platform/.github/ to root .github/"
 
@@ -624,6 +648,9 @@ knowledge_base:
 
 | Datum | Změna | Autor |
 |---|---|---|
+| 2026-08-08 | SPOS-020 — Code Quality Engine: _persist_run() deduplicated (blueprints.py + ws.py → repository.py), psutil removed from dependencies. Code duplicates 1→0, dependencies 21→20, tech debt 3→1, repo hygiene 88%→90%. TD-008/TD-009 resolved. CONSOLIDATION_ROADMAP 100% complete | Claude Code |
+| 2026-08-08 | SPOS-019 — Repository Restructure Engine: 25 dirs + 68 scripts moved to legacy/ via git mv. Root dirs 27→5, repo hygiene 72%→88%, arch alignment 87%→93%, tech debt 7→3. knowledge/ kept at root (active SAKB) | Claude Code |
+| 2026-08-08 | SPOS-018 — Repository Hygiene Engine: 6 dead dirs + 3 stale files removed. Root dirs 35→27, repo hygiene 65%→72%, tech debt 13→7. TD-011..TD-016 resolved | Claude Code |
 | 2026-08-08 | SPOS-017 — CI/CD Consolidation & Hardening: 4 workflows přesunuto z platform/.github/ do root, 3 broken smazány, 5 duplikátů smazáno, ci.yml hardened, dependabot opraven. Workflow coverage 31%→100%, repo hygiene 35%→65%. SFIND-001/003/005 + TD-002/003 resolved | Claude Code |
 | 2026-08-08 | SPOS-016 — Repository Consolidation Engine: 35 root dirs, 73+ soubory, 6796+ moduly auditovány. Architecture alignment 79%, repo hygiene 35%, 16 tech debt items, 4-milestone consolidation roadmap. 10 výstupních souborů | Claude Code |
 | 2026-08-07 | SPOS-015 — Ecosystem Hygiene Engine: 35+ root dirs auditováno, ecosystem health score 58%, 18 legacy + 4 dead code identifikováno, 15 gaps, 12 doporučení, 8 výstupních souborů | Claude Code |

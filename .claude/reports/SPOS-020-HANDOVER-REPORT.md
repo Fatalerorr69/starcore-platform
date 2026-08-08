@@ -1,6 +1,6 @@
 # SPOS-020 HANDOVER REPORT
 
-Datum: 2026-08-08 | Status: PENDING APPROVAL | Commit: (pending)
+Datum: 2026-08-08 | Status: DOKONCENO | Commit: 87a0ede
 
 ---
 

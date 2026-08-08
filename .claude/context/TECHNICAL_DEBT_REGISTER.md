@@ -129,7 +129,7 @@ source: SPOS-016
 
 ## MEDIUM DEBT
 
-### TD-008 — DUP-001 _persist_run() copy
+### TD-008 — DUP-001 _persist_run() copy ✅ RESOLVED (SPOS-020, commit 87a0ede)
 
 ```yaml
 id: TD-008
@@ -139,9 +139,13 @@ description: "Identická _persist_run() v blueprints.py:177 a ws.py:202."
 effort: XS
 recommendation: "Extrahovat do sdíleného modulu."
 source: SPOS-015
+status: RESOLVED
+resolved_by: SPOS-020
+resolution: "persist_run() extracted to packages/core/repository.py. Both local copies removed."
+resolved_date: "2026-08-08"
 ```
 
-### TD-009 — psutil jako přímá závislost
+### TD-009 — psutil jako přímá závislost ✅ RESOLVED (SPOS-020, commit 87a0ede)
 
 ```yaml
 id: TD-009
@@ -151,6 +155,10 @@ description: "psutil je v pyproject.toml dependencies, ale žádný platform/ k�
 effort: XS
 recommendation: "Odebrat z přímých dependencies."
 source: SPOS-016
+status: RESOLVED
+resolved_by: SPOS-020
+resolution: "psutil>=7.0.0 removed from pyproject.toml. uv.lock regenerated. uv sync clean."
+resolved_date: "2026-08-08"
 ```
 
 ### TD-010 — platform/reports/ stale historical reports
@@ -237,11 +245,13 @@ recommendation: REMOVE
 
 ```yaml
 total_debt_items: 16
+resolved_items: 15 (TD-001..TD-009, TD-011..TD-016)
+open_items: 1 (TD-010)
 
-critical: 3 (TD-001, TD-002, TD-003)
-high: 4 (TD-004, TD-005, TD-006, TD-007)
-medium: 3 (TD-008, TD-009, TD-011)
-low: 6 (TD-010, TD-012..TD-016)
+critical: 3 (TD-001, TD-002, TD-003) — ALL RESOLVED by SPOS-017
+high: 4 (TD-004, TD-005, TD-006, TD-007) — ALL RESOLVED by SPOS-018/019
+medium: 3 (TD-008, TD-009, TD-011) — ALL RESOLVED by SPOS-018/020
+low: 6 (TD-010, TD-012..TD-016) — TD-010 OPEN, rest RESOLVED by SPOS-018
 
 estimated_total_effort: "M (10-15h pro plnou konsolidaci)"
 estimated_quick_wins: "XS (2-3h pro TD-002, TD-003, TD-008, TD-009, TD-011..TD-016)"

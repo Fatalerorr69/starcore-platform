@@ -1,6 +1,6 @@
 # SPOS-020 IMPLEMENTATION REPORT
 
-Standard: SPOS-020 | Datum: 2026-08-08 | Status: PENDING APPROVAL
+Standard: SPOS-020 | Datum: 2026-08-08 | Status: DOKONCENO | Commit: 87a0ede
 
 ---
 

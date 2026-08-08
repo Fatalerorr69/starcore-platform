@@ -1,6 +1,6 @@
 # CONSOLIDATION ROADMAP
 
-Standard: SPOS-016 §9 | Aktualizováno: 2026-08-08
+Standard: SPOS-016 §9 | Aktualizováno: 2026-08-08 | Status: 100% DOKONČENO
 
 Chronologický plán konsolidace repozitáře s prioritami a závislostmi.
 
@@ -19,7 +19,7 @@ P3_LOW:       Kosmetické, nice-to-have
 
 ## ROADMAP
 
-### MILESTONE 1 — CI/CD Fix (P0, 1-2h)
+### MILESTONE 1 — CI/CD Fix (P0, 1-2h) ✅ DONE (SPOS-017, commit 1b93a0a)
 
 | # | Akce | Priority | Effort | Závislosti |
 |---|---|---|---|---|
@@ -34,7 +34,7 @@ P3_LOW:       Kosmetické, nice-to-have
 
 **Výsledek:** 10/10 aktivních workflows (z 4/13 aktuálních), 0 orphaned, 0 broken
 
-### MILESTONE 2 — Dead Code Removal (P1, 1h)
+### MILESTONE 2 — Dead Code Removal (P1, 1h) ✅ DONE (SPOS-018, commit 70186bc)
 
 | # | Akce | Priority | Effort | Závislosti |
 |---|---|---|---|---|
@@ -48,7 +48,7 @@ P3_LOW:       Kosmetické, nice-to-have
 
 **Výsledek:** -9 zbytečných položek z root
 
-### MILESTONE 3 — Repository Restructure (P1, 4-6h)
+### MILESTONE 3 — Repository Restructure (P1, 4-6h) ✅ DONE (SPOS-019, commit c3c4924)
 
 | # | Akce | Priority | Effort | Závislosti |
 |---|---|---|---|---|
@@ -63,7 +63,7 @@ P3_LOW:       Kosmetické, nice-to-have
 
 **Výsledek:** Root obsahuje jen 5-7 adresářů místo 35
 
-### MILESTONE 4 — Code Quality (P2, 1-2h)
+### MILESTONE 4 — Code Quality (P2, 1-2h) ✅ DONE (SPOS-020, commit 87a0ede)
 
 | # | Akce | Priority | Effort | Závislosti |
 |---|---|---|---|---|

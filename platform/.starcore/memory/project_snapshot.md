@@ -39,8 +39,8 @@
 | Automation | 61% | ČÁSTEČNĚ_ZDRAVÝ |
 | AAOS (AI) | 38% | KRITICKÝ |
 | Architecture Alignment | 93% | ALIGNED |
-| Repository Hygiene | 88% | ZDRAVÝ |
-| Technical Debt | 3 items | NÍZKÝ |
+| Repository Hygiene | 90% | ZDRAVÝ |
+| Technical Debt | 1 item | NÍZKÝ |
 | Workflow Coverage | 100% (7/7 active) | ZDRAVÝ |
 | Security | CI clean (bandit/pip-audit/gitleaks) | DOBRÝ |
 | Documentation | 126+ docs, mkdocs PASS | DOBRÝ |
@@ -53,7 +53,11 @@
 |--------|--------|
 | SPOS-001..015 | DOKONČENO |
 | SPOS-016 (Consolidation) | DOKONČENO |
-| SPOS-017+ | ČEKÁ |
+| SPOS-017 (CI/CD) | DOKONČENO |
+| SPOS-018 (Hygiene) | DOKONČENO |
+| SPOS-019 (Restructure) | DOKONČENO |
+| SPOS-020 (Code Quality) | DOKONČENO |
+| SPOS-021+ | ČEKÁ |
 
 ## Architektura (přehled)
 

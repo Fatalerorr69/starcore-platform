@@ -583,3 +583,58 @@ sessions:
   blockers: []
   end_time: '2026-08-08T19:00:00Z'
   next_action: SPOS-019 DOKONCENO. Commit c3c4924 pushed.
+- session_id: spos-020-20260808
+  start_time: '2026-08-08T20:00:00Z'
+  end_time: null
+  branch: claude/starcore-ai-bootstrap-fkyb96
+  head: 87a0ede
+  user_requests:
+  - SPOS-020 Code Quality Engine — M4 Code Quality (_persist_run deduplicate, psutil remove)
+  prompts_used:
+  - PROM-016
+  files_read:
+  - platform/packages/core/routers/blueprints.py
+  - platform/packages/core/routers/ws.py
+  - platform/packages/core/repository.py
+  - platform/pyproject.toml
+  - platform/uv.lock
+  files_created:
+  - .claude/reports/SPOS-020-IMPLEMENTATION-REPORT.md
+  - .claude/reports/SPOS-020-HANDOVER-REPORT.md
+  files_modified:
+  - platform/packages/core/repository.py (persist_run() added)
+  - platform/packages/core/routers/blueprints.py (local _persist_run() removed)
+  - platform/packages/core/routers/ws.py (local _persist_run() removed)
+  - platform/pyproject.toml (psutil removed)
+  - platform/uv.lock (regenerated)
+  - .claude/registry/SPOS_REGISTRY.md
+  - .claude/registry/DOCUMENTATION_REGISTRY.md
+  - .claude/ses/SES-INDEX.md
+  - .claude/context/DIGITAL_TWIN.md
+  - .claude/context/CONSOLIDATION_ROADMAP.md
+  - .claude/context/TECHNICAL_DEBT_REGISTER.md
+  - platform/.starcore/memory/current_state.md
+  - platform/.starcore/memory/project_snapshot.md
+  - platform/.starcore/state/project_state.json
+  - platform/.starcore/sessions/ledger.yaml
+  - platform/.starcore/prompts/registry.yaml
+  commands_executed:
+  - uv run pytest (796 passed, 9 skipped)
+  - uv run ruff check . (all passed)
+  - uv run pyright (0 errors)
+  - uv run bandit -r packages/ apps/ scripts/ -ll -q (clean)
+  - uv run pip-audit (clean)
+  - uv run mkdocs build --strict (OK)
+  - uv sync --extra dev (psutil removed, clean install)
+  tests_executed:
+  - pytest 796 passed, 9 skipped, 0 failed
+  decisions:
+  - persist_run() placed in repository.py alongside save_run() (persistence concern)
+  - psutil confirmed zero imports — safe removal
+  - CONSOLIDATION_ROADMAP 100% complete (M1+M2+M3+M4)
+  risks:
+  - No new risks introduced
+  approvals:
+  - SPOS-020 COMMIT & PUSH explicitly approved by user
+  blockers: []
+  next_action: SPOS-020 DOKONCENO. Commit 87a0ede pushed. Next engine discovery.

@@ -30,7 +30,8 @@ Aktualizováno: 2026-08-08
 | SPOS-017 | CI/CD Consolidation & Hardening | ✅ AKTIVNÍ | (SPOS-017-IMPLEMENTATION-REPORT + HANDOVER-REPORT + aktualizovaný WORKFLOW_AUTOMATION) |
 | SPOS-018 | Repository Hygiene Engine | ✅ AKTIVNÍ | (6 souborů: HYGIENE_REGISTRY, DELETION_MANIFEST, REPOSITORY_HYGIENE_REPORT, HYGIENE_HEALTH, HYGIENE_RECOMMENDATIONS + report) |
 | SPOS-019 | Repository Restructure Engine | ✅ AKTIVNÍ | (4 soubory: MIGRATION_REGISTRY, ROOT_STRUCTURE_POLICY + implementation report + handover report) |
-| SPOS-020+ | SPOS Modules | ⏳ ČEKÁ | TBD |
+| SPOS-020 | Code Quality Engine | ✅ AKTIVNÍ | (M4 Code Quality: _persist_run() deduplicated, psutil removed + implementation report + handover report) |
+| SPOS-021+ | SPOS Modules | ⏳ ČEKÁ | TBD |
 
 ---
 

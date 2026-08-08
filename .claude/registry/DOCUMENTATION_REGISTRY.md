@@ -117,6 +117,8 @@ Formát dle SPOS-006 §3: DOCUMENT_ID/TITLE/TYPE/VERSION/STATUS/OWNER/RELATED_CO
 | DR-081 | Root Structure Policy | `.claude/context/ROOT_STRUCTURE_POLICY.md` | ✅ HOTOVO |
 | DR-082 | SPOS-019 Implementation Report | `.claude/reports/SPOS-019-IMPLEMENTATION-REPORT.md` | ✅ HOTOVO |
 | DR-083 | SPOS-019 Handover Report | `.claude/reports/SPOS-019-HANDOVER-REPORT.md` | ✅ HOTOVO |
+| DR-084 | SPOS-020 Implementation Report | `.claude/reports/SPOS-020-IMPLEMENTATION-REPORT.md` | ✅ HOTOVO |
+| DR-085 | SPOS-020 Handover Report | `.claude/reports/SPOS-020-HANDOVER-REPORT.md` | ✅ HOTOVO |
 
 ---
 
