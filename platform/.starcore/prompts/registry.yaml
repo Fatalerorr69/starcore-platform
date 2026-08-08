@@ -440,3 +440,28 @@ prompts:
     IMPLEMENTATION. 4 workflows přesunuto z orphaned platform/.github/ do root, 3 broken
     smazány, 5 duplikátů smazáno, ci.yml hardened, dependabot opraven. Workflow coverage
     31%→100%, repo hygiene 35%→65%. SFIND-001/003/005 + TD-002/003 resolved.
+- id: PROM-014
+  name: STARCORE Repository Hygiene Engine
+  version: '1.0'
+  type: IMPLEMENTATION
+  purpose: SPOS-018 — M2 Dead Code Removal, evidence-based deletion s 10-point safety check
+  phase: null
+  status: ACTIVE
+  created_at: '2026-08-08T15:00:00Z'
+  updated_at: '2026-08-08'
+  source: USER
+  supersedes: null
+  superseded_by: null
+  dependencies:
+  - SPOS-016
+  - SPOS-017
+  - PROM-013
+  session_id: spos-018-20260808
+  tags:
+  - hygiene
+  - consolidation
+  - cleanup
+  - implementation
+  description: SPOS-018 Repository Hygiene Engine — M2 Dead Code Removal. 6 dirs + 3 stale
+    files removed (14 files total). 10-point safety check per candidate. Root dirs 35->27,
+    tech debt 13->7, repo hygiene 65%->72%. TD-011..TD-016 resolved.
