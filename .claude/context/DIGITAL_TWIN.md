@@ -236,6 +236,28 @@ spos_017_cicd_consolidation:
     - ".claude/context/WORKFLOW_AUTOMATION.md (WF-A02, WF-A08 status + WF-A09, WF-A10 added)"
   no_python_code_modified: true
 
+spos_018_repository_hygiene:
+  implementation_date: "2026-08-08"
+  approach: "M2 Dead Code Removal — evidence-based deletion with 10-point safety check per candidate"
+  directories_deleted: 6
+  files_deleted: 14
+  root_dirs_before: 35
+  root_dirs_after: 27
+  resolved_findings: [TD-011, TD-012, TD-013, TD-014, TD-015, TD-016]
+  repository_hygiene_improvement: "65% → 72%"
+  tech_debt_before: 13
+  tech_debt_after: 7
+  added:
+    - ".claude/registry/HYGIENE_REGISTRY.md"
+    - ".claude/context/DELETION_MANIFEST.md"
+    - ".claude/context/REPOSITORY_HYGIENE_REPORT.md"
+    - ".claude/context/HYGIENE_HEALTH.md"
+    - ".claude/context/HYGIENE_RECOMMENDATIONS.md"
+    - ".claude/reports/SPOS-018-IMPLEMENTATION-REPORT.md"
+  modified:
+    - "README.md (removed config.yaml from directory tree)"
+  no_python_code_modified: true
+
 prompt_status:
   total_prompts: 16
   active: 13
@@ -247,9 +269,9 @@ prompt_status:
 spos_status:
   discovery: "platform/.starcore/ already exists — mature runtime (3843 lines Python, 171 tests)"
   decision: "Adopted existing platform/.starcore/ as canonical SPOS implementation; no duplicate created at root"
-  modules_fully_covered: [SPOS-001, SPOS-002, SPOS-003, SPOS-005, SPOS-012, SPOS-013, SPOS-014, SPOS-016, SPOS-017]
+  modules_fully_covered: [SPOS-001, SPOS-002, SPOS-003, SPOS-005, SPOS-012, SPOS-013, SPOS-014, SPOS-016, SPOS-017, SPOS-018]
   modules_partial: [SPOS-004, SPOS-008]
-  modules_missing: [SPOS-018+]
+  modules_missing: [SPOS-019+]
   duplicate_concept: "SPOS-010 — two digital twin docs with different scope (ecosystem vs platform); platform snapshot STALE (v0.4.0 vs actual v0.6.0)"
   correction_to_ses_001: "RESOLVED by SPOS-017 — Dependabot + SBOM configs moved from orphaned platform/.github/ to root .github/"
 

@@ -107,6 +107,12 @@ Formát dle SPOS-006 §3: DOCUMENT_ID/TITLE/TYPE/VERSION/STATUS/OWNER/RELATED_CO
 | DR-071 | SPOS-016 Implementation Report | `.claude/reports/SPOS-016-IMPLEMENTATION-REPORT.md` | ✅ HOTOVO |
 | DR-072 | SPOS-017 Implementation Report | `.claude/reports/SPOS-017-IMPLEMENTATION-REPORT.md` | ✅ HOTOVO |
 | DR-073 | SPOS-017 Handover Report | `.claude/reports/SPOS-017-HANDOVER-REPORT.md` | ✅ HOTOVO |
+| DR-074 | SPOS-018 Implementation Report | `.claude/reports/SPOS-018-IMPLEMENTATION-REPORT.md` | ✅ HOTOVO |
+| DR-075 | Hygiene Registry | `.claude/registry/HYGIENE_REGISTRY.md` | ✅ HOTOVO |
+| DR-076 | Deletion Manifest | `.claude/context/DELETION_MANIFEST.md` | ✅ HOTOVO |
+| DR-077 | Repository Hygiene Report | `.claude/context/REPOSITORY_HYGIENE_REPORT.md` | ✅ HOTOVO |
+| DR-078 | Hygiene Health | `.claude/context/HYGIENE_HEALTH.md` | ✅ HOTOVO |
+| DR-079 | Hygiene Recommendations | `.claude/context/HYGIENE_RECOMMENDATIONS.md` | ✅ HOTOVO |
 
 ---
 

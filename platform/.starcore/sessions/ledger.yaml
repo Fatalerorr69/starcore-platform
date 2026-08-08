@@ -456,3 +456,76 @@ sessions:
   blockers: []
   end_time: '2026-08-08T14:00:00Z'
   next_action: SPOS-017 DOKONČENO. Commit 1b93a0a pushed.
+- session_id: spos-018-20260808
+  start_time: '2026-08-08T15:00:00Z'
+  end_time: null
+  branch: claude/starcore-ai-bootstrap-fkyb96
+  head: pending
+  user_requests:
+  - SPOS-018 Repository Hygiene Engine — M2 Dead Code Removal
+  prompts_used: []
+  files_read:
+  - .claude/context/ROOT_DIRECTORY_AUDIT.md
+  - .claude/context/CONSOLIDATION_ROADMAP.md
+  - .claude/context/TECHNICAL_DEBT_REGISTER.md
+  - github_intelligence/ (1 file)
+  - knowledge_engine/ (1 file)
+  - performance/ (1 file)
+  - api_gateway/ (1 file)
+  - registry/ (3 files)
+  - bin/ (4 files)
+  - requirements.txt
+  - .envrc
+  - config.yaml
+  files_created:
+  - .claude/registry/HYGIENE_REGISTRY.md
+  - .claude/context/DELETION_MANIFEST.md
+  - .claude/context/REPOSITORY_HYGIENE_REPORT.md
+  - .claude/context/HYGIENE_HEALTH.md
+  - .claude/context/HYGIENE_RECOMMENDATIONS.md
+  - .claude/reports/SPOS-018-IMPLEMENTATION-REPORT.md
+  files_modified:
+  - README.md
+  - .claude/registry/SPOS_REGISTRY.md
+  - .claude/registry/DOCUMENTATION_REGISTRY.md
+  - .claude/ses/SES-INDEX.md
+  - .claude/context/DIGITAL_TWIN.md
+  - platform/.starcore/memory/current_state.md
+  - platform/.starcore/memory/project_snapshot.md
+  - platform/.starcore/state/project_state.json
+  - platform/.starcore/sessions/ledger.yaml
+  files_deleted:
+  - github_intelligence/github_scanner.py
+  - knowledge_engine/knowledge_core.py
+  - performance/performance_analyzer.py
+  - api_gateway/api_gateway.py
+  - registry/commands.json
+  - registry/modules.json
+  - registry/sdk_registry.json
+  - bin/control-center
+  - bin/starcore
+  - bin/starcore-status
+  - bin/starcore-verify
+  - requirements.txt
+  - .envrc
+  - config.yaml
+  commands_executed:
+  - uv run pytest (796 passed, 9 skipped)
+  - uv run ruff check . (all passed)
+  - uv run ruff format --check . (138 formatted)
+  - uv run pyright (0 errors, 0 warnings)
+  - uv run mkdocs build --strict (OK)
+  tests_executed:
+  - pytest 796 passed, 9 skipped, 0 failed
+  decisions:
+  - 4 dead code directories removed (github_intelligence, knowledge_engine, performance, api_gateway)
+  - 1 deprecated directory removed (registry — empty JSON shells)
+  - 1 broken directory removed (bin — Termux symlink + scripts)
+  - 3 stale root files removed (requirements.txt, .envrc, config.yaml)
+  - README.md updated (config.yaml reference removed)
+  - 10-point safety check applied to every candidate
+  risks:
+  - No new risks introduced
+  approvals: []
+  blockers: []
+  next_action: SPOS-018 awaiting commit approval.

@@ -39,7 +39,7 @@
 | Automation | 61% | ČÁSTEČNĚ_ZDRAVÝ |
 | AAOS (AI) | 38% | KRITICKÝ |
 | Architecture Alignment | 79% | ČÁSTEČNĚ_ALIGNED |
-| Repository Hygiene | 65% | ČÁSTEČNĚ_ZDRAVÝ |
+| Repository Hygiene | 72% | ČÁSTEČNĚ_ZDRAVÝ |
 | Technical Debt | 13 items (2 critical) | VYSOKÝ |
 | Workflow Coverage | 100% (7/7 active) | ZDRAVÝ |
 | Security | CI clean (bandit/pip-audit/gitleaks) | DOBRÝ |

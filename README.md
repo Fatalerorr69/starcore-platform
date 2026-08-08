@@ -29,8 +29,7 @@ starcore-platform/
 ├── automation/         ← Automation
 │
 ├── install_*.sh        ← Instalační skripty (64 skriptů)
-├── .claude/            ← AI Engineering context
-└── config.yaml         ← Root konfigurace
+└── .claude/            ← AI Engineering context
 ```
 
 ---

@@ -3,7 +3,7 @@
   "updated_at": "2026-08-08",
   "version": "0.6.0",
   "current_phase": "SES/SAKB/SPOS governance bootstrap",
-  "active_task": "SPOS-018+ — čeká na další governance moduly",
+  "active_task": "SPOS-019+ — next governance modules",
   "completed_tasks": [
     "Bootstrap 00 — discovery reports + .claude/ structure",
     "SES-000 — Engineering Constitution",
@@ -25,20 +25,17 @@
     "SPOS-014 — AI Agent Operating System (AAOS health score: 38%, 4 active agents, 22 gaps)",
     "SPOS-015 — Ecosystem Hygiene Engine (ecosystem health: 58%, 18 legacy dirs, 4 dead code, 15 gaps)",
     "SPOS-016 — Repository Consolidation Engine (architecture alignment: 79%, repo hygiene: 35%, 16 tech debt items, consolidation roadmap ready)",
-    "SPOS-017 — CI/CD Consolidation & Hardening (workflow coverage: 31%→100%, repo hygiene: 35%→65%, 5 findings resolved)"
+    "SPOS-017 — CI/CD Consolidation & Hardening (workflow coverage: 31%→100%, repo hygiene: 35%→65%, 5 findings resolved)",
+    "SPOS-018 — Repository Hygiene Engine (repo hygiene: 65%→72%, 6 dirs + 3 files removed, 6 tech debt items resolved)"
   ],
   "blockers": [],
   "risks": [
     "memory/project_snapshot.md stale (v0.4.0 vs actual v0.6.0)",
     "state/release.md stale (v0.2.0 vs actual v0.6.0)",
     "All 3 infra providers offline (DockerProvider, ProxmoxProvider, KubernetesProvider)",
-    "Nulová self-maintenance automation (governance drift undetected)",
-    "AAOS maturity Level 2/5 — multi-agent, RAG, runtime routing missing",
-    "Repository hygiene 65% — 24 legacy dirs, 65 Termux scripts, 16MB backup in git (improved from 35%)"
+    "Repository hygiene 72% — 23 legacy dirs, 65 Termux scripts, 16MB backup in git"
   ],
   "next_actions": [
-    "SPOS-018+ — další governance moduly",
-    "Milestone 2: Remove dead code (P1, 1h) — github_intelligence/, knowledge_engine/, performance/, api_gateway/",
     "Milestone 3: Repository restructure (P1, 4-6h) — move legacy dirs to legacy/",
     "Milestone 4: Code quality (P2, 1-2h) — deduplicate _persist_run(), remove psutil"
   ],
@@ -47,10 +44,10 @@
   "aaos_health_score": "38%",
   "ecosystem_health_score": "58%",
   "architecture_alignment": "79%",
-  "repository_hygiene": "65%",
-  "technical_debt_items": 13,
+  "repository_hygiene": "72%",
+  "technical_debt_items": 7,
   "workflow_coverage": "100% (7/7 active)",
-  "consolidation_readiness": "100% (audit done, plan ready, P0 done)",
+  "consolidation_readiness": "100% (audit done, plan ready, P0+M2 done)",
   "automation_maturity": "Level 3.5 / 5",
   "aaos_maturity": "Level 2 / 5",
   "ecosystem_maturity": "33%",
