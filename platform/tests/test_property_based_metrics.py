@@ -193,3 +193,56 @@ def test_record_task_completed_tolerates_arbitrary_provider_and_status(
     record({"provider": provider, "status": status})
     value = counter.labels(provider=provider, status=status)._value.get()
     assert value == 1
+
+
+# ── record_ai_request_completed integration ─────────────────────────────────
+
+
+@given(
+    provider=_PROVIDER,
+    status=_STATUS,
+    duration=_DURATION,
+)
+@settings(max_examples=50)
+def test_record_ai_request_completed_tolerates_arbitrary_inputs(
+    provider: str, status: str, duration: float
+) -> None:
+    """record_ai_request_completed() must never raise for any valid input."""
+    from prometheus_client import CollectorRegistry, Counter, Histogram
+
+    reg = CollectorRegistry()
+    counter = Counter(
+        "starcore_ai_requests_total_iso",
+        "Isolated AI counter",
+        ["provider", "status"],
+        registry=reg,
+    )
+    hist = Histogram(
+        "starcore_ai_request_duration_seconds_iso",
+        "Isolated AI histogram",
+        ["provider"],
+        registry=reg,
+    )
+    token_counter = Counter(
+        "starcore_ai_token_count_iso",
+        "Isolated AI token counter",
+        ["provider", "direction"],
+        registry=reg,
+    )
+
+    def record(payload: dict) -> None:
+        prov = payload.get("provider", "unknown")
+        st_ = payload.get("status", "unknown")
+        counter.labels(provider=prov, status=st_).inc()
+        d = payload.get("duration_seconds")
+        if d is not None:
+            hist.labels(provider=prov).observe(d)
+        inp = payload.get("input_tokens")
+        if inp is not None:
+            token_counter.labels(provider=prov, direction="input").inc(inp)
+        out = payload.get("output_tokens")
+        if out is not None:
+            token_counter.labels(provider=prov, direction="output").inc(out)
+
+    record({"provider": provider, "status": status, "duration_seconds": duration})
+    assert counter.labels(provider=provider, status=status)._value.get() == 1

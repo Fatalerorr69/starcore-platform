@@ -196,5 +196,3 @@ async def _ws_run_blueprint(websocket: WebSocket, parallel: bool) -> None:
             except asyncio.CancelledError:
                 pass
         queue_getter.cancel()
-
-

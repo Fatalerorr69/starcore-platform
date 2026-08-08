@@ -171,5 +171,3 @@ async def _sse_generator(blueprint: Blueprint, parallel: bool) -> AsyncGenerator
             except asyncio.CancelledError:
                 pass
         queue_getter.cancel()
-
-

@@ -84,9 +84,17 @@ def probe_adr_count() -> int:
     return len(list(adr_dir.glob("ADR-*.md")))
 
 
+def _git_repo_root() -> Path:
+    """Find the git repository root (may differ from _REPO_ROOT in a monorepo)."""
+    rc, out = _run(["git", "rev-parse", "--show-toplevel"])
+    if rc == 0 and out:
+        return Path(out)
+    return _REPO_ROOT
+
+
 def probe_workflow_count() -> int:
-    """Count .github/workflows/*.yml files."""
-    wf_dir = _REPO_ROOT / ".github" / "workflows"
+    """Count .github/workflows/*.yml files from the git repo root."""
+    wf_dir = _git_repo_root() / ".github" / "workflows"
     if not wf_dir.exists():
         return -1
     return len(list(wf_dir.glob("*.yml")))

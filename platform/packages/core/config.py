@@ -49,6 +49,10 @@ class Settings(BaseSettings):
     # silently send a nonexistent model to the configured server.
     ai_model: str | None = None
 
+    ai_max_tokens: int = 2000
+    ai_timeout: float = 120.0
+    ai_max_retries: int = 3
+
     # Requests per minute allowed per client IP, applied globally to all
     # endpoints except /health (see core/main.py). 0 disables rate limiting
     # entirely -- useful for local development or trusted-network-only

@@ -84,6 +84,25 @@ def test_build_provider_raises_on_unknown_provider():
         _build_provider(_settings(ai_provider="nonexistent"))
 
 
+def test_build_provider_passes_configured_max_tokens_and_timeout():
+    from ai.providers.anthropic import AnthropicProvider
+
+    provider = _build_provider(
+        _settings(anthropic_api_key="sk-test", ai_max_tokens=4096, ai_timeout=60.0)
+    )
+    assert isinstance(provider, AnthropicProvider)
+    assert provider._max_tokens == 4096
+    assert provider._timeout == 60.0
+
+
+def test_build_provider_passes_retry_config_from_settings():
+    from ai.providers.anthropic import AnthropicProvider
+
+    provider = _build_provider(_settings(anthropic_api_key="sk-test", ai_max_retries=5))
+    assert isinstance(provider, AnthropicProvider)
+    assert provider._retry_config.max_retries == 5
+
+
 # ---------------------------------------------------------------------------
 # generate_blueprint_yaml — Anthropic path (patching the provider class)
 # ---------------------------------------------------------------------------
@@ -163,6 +182,68 @@ async def test_generate_blueprint_yaml_raises_on_non_text_block():
     ):
         with pytest.raises(BlueprintGenerationError, match="non-text response block"):
             await generate_blueprint_yaml("a web app")
+
+
+# ---------------------------------------------------------------------------
+# BlueprintLoader smoke test (unchanged from before)
+# ---------------------------------------------------------------------------
+
+
+async def test_generate_blueprint_yaml_emits_ai_metrics_event_on_success():
+    from core.events import event_bus
+
+    fake_response = MagicMock()
+    fake_response.content = [MagicMock(spec=TextBlock, text="name: demo\nresources: []")]
+    fake_client = MagicMock()
+    fake_client.messages.create = AsyncMock(return_value=fake_response)
+
+    settings = _settings(anthropic_api_key="sk-test-key")
+    captured: list[dict] = []
+
+    def capture(payload: dict) -> None:
+        captured.append(payload)
+
+    event_bus.subscribe("ai.request.completed", capture)
+    try:
+        with (
+            patch("ai.generator.get_settings", return_value=settings),
+            patch("ai.providers.anthropic.AsyncAnthropic", return_value=fake_client),
+        ):
+            await generate_blueprint_yaml("a web app")
+    finally:
+        event_bus.unsubscribe("ai.request.completed", capture)
+
+    assert len(captured) == 1
+    assert captured[0]["provider"] == "anthropic"
+    assert captured[0]["status"] == "success"
+    assert "duration_seconds" in captured[0]
+
+
+async def test_generate_blueprint_yaml_emits_ai_metrics_event_on_error():
+    from core.events import event_bus
+
+    fake_client = MagicMock()
+    fake_client.messages.create = AsyncMock(side_effect=RuntimeError("fail"))
+
+    settings = _settings(anthropic_api_key="sk-test-key")
+    captured: list[dict] = []
+
+    def capture(payload: dict) -> None:
+        captured.append(payload)
+
+    event_bus.subscribe("ai.request.completed", capture)
+    try:
+        with (
+            patch("ai.generator.get_settings", return_value=settings),
+            patch("ai.providers.anthropic.AsyncAnthropic", return_value=fake_client),
+        ):
+            with pytest.raises(BlueprintGenerationError):
+                await generate_blueprint_yaml("a web app")
+    finally:
+        event_bus.unsubscribe("ai.request.completed", capture)
+
+    assert len(captured) == 1
+    assert captured[0]["status"] == "error"
 
 
 # ---------------------------------------------------------------------------

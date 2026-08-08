@@ -117,7 +117,7 @@ apps/cli (Typer)           packages/core/main.py (FastAPI)
 - `database.py`: SQLite persistence via SQLAlchemy + Alembic; `init_db()` enforces fresh-vs-existing schema on startup.
 - `models_db.py`: ORM models; must stay in sync with `migrations/versions/`.
 - `events.py`: in-process `EventBus` singleton; emits `task.started`, `task.completed`, `run.completed`.
-- `metrics.py`: Prometheus metrics via a **dedicated `CollectorRegistry`** (not the global default, to avoid duplicate-registration errors in the test suite). Subscribes to `EventBus` `task.completed` to record `BLUEPRINT_TASKS_TOTAL`. `HTTP_REQUESTS_TOTAL` and `HTTP_REQUEST_DURATION_SECONDS` are recorded by middleware. Exposed at the authenticated `GET /metrics` endpoint.
+- `metrics.py`: Prometheus metrics via a **dedicated `CollectorRegistry`** (not the global default, to avoid duplicate-registration errors in the test suite). Subscribes to `EventBus` `task.completed` to record `BLUEPRINT_TASKS_TOTAL` and `ai.request.completed` to record `AI_REQUESTS_TOTAL`, `AI_REQUEST_DURATION_SECONDS`, and `AI_TOKEN_COUNT`. `HTTP_REQUESTS_TOTAL` and `HTTP_REQUEST_DURATION_SECONDS` are recorded by middleware. Exposed at the authenticated `GET /metrics` endpoint.
 - `logger.py`: centralizes the process-wide loguru sink. Import it early (both `core/main.py` and `apps/cli/main.py` do this as a side effect). Every log record carries a `request_id` extra (default `"-"` for non-request contexts). Set `STARCORE_LOG_JSON=true` for JSON-structured log output suited to log aggregators (Loki, ELK, CloudWatch).
 - `correlation.py`: `ContextVar`-based request ID propagation (ADR-015). `resolve_request_id()` accepts a caller-supplied `X-Request-ID` header (validated against `[A-Za-z0-9_-]{1,128}`) or generates a UUID. `contextualize_request()` binds the ID to the asyncio context so it propagates automatically to all awaited coroutines.
 - `request_id_middleware.py`: `RequestIdMiddleware` class wrapping the correlation module. The inline `_request_id_middleware` in `main.py` also handles this for the FastAPI app directly, echoing `X-Request-ID` in every response.
@@ -199,6 +199,9 @@ Key variables:
 | `STARCORE_AI_BASE_URL` | _(none)_ | Required for `openai-compatible` |
 | `STARCORE_AI_MODEL` | _(none)_ | Required for `openai-compatible` |
 | `STARCORE_AI_API_KEY` | _(none)_ | Optional for `openai-compatible` |
+| `STARCORE_AI_MAX_TOKENS` | `2000` | Maximum tokens for AI generation |
+| `STARCORE_AI_TIMEOUT` | `120.0` | AI request timeout in seconds |
+| `STARCORE_AI_MAX_RETRIES` | `3` | Maximum retry attempts for AI requests |
 | `STARCORE_PROXMOX_HOST` | _(none)_ | Proxmox API hostname |
 | `STARCORE_PROXMOX_USER` | _(none)_ | Proxmox API user |
 | `STARCORE_PROXMOX_TOKEN_NAME` | _(none)_ | Proxmox API token name |

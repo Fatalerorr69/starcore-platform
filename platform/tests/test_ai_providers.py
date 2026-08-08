@@ -260,3 +260,150 @@ async def test_openai_compat_provider_trims_trailing_slash_from_base_url():
 
     url_arg = mock_post.call_args[0][0]
     assert "//" not in url_arg.split("://", 1)[1]
+
+
+# ---------------------------------------------------------------------------
+# Configurable max_tokens and timeout
+# ---------------------------------------------------------------------------
+
+
+async def test_anthropic_provider_uses_configured_max_tokens():
+    fake_response = MagicMock()
+    fake_response.content = [MagicMock(spec=TextBlock, text="name: demo\nresources: []")]
+    fake_client = MagicMock()
+    fake_client.messages.create = AsyncMock(return_value=fake_response)
+
+    with patch("ai.providers.anthropic.AsyncAnthropic", return_value=fake_client):
+        provider = AnthropicProvider(
+            api_key="sk-test-key",
+            model="claude-sonnet-5",
+            max_tokens=4096,
+        )
+        await provider.generate_blueprint_yaml("a web app")
+
+    call_kwargs = fake_client.messages.create.call_args[1]
+    assert call_kwargs["max_tokens"] == 4096
+
+
+async def test_anthropic_provider_passes_timeout_to_client():
+    fake_response = MagicMock()
+    fake_response.content = [MagicMock(spec=TextBlock, text="name: demo\nresources: []")]
+    fake_client = MagicMock()
+    fake_client.messages.create = AsyncMock(return_value=fake_response)
+
+    with patch("ai.providers.anthropic.AsyncAnthropic", return_value=fake_client) as mock_cls:
+        provider = AnthropicProvider(
+            api_key="sk-test-key",
+            model="claude-sonnet-5",
+            timeout=60.0,
+        )
+        await provider.generate_blueprint_yaml("a web app")
+
+    mock_cls.assert_called_once_with(api_key="sk-test-key", timeout=60.0)
+
+
+async def test_openai_compat_provider_uses_configured_max_tokens():
+    fake_resp = _ok_response()
+    mock_post = AsyncMock(return_value=fake_resp)
+
+    with patch("ai.providers.openai_compat.httpx.AsyncClient") as mock_cls:
+        mock_cls.return_value.__aenter__ = AsyncMock(return_value=MagicMock(post=mock_post))
+        mock_cls.return_value.__aexit__ = AsyncMock(return_value=False)
+
+        provider = OpenAICompatProvider(
+            base_url="http://localhost:11434/v1",
+            model="llama3.2",
+            max_tokens=8192,
+        )
+        await provider.generate_blueprint_yaml("a web app")
+
+    call_kwargs = mock_post.call_args[1]
+    assert call_kwargs["json"]["max_tokens"] == 8192
+
+
+# ---------------------------------------------------------------------------
+# Retry wiring
+# ---------------------------------------------------------------------------
+
+
+async def test_anthropic_provider_retries_on_connection_error():
+    from provider_sdk.retry import RetryConfig
+
+    fake_response = MagicMock()
+    fake_response.content = [MagicMock(spec=TextBlock, text="name: demo\nresources: []")]
+    fake_client = MagicMock()
+    fake_client.messages.create = AsyncMock(side_effect=[ConnectionError("fail"), fake_response])
+
+    retry = RetryConfig(max_retries=2, base_delay=0.0, jitter=False)
+    with patch("ai.providers.anthropic.AsyncAnthropic", return_value=fake_client):
+        provider = AnthropicProvider(
+            api_key="sk-test-key",
+            model="claude-sonnet-5",
+            retry_config=retry,
+        )
+        result = await provider.generate_blueprint_yaml("a web app")
+
+    assert result == "name: demo\nresources: []"
+    assert fake_client.messages.create.call_count == 2
+
+
+async def test_openai_compat_provider_retries_on_connect_error():
+    from provider_sdk.retry import RetryConfig
+
+    fake_resp = _ok_response()
+    mock_post = AsyncMock(side_effect=[httpx.ConnectError("fail"), fake_resp])
+
+    with patch("ai.providers.openai_compat.httpx.AsyncClient") as mock_cls:
+        mock_client = MagicMock(post=mock_post)
+        mock_cls.return_value.__aenter__ = AsyncMock(return_value=mock_client)
+        mock_cls.return_value.__aexit__ = AsyncMock(return_value=False)
+
+        retry = RetryConfig(
+            max_retries=2,
+            base_delay=0.0,
+            jitter=False,
+            retryable_exceptions=(ConnectionError, TimeoutError, OSError, httpx.ConnectError),
+        )
+        provider = OpenAICompatProvider(
+            base_url="http://localhost:11434/v1",
+            model="llama3.2",
+            retry_config=retry,
+        )
+        result = await provider.generate_blueprint_yaml("a web app")
+
+    assert result == "name: demo\nresources: []"
+    assert mock_post.call_count == 2
+
+
+async def test_anthropic_provider_raises_after_retries_exhausted():
+    from provider_sdk.retry import RetryConfig
+
+    fake_client = MagicMock()
+    fake_client.messages.create = AsyncMock(side_effect=ConnectionError("persistent failure"))
+
+    retry = RetryConfig(max_retries=1, base_delay=0.0, jitter=False)
+    with patch("ai.providers.anthropic.AsyncAnthropic", return_value=fake_client):
+        provider = AnthropicProvider(
+            api_key="sk-test-key",
+            model="claude-sonnet-5",
+            retry_config=retry,
+        )
+        with pytest.raises(BlueprintGenerationError, match="after retries"):
+            await provider.generate_blueprint_yaml("a web app")
+
+
+async def test_openai_compat_provider_raises_on_non_retryable_http_error():
+    """Non-retryable httpx.HTTPError (not HTTPStatusError) triggers the generic handler."""
+    exc = httpx.DecodingError("bad encoding")
+    mock_post = AsyncMock(side_effect=exc)
+
+    with patch("ai.providers.openai_compat.httpx.AsyncClient") as mock_cls:
+        mock_cls.return_value.__aenter__ = AsyncMock(return_value=MagicMock(post=mock_post))
+        mock_cls.return_value.__aexit__ = AsyncMock(return_value=False)
+
+        provider = OpenAICompatProvider(
+            base_url="http://localhost:11434/v1",
+            model="llama3.2",
+        )
+        with pytest.raises(BlueprintGenerationError, match="request failed"):
+            await provider.generate_blueprint_yaml("a web app")

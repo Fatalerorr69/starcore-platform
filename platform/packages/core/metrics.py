@@ -49,6 +49,27 @@ BLUEPRINT_TASKS_TOTAL = Counter(
     registry=registry,
 )
 
+AI_REQUESTS_TOTAL = Counter(
+    "starcore_ai_requests_total",
+    "Total AI blueprint generation requests, by provider and status",
+    ["provider", "status"],
+    registry=registry,
+)
+
+AI_REQUEST_DURATION_SECONDS = Histogram(
+    "starcore_ai_request_duration_seconds",
+    "AI blueprint generation request duration in seconds, by provider",
+    ["provider"],
+    registry=registry,
+)
+
+AI_TOKEN_COUNT = Counter(
+    "starcore_ai_token_count",
+    "Cumulative AI token usage, by provider and direction",
+    ["provider", "direction"],
+    registry=registry,
+)
+
 
 def record_task_completed(payload: dict) -> None:
     """EventBus subscriber for "task.completed". See scheduler.py / executor.py."""
@@ -58,7 +79,24 @@ def record_task_completed(payload: dict) -> None:
     ).inc()
 
 
+def record_ai_request_completed(payload: dict) -> None:
+    """EventBus subscriber for "ai.request.completed"."""
+    provider = payload.get("provider", "unknown")
+    status = payload.get("status", "unknown")
+    AI_REQUESTS_TOTAL.labels(provider=provider, status=status).inc()
+    duration = payload.get("duration_seconds")
+    if duration is not None:
+        AI_REQUEST_DURATION_SECONDS.labels(provider=provider).observe(duration)
+    input_tokens = payload.get("input_tokens")
+    if input_tokens is not None:
+        AI_TOKEN_COUNT.labels(provider=provider, direction="input").inc(input_tokens)
+    output_tokens = payload.get("output_tokens")
+    if output_tokens is not None:
+        AI_TOKEN_COUNT.labels(provider=provider, direction="output").inc(output_tokens)
+
+
 event_bus.subscribe("task.completed", record_task_completed)
+event_bus.subscribe("ai.request.completed", record_ai_request_completed)
 
 
 def render_metrics() -> bytes:

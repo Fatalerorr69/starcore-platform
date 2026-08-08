@@ -5,7 +5,13 @@ Tests for core.metrics: Prometheus metrics collection and the /metrics endpoint.
 import pytest
 from core.events import event_bus
 from core.main import app
-from core.metrics import BLUEPRINT_TASKS_TOTAL, record_task_completed, registry
+from core.metrics import (
+    AI_REQUESTS_TOTAL,
+    BLUEPRINT_TASKS_TOTAL,
+    record_ai_request_completed,
+    record_task_completed,
+    registry,
+)
 from fastapi.testclient import TestClient
 
 client = TestClient(app)
@@ -92,3 +98,74 @@ def test_blueprint_tasks_total_metric_registered_before_first_use():
     BLUEPRINT_TASKS_TOTAL.labels(provider="test-provider", status="success").inc()
     response = client.get("/metrics")
     assert 'provider="test-provider"' in response.text
+
+
+# ---------------------------------------------------------------------------
+# AI metrics
+# ---------------------------------------------------------------------------
+
+
+def test_record_ai_request_completed_increments_counter():
+    before = _counter_value(
+        "starcore_ai_requests_total", {"provider": "anthropic", "status": "success"}
+    )
+    record_ai_request_completed(
+        {"provider": "anthropic", "status": "success", "duration_seconds": 1.5}
+    )
+    after = _counter_value(
+        "starcore_ai_requests_total", {"provider": "anthropic", "status": "success"}
+    )
+    assert after == before + 1
+
+
+def test_record_ai_request_completed_observes_duration():
+    record_ai_request_completed(
+        {"provider": "anthropic", "status": "success", "duration_seconds": 2.5}
+    )
+    response = client.get("/metrics")
+    assert "starcore_ai_request_duration_seconds" in response.text
+
+
+def test_record_ai_request_completed_tracks_tokens():
+    record_ai_request_completed(
+        {
+            "provider": "anthropic",
+            "status": "success",
+            "duration_seconds": 1.0,
+            "input_tokens": 100,
+            "output_tokens": 50,
+        }
+    )
+    response = client.get("/metrics")
+    assert "starcore_ai_token_count" in response.text
+
+
+def test_record_ai_request_completed_handles_missing_optional_fields():
+    record_ai_request_completed({"provider": "anthropic", "status": "error"})
+    value = _counter_value(
+        "starcore_ai_requests_total", {"provider": "anthropic", "status": "error"}
+    )
+    assert value >= 1
+
+
+@pytest.mark.asyncio
+async def test_ai_request_completed_event_updates_metrics():
+    event_bus.subscribe("ai.request.completed", record_ai_request_completed)
+
+    before = _counter_value(
+        "starcore_ai_requests_total", {"provider": "openai-compat", "status": "success"}
+    )
+    await event_bus.emit(
+        "ai.request.completed",
+        {"provider": "openai-compat", "status": "success", "duration_seconds": 0.5},
+    )
+    after = _counter_value(
+        "starcore_ai_requests_total", {"provider": "openai-compat", "status": "success"}
+    )
+    assert after == before + 1
+
+
+def test_ai_metrics_registered_in_same_registry_as_endpoint():
+    AI_REQUESTS_TOTAL.labels(provider="test-ai", status="success").inc()
+    response = client.get("/metrics")
+    assert 'provider="test-ai"' in response.text
