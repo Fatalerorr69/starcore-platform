@@ -106,6 +106,7 @@ Formát dle SPOS-006 §3: DOCUMENT_ID/TITLE/TYPE/VERSION/STATUS/OWNER/RELATED_CO
 | DR-070 | Consolidation Roadmap | `.claude/context/CONSOLIDATION_ROADMAP.md` | ✅ HOTOVO |
 | DR-071 | SPOS-016 Implementation Report | `.claude/reports/SPOS-016-IMPLEMENTATION-REPORT.md` | ✅ HOTOVO |
 | DR-072 | SPOS-017 Implementation Report | `.claude/reports/SPOS-017-IMPLEMENTATION-REPORT.md` | ✅ HOTOVO |
+| DR-073 | SPOS-017 Handover Report | `.claude/reports/SPOS-017-HANDOVER-REPORT.md` | ✅ HOTOVO |
 
 ---
 

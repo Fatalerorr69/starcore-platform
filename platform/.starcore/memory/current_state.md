@@ -16,7 +16,7 @@ governance_layer: SES/SAKB/SPOS bootstrap (probíhá přes .claude/)
 active_document: SPOS-017 — CI/CD Consolidation & Hardening Engine (DOKONČENO)
 next_document: SPOS-018+ (ČEKÁ)
 branch: claude/starcore-ai-bootstrap-fkyb96
-last_governance_commit: "fc454e0 feat(spos): implement SPOS-016 Repository Consolidation Engine"
+last_governance_commit: "1b93a0a feat(cicd): implement SPOS-017 CI/CD Consolidation & Hardening Engine"
 last_updated: "2026-08-08"
 spos_completed: [SPOS-001, SPOS-002, SPOS-003, SPOS-004, SPOS-005, SPOS-006, SPOS-007, SPOS-008, SPOS-009, SPOS-010/011, SPOS-012, SPOS-013, SPOS-014, SPOS-015, SPOS-016, SPOS-017]
 integration_health_score: "64% (ČÁSTEČNĚ_ZDRAVÝ)"
