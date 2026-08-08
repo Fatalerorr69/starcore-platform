@@ -1,7 +1,7 @@
 # Project Snapshot — STARCORE Platform
 
 > Kanonická referenční karta pro cold-start. Aktualizovat při každé strukturální změně.
-> **Poslední aktualizace:** 2026-08-07 (sezení: spos-014-20260807)
+> **Poslední aktualizace:** 2026-08-08 (sezení: spos-016-20260808)
 
 ## Identita projektu
 
@@ -31,25 +31,29 @@
 | ADR záznamy | ADR-001 až ADR-017 |
 | Regression sentinel | PASS (baseline: 805 testy, 21 routes, 32 config fields, 17 ADRs) |
 
-## Health Scores (stav 2026-08-07)
+## Health Scores (stav 2026-08-08)
 
 | Dimenze | Score | Stav |
 |---------|-------|------|
 | Integration | 64% | ČÁSTEČNĚ_ZDRAVÝ |
 | Automation | 61% | ČÁSTEČNĚ_ZDRAVÝ |
 | AAOS (AI) | 38% | KRITICKÝ |
+| Architecture Alignment | 79% | ČÁSTEČNĚ_ALIGNED |
+| Repository Hygiene | 35% | KRITICKÝ |
+| Technical Debt | 16 items (3 critical) | KRITICKÝ |
+| Workflow Coverage | 31% (4/13 active) | KRITICKÝ |
 | Security | CI clean (bandit/pip-audit/gitleaks) | DOBRÝ |
-| Documentation | 126 docs, mkdocs PASS | DOBRÝ |
+| Documentation | 126+ docs, mkdocs PASS | DOBRÝ |
 | Intelligence (QC) | 88.2% (4 engines) | DOBRÝ |
-| **Overall Project Maturity** | **~64%** | **ČÁSTEČNĚ_ZDRAVÝ** |
+| **Overall Project Maturity** | **~60%** | **ČÁSTEČNĚ_ZDRAVÝ** |
 
-## SPOS Governance (stav 2026-08-07)
+## SPOS Governance (stav 2026-08-08)
 
 | Module | Status |
 |--------|--------|
-| SPOS-001..013 | DOKONČENO |
-| SPOS-014 (AAOS) | DOKONČENO |
-| SPOS-015+ | ČEKÁ |
+| SPOS-001..015 | DOKONČENO |
+| SPOS-016 (Consolidation) | DOKONČENO |
+| SPOS-017+ | ČEKÁ |
 
 ## Architektura (přehled)
 

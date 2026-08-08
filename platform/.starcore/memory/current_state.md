@@ -13,16 +13,18 @@
 
 ```yaml
 governance_layer: SES/SAKB/SPOS bootstrap (probíhá přes .claude/)
-active_document: SPOS-015 — Ecosystem Hygiene Engine (DOKONČENO)
-next_document: SPOS-016+ (ČEKÁ)
+active_document: SPOS-016 — Repository Consolidation Engine (DOKONČENO)
+next_document: SPOS-017+ (ČEKÁ)
 branch: claude/starcore-ai-bootstrap-fkyb96
-last_governance_commit: "9a4d5c2 feat(spos): implement SPOS-015 Ecosystem Hygiene Engine"
-last_updated: "2026-08-07"
-spos_completed: [SPOS-001, SPOS-002, SPOS-003, SPOS-004, SPOS-005, SPOS-006, SPOS-007, SPOS-008, SPOS-009, SPOS-010/011, SPOS-012, SPOS-013, SPOS-014, SPOS-015]
+last_governance_commit: "pending — SPOS-016 commit"
+last_updated: "2026-08-08"
+spos_completed: [SPOS-001, SPOS-002, SPOS-003, SPOS-004, SPOS-005, SPOS-006, SPOS-007, SPOS-008, SPOS-009, SPOS-010/011, SPOS-012, SPOS-013, SPOS-014, SPOS-015, SPOS-016]
 integration_health_score: "64% (ČÁSTEČNĚ_ZDRAVÝ)"
 automation_health_score: "61% (ČÁSTEČNĚ_ZDRAVÝ)"
 aaos_health_score: "38% (KRITICKÝ)"
 ecosystem_health_score: "58% (ČÁSTEČNĚ_ZDRAVÝ)"
+architecture_alignment: "79% (ČÁSTEČNĚ_ALIGNED)"
+repository_hygiene: "35% (KRITICKÝ)"
 ```
 
 ## Platform runtime stav (ke dni poslední aktualizace tohoto souboru)

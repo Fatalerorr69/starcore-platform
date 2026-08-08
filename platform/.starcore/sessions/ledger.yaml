@@ -333,3 +333,57 @@ sessions:
   approvals: []
   blockers: []
   next_action: SPOS-015 DOKONČENO. Pokračuje SPOS-016+.
+- session_id: spos-016-20260808
+  start_time: '2026-08-08T00:00:01Z'
+  end_time: null
+  branch: claude/starcore-ai-bootstrap-fkyb96
+  head: null
+  user_requests:
+  - SPOS-016 Repository Consolidation Engine — plný audit repozitáře, klasifikace, závislosti,
+    duplicity, architekturní alignment, konsolidační plán
+  prompts_used:
+  - PROM-012
+  files_read:
+  - platform/pyproject.toml
+  - platform/.github/workflows/ (7 files)
+  - .github/workflows/ (6 files)
+  - root directories (35 dirs audited)
+  - root files (73+ audited)
+  files_created:
+  - .claude/context/REPOSITORY_CONSOLIDATION.md
+  - .claude/context/LEGACY_MIGRATION_PLAN.md
+  - .claude/context/MODULE_CLASSIFICATION.md
+  - .claude/context/DEPENDENCY_ANALYSIS.md
+  - .claude/context/CODE_DUPLICATION_REPORT.md
+  - .claude/context/ARCHITECTURE_ALIGNMENT.md
+  - .claude/context/ROOT_DIRECTORY_AUDIT.md
+  - .claude/context/TECHNICAL_DEBT_REGISTER.md
+  - .claude/context/CONSOLIDATION_ROADMAP.md
+  - .claude/reports/SPOS-016-IMPLEMENTATION-REPORT.md
+  files_modified:
+  - .claude/registry/SPOS_REGISTRY.md
+  - .claude/ses/SES-INDEX.md
+  - .claude/registry/DOCUMENTATION_REGISTRY.md
+  - .claude/context/DIGITAL_TWIN.md
+  - platform/.starcore/memory/current_state.md
+  - platform/.starcore/memory/project_snapshot.md
+  - platform/.starcore/state/project_state.json
+  - platform/.starcore/sessions/ledger.yaml
+  - platform/.starcore/prompts/registry.yaml
+  commands_executed: []
+  tests_executed: []
+  decisions:
+  - 'SPOS-016 Repository Consolidation Engine dokončen. Architecture alignment: 79%,
+    repo hygiene: 35%, 16 tech debt items (3 critical), workflow coverage 31% (4/13).
+    Consolidation roadmap s 4 milestony připraven.'
+  - Root-level dirs klasifikovány na 4 ACTIVE, 24 ARCHIVE, 5 REMOVE, 2 KEEP
+  - Workflow duplicity identifikována — 7 orphaned, 3 duplicate, 2 broken
+  - Zero cross-boundary imports mezi root dirs a platform/ potvrzeno
+  risks:
+  - Repository hygiene 35% — 24 legacy dirs bez governance
+  - 7 orphaned workflows v platform/.github/ — GitHub je nespustí
+  - starcore-integrity.yml BROKEN — odkazuje na neexistující root core/
+  - 16MB Gold Master backup v git historii
+  approvals: []
+  blockers: []
+  next_action: SPOS-016 DOKONČENO. Konsolidace dle CONSOLIDATION_ROADMAP.md.

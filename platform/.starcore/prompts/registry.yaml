@@ -388,3 +388,29 @@ prompts:
     25 undocumented dirs klasifikováno, 18 legacy, 4 dead code, 3 empty registries,
     3 duplicity. Ecosystem health score 58%, 15 gaps, 12 doporučení. 8 nových governance
     souborů.
+- id: PROM-012
+  name: STARCORE Repository Consolidation Engine
+  version: '1.0'
+  type: IMPLEMENTATION
+  purpose: SPOS-016 — plný audit a konsolidační plán celého STARCORE repozitáře
+  phase: null
+  status: ACTIVE
+  created_at: '2026-08-08T00:00:01Z'
+  updated_at: '2026-08-08'
+  source: USER
+  supersedes: null
+  superseded_by: null
+  dependencies:
+  - SPOS-015
+  - PROM-011
+  session_id: spos-016-20260808
+  tags:
+  - consolidation
+  - repository
+  - audit
+  - technical-debt
+  - governance
+  description: SPOS-016 Repository Consolidation Engine — plný audit celého STARCORE
+    repozitáře. 35 root dirs, 73+ souborů, 6796+ modulů, 65 install skriptů, 13 workflows,
+    24 závislostí auditováno. Architecture alignment 79%, repo hygiene 35%, 16 tech
+    debt items, 4-milestone consolidation roadmap. 10 nových governance souborů.

@@ -1,6 +1,6 @@
 # STARCORE DIGITAL TWIN
 
-Aktualizováno: 2026-08-07 | Standard: SES-001 §17
+Aktualizováno: 2026-08-08 | Standard: SES-001 §17
 
 Tento soubor je digitální obraz aktuálního stavu systému STARCORE.
 Musí být aktualizován po každé významné změně.
@@ -196,9 +196,30 @@ spos_007_status:
   new_findings: "api_gateway/ and backups/ directories in root repo are undocumented and not in MODULE_REGISTRY -- flagged as future audit TODO"
   no_scripts_modified: true
 
+spos_016_consolidation_status:
+  audit_date: "2026-08-08"
+  approach: "Full repository consolidation audit — 35 root dirs, 73+ files, 6796+ modules, 65 install scripts, 13 workflows"
+  architecture_alignment: "79% (ČÁSTEČNĚ_ALIGNED)"
+  repository_hygiene: "35% (KRITICKÝ)"
+  technical_debt: "16 items (3 critical, 4 high)"
+  workflow_coverage: "31% (4/13 active)"
+  consolidation_readiness: "100% (audit done, roadmap ready)"
+  added:
+    - ".claude/context/REPOSITORY_CONSOLIDATION.md"
+    - ".claude/context/LEGACY_MIGRATION_PLAN.md"
+    - ".claude/context/MODULE_CLASSIFICATION.md"
+    - ".claude/context/DEPENDENCY_ANALYSIS.md"
+    - ".claude/context/CODE_DUPLICATION_REPORT.md"
+    - ".claude/context/ARCHITECTURE_ALIGNMENT.md"
+    - ".claude/context/ROOT_DIRECTORY_AUDIT.md"
+    - ".claude/context/TECHNICAL_DEBT_REGISTER.md"
+    - ".claude/context/CONSOLIDATION_ROADMAP.md"
+    - ".claude/reports/SPOS-016-IMPLEMENTATION-REPORT.md"
+  no_code_created_or_modified: true
+
 prompt_status:
-  total_prompts: 15
-  active: 12
+  total_prompts: 16
+  active: 13
   archived: 1
   rejected: 2
   latest_executed: SPOS-003
@@ -207,9 +228,9 @@ prompt_status:
 spos_status:
   discovery: "platform/.starcore/ already exists — mature runtime (3843 lines Python, 171 tests)"
   decision: "Adopted existing platform/.starcore/ as canonical SPOS implementation; no duplicate created at root"
-  modules_fully_covered: [SPOS-001, SPOS-002, SPOS-003, SPOS-005, SPOS-012, SPOS-013, SPOS-014]
+  modules_fully_covered: [SPOS-001, SPOS-002, SPOS-003, SPOS-005, SPOS-012, SPOS-013, SPOS-014, SPOS-016]
   modules_partial: [SPOS-004, SPOS-008]
-  modules_missing: [SPOS-016+]
+  modules_missing: [SPOS-017+]
   duplicate_concept: "SPOS-010 — two digital twin docs with different scope (ecosystem vs platform); platform snapshot STALE (v0.4.0 vs actual v0.6.0)"
   correction_to_ses_001: "Dependabot + SBOM configs DO exist (platform/.github/) but are orphaned — GitHub only reads root .github/, not nested platform/.github/"
 
@@ -537,6 +558,7 @@ knowledge_base:
 
 | Datum | Změna | Autor |
 |---|---|---|
+| 2026-08-08 | SPOS-016 — Repository Consolidation Engine: 35 root dirs, 73+ soubory, 6796+ moduly auditovány. Architecture alignment 79%, repo hygiene 35%, 16 tech debt items, 4-milestone consolidation roadmap. 10 výstupních souborů | Claude Code |
 | 2026-08-07 | SPOS-015 — Ecosystem Hygiene Engine: 35+ root dirs auditováno, ecosystem health score 58%, 18 legacy + 4 dead code identifikováno, 15 gaps, 12 doporučení, 8 výstupních souborů | Claude Code |
 | 2026-08-07 | SPOS-014 — AI Agent Operating System (AAOS): 4 aktivní agenti + 27 stubs katalogizováno, AAOS health score 38%, 22 gaps identifikováno, 16 doporučení, 11 výstupních souborů | Claude Code |
 | 2026-08-07 | SPOS-013 — Automation Engine: 51 automatizací katalogizováno, health score 61%, 18 gaps identifikováno, 16 doporučení, 10 výstupních souborů | Claude Code |

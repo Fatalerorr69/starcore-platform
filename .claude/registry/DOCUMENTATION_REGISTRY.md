@@ -1,6 +1,6 @@
 # DOCUMENTATION REGISTRY
 
-Aktualizováno: 2026-08-07 | Standard: SPOS-006
+Aktualizováno: 2026-08-08 | Standard: SPOS-006
 
 Formát dle SPOS-006 §3: DOCUMENT_ID/TITLE/TYPE/VERSION/STATUS/OWNER/RELATED_COMPONENTS/RELATED_CODE/RELATED_REGISTRY/LAST_VALIDATION — plně aplikováno na governance dokumenty (SES/SAKB/SPOS níže); pro `platform/docs/` (56 souborů, existující, dobře udržované) viz zjednodušený přehled a `DOCUMENTATION_MAP.md` pro plnou mapu podle typu (§4).
 
@@ -94,6 +94,16 @@ Formát dle SPOS-006 §3: DOCUMENT_ID/TITLE/TYPE/VERSION/STATUS/OWNER/RELATED_CO
 | DR-059 | Ecosystem Gap Analysis | `.claude/context/ECOSYSTEM_GAP_ANALYSIS.md` | ✅ HOTOVO |
 | DR-060 | Ecosystem Recommendations | `.claude/context/ECOSYSTEM_RECOMMENDATIONS.md` | ✅ HOTOVO |
 | DR-061 | SPOS-015 Implementation Report | `.claude/reports/SPOS-015-IMPLEMENTATION-REPORT.md` | ✅ HOTOVO |
+| DR-062 | Repository Consolidation | `.claude/context/REPOSITORY_CONSOLIDATION.md` | ✅ HOTOVO |
+| DR-063 | Legacy Migration Plan | `.claude/context/LEGACY_MIGRATION_PLAN.md` | ✅ HOTOVO |
+| DR-064 | Module Classification | `.claude/context/MODULE_CLASSIFICATION.md` | ✅ HOTOVO |
+| DR-065 | Dependency Analysis | `.claude/context/DEPENDENCY_ANALYSIS.md` | ✅ HOTOVO |
+| DR-066 | Code Duplication Report | `.claude/context/CODE_DUPLICATION_REPORT.md` | ✅ HOTOVO |
+| DR-067 | Architecture Alignment | `.claude/context/ARCHITECTURE_ALIGNMENT.md` | ✅ HOTOVO |
+| DR-068 | Root Directory Audit | `.claude/context/ROOT_DIRECTORY_AUDIT.md` | ✅ HOTOVO |
+| DR-069 | Technical Debt Register | `.claude/context/TECHNICAL_DEBT_REGISTER.md` | ✅ HOTOVO |
+| DR-070 | Consolidation Roadmap | `.claude/context/CONSOLIDATION_ROADMAP.md` | ✅ HOTOVO |
+| DR-071 | SPOS-016 Implementation Report | `.claude/reports/SPOS-016-IMPLEMENTATION-REPORT.md` | ✅ HOTOVO |
 
 ---
 
@@ -143,6 +153,6 @@ Audit D001-D006: `.claude/reports/DOCUMENTATION_HEALTH_REPORT.md` (9 nálezů).
 | `docker/ai-stack/README.md` | VYSOKÁ | ❌ CHYBÍ |
 | USER_GUIDE (SPOS-006 §13) | STŘEDNÍ | ❌ CHYBÍ |
 | `ansible/README.md` | STŘEDNÍ | ❌ CHYBÍ |
-| `ECOSYSTEM_MAP.md` | STŘEDNÍ | ❌ CHYBÍ |
+| `ECOSYSTEM_MAP.md` | STŘEDNÍ | ✅ HOTOVO (DR-055) |
 | 16 zbývajících Technology Profiles | STŘEDNÍ | ⏳ PLÁNOVÁNO |
 | SPOS-007+ | VYSOKÁ | ⏳ ČEKÁ |
