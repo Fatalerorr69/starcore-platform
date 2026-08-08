@@ -637,4 +637,63 @@ sessions:
   approvals:
   - SPOS-020 COMMIT & PUSH explicitly approved by user
   blockers: []
+  end_time: '2026-08-08T22:00:00Z'
   next_action: SPOS-020 DOKONCENO. Commit 87a0ede pushed. Next engine discovery.
+- session_id: spos-021-20260808
+  start_time: '2026-08-08T22:00:00Z'
+  end_time: null
+  branch: claude/starcore-ai-bootstrap-fkyb96
+  head: da522a2
+  user_requests:
+  - SPOS-021 AAOS Foundation Sprint — configurable AI params, retry wiring, Prometheus AI metrics, sentinel fix
+  prompts_used: []
+  files_read:
+  - platform/packages/ai/providers/anthropic.py
+  - platform/packages/ai/providers/openai_compat.py
+  - platform/packages/ai/generator.py
+  - platform/packages/core/config.py
+  - platform/packages/core/metrics.py
+  - platform/.starcore/scripts/regression_sentinel.py
+  - platform/tests/test_ai_providers.py
+  - platform/tests/test_ai_generator.py
+  - platform/tests/test_metrics.py
+  files_created: []
+  files_modified:
+  - platform/packages/ai/providers/anthropic.py (retry + configurable params)
+  - platform/packages/ai/providers/openai_compat.py (retry + configurable params)
+  - platform/packages/ai/generator.py (retry config builder, AI metrics events)
+  - platform/packages/core/config.py (3 new AI settings)
+  - platform/packages/core/metrics.py (3 new Prometheus metrics + handler)
+  - platform/.starcore/scripts/regression_sentinel.py (workflow count fix)
+  - platform/tests/test_ai_providers.py (+7 tests)
+  - platform/tests/test_ai_generator.py (+4 tests)
+  - platform/tests/test_metrics.py (+6 tests)
+  - platform/tests/test_property_based_metrics.py (+1 test)
+  - platform/CLAUDE.md (3 new config vars + AI metrics docs)
+  - .claude/registry/SPOS_REGISTRY.md
+  - .claude/context/DIGITAL_TWIN.md
+  - platform/.starcore/memory/current_state.md
+  - platform/.starcore/memory/project_snapshot.md
+  - platform/.starcore/state/project_state.json
+  - platform/.starcore/sessions/ledger.yaml
+  commands_executed:
+  - uv run pytest (814 passed, 9 skipped)
+  - uv run ruff check . (all passed)
+  - uv run ruff format . (clean)
+  - uv run pyright (0 errors)
+  - uv run bandit -r packages/ apps/ scripts/ -ll -q (clean)
+  - uv run pip-audit (clean)
+  - uv run mkdocs build --strict (OK)
+  tests_executed:
+  - pytest 814 passed, 9 skipped, 0 failed
+  decisions:
+  - RetryConfig wired via attempt_with_retry() from provider_sdk.retry
+  - AI metrics emitted via EventBus (ai.request.completed) for decoupled collection
+  - Backward-compatible defaults (max_tokens=2000, timeout=120.0, max_retries=3)
+  - Regression sentinel fixed to scan from git repo root for workflow_count
+  risks:
+  - No new risks introduced
+  approvals:
+  - SPOS-021 COMMIT & PUSH explicitly approved by user
+  blockers: []
+  next_action: SPOS-021 DOKONCENO. Commit da522a2 pushed. Next engine discovery.

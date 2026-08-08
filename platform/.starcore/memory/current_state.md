@@ -13,15 +13,15 @@
 
 ```yaml
 governance_layer: SES/SAKB/SPOS bootstrap (probíhá přes .claude/)
-active_document: SPOS-020 — Code Quality Engine (DOKONČENO)
-next_document: SPOS-021+ (ČEKÁ — next engine discovery)
+active_document: SPOS-021 — AAOS Foundation Sprint (DOKONČENO)
+next_document: SPOS-022+ (ČEKÁ — next engine discovery)
 branch: claude/starcore-ai-bootstrap-fkyb96
-last_governance_commit: "87a0ede feat(spos): implement SPOS-020 Code Quality Engine"
+last_governance_commit: "da522a2 feat(ai): SPOS-021 AAOS foundation"
 last_updated: "2026-08-08"
-spos_completed: [SPOS-001, SPOS-002, SPOS-003, SPOS-004, SPOS-005, SPOS-006, SPOS-007, SPOS-008, SPOS-009, SPOS-010/011, SPOS-012, SPOS-013, SPOS-014, SPOS-015, SPOS-016, SPOS-017, SPOS-018, SPOS-019, SPOS-020]
+spos_completed: [SPOS-001, SPOS-002, SPOS-003, SPOS-004, SPOS-005, SPOS-006, SPOS-007, SPOS-008, SPOS-009, SPOS-010/011, SPOS-012, SPOS-013, SPOS-014, SPOS-015, SPOS-016, SPOS-017, SPOS-018, SPOS-019, SPOS-020, SPOS-021]
 integration_health_score: "64% (ČÁSTEČNĚ_ZDRAVÝ)"
 automation_health_score: "61% (ČÁSTEČNĚ_ZDRAVÝ)"
-aaos_health_score: "38% (KRITICKÝ)"
+aaos_health_score: "42% (SLABÝ)"
 ecosystem_health_score: "58% (ČÁSTEČNĚ_ZDRAVÝ)"
 architecture_alignment: "93% (ALIGNED)"
 repository_hygiene: "90% (ZDRAVÝ)"

@@ -21,7 +21,7 @@
 
 | Metrika | Hodnota |
 |---------|---------|
-| Testy | 796 passed, 0 failed (9 skipped — postgres) |
+| Testy | 814 passed, 0 failed (9 skipped — postgres) |
 | Coverage | 100.00% |
 | Ruff | 0 chyb |
 | Pyright | 0 chyb |
@@ -29,7 +29,7 @@
 | Bandit | čistý |
 | mkdocs | --strict PASS |
 | ADR záznamy | ADR-001 až ADR-017 |
-| Regression sentinel | PASS (baseline: 805 testy, 21 routes, 32 config fields, 17 ADRs) |
+| Regression sentinel | PASS (baseline: 814 testy, 21 routes, 35 config fields, 17 ADRs) |
 
 ## Health Scores (stav 2026-08-08)
 
@@ -37,7 +37,7 @@
 |---------|-------|------|
 | Integration | 64% | ČÁSTEČNĚ_ZDRAVÝ |
 | Automation | 61% | ČÁSTEČNĚ_ZDRAVÝ |
-| AAOS (AI) | 38% | KRITICKÝ |
+| AAOS (AI) | 42% | SLABÝ |
 | Architecture Alignment | 93% | ALIGNED |
 | Repository Hygiene | 90% | ZDRAVÝ |
 | Technical Debt | 1 item | NÍZKÝ |
@@ -57,7 +57,8 @@
 | SPOS-018 (Hygiene) | DOKONČENO |
 | SPOS-019 (Restructure) | DOKONČENO |
 | SPOS-020 (Code Quality) | DOKONČENO |
-| SPOS-021+ | ČEKÁ |
+| SPOS-021 (AAOS Foundation) | DOKONČENO |
+| SPOS-022+ | ČEKÁ |
 
 ## Architektura (přehled)
 

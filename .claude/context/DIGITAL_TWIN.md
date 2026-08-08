@@ -307,6 +307,32 @@ spos_020_code_quality:
     - ".claude/reports/SPOS-020-HANDOVER-REPORT.md"
   consolidation_roadmap_status: "M1+M2+M3+M4 = 100% COMPLETE"
 
+spos_021_aaos_foundation:
+  implementation_date: "2026-08-08"
+  approach: "AAOS Foundation Sprint — configurable AI params, retry wiring, Prometheus AI metrics, regression sentinel fix"
+  commit: "da522a2"
+  milestones:
+    A_configurable_params: "ai_max_tokens, ai_timeout, ai_max_retries added to Settings; AnthropicProvider + OpenAICompatProvider accept configurable max_tokens/timeout"
+    B_retry_wiring: "RetryConfig from provider_sdk.retry wired into both AI providers via attempt_with_retry(); _build_retry_config() in generator.py"
+    C_ai_metrics: "3 new Prometheus metrics (starcore_ai_requests_total, starcore_ai_request_duration_seconds, starcore_ai_token_count) + record_ai_request_completed() handler + ai.request.completed EventBus event emitted from generator"
+    D_sentinel_fix: "regression_sentinel.py probe_workflow_count() now scans from git repo root (fixes SPOS-017 workflow relocation)"
+  tests_before: 807
+  tests_after: 814
+  coverage: "100%"
+  aaos_health_improvement: "38% → 42%"
+  modified:
+    - "packages/ai/providers/anthropic.py (retry + configurable params)"
+    - "packages/ai/providers/openai_compat.py (retry + configurable params)"
+    - "packages/ai/generator.py (retry config builder, AI metrics events)"
+    - "packages/core/config.py (3 new AI settings)"
+    - "packages/core/metrics.py (3 new Prometheus metrics + handler)"
+    - ".starcore/scripts/regression_sentinel.py (workflow count fix)"
+    - "tests/test_ai_providers.py (+7 tests)"
+    - "tests/test_ai_generator.py (+4 tests)"
+    - "tests/test_metrics.py (+6 tests)"
+    - "tests/test_property_based_metrics.py (+1 test)"
+  no_new_dependencies: true
+
 prompt_status:
   total_prompts: 16
   active: 13
@@ -533,9 +559,9 @@ spos_013_automation_status:
 
 ```yaml
 spos_014_aaos_status:
-  audit_date: "2026-08-07"
-  aaos_health_score: "38% (KRITICKÝ)"
-  aaos_maturity: "Level 2 / 5"
+  audit_date: "2026-08-08"
+  aaos_health_score: "42% (SLABÝ — improved by SPOS-021)"
+  aaos_maturity: "Level 2.5 / 5"
   score_breakdown:
     agent_coverage: "35% KRITICKÝ"
     provider_routing: "40% SLABÝ"
@@ -648,6 +674,7 @@ knowledge_base:
 
 | Datum | Změna | Autor |
 |---|---|---|
+| 2026-08-08 | SPOS-021 — AAOS Foundation Sprint: configurable AI params (max_tokens/timeout/max_retries), RetryConfig wired into both AI providers, 3 Prometheus AI metrics (requests/duration/tokens), regression sentinel workflow count fix. Tests 807→814, coverage 100%, AAOS 38%→42% | Claude Code |
 | 2026-08-08 | SPOS-020 — Code Quality Engine: _persist_run() deduplicated (blueprints.py + ws.py → repository.py), psutil removed from dependencies. Code duplicates 1→0, dependencies 21→20, tech debt 3→1, repo hygiene 88%→90%. TD-008/TD-009 resolved. CONSOLIDATION_ROADMAP 100% complete | Claude Code |
 | 2026-08-08 | SPOS-019 — Repository Restructure Engine: 25 dirs + 68 scripts moved to legacy/ via git mv. Root dirs 27→5, repo hygiene 72%→88%, arch alignment 87%→93%, tech debt 7→3. knowledge/ kept at root (active SAKB) | Claude Code |
 | 2026-08-08 | SPOS-018 — Repository Hygiene Engine: 6 dead dirs + 3 stale files removed. Root dirs 35→27, repo hygiene 65%→72%, tech debt 13→7. TD-011..TD-016 resolved | Claude Code |
