@@ -10,7 +10,7 @@ from __future__ import annotations
 import httpx
 from provider_sdk.retry import RetryableError, RetryConfig, attempt_with_retry
 
-from ai.base import AIProvider, BlueprintGenerationError
+from ai.base import AIProvider, BlueprintGenerationError, RetryableStatusError, TokenUsage
 from ai.prompts import BLUEPRINT_SYSTEM_PROMPT
 
 
@@ -39,6 +39,7 @@ class OpenAICompatProvider(AIProvider):
                 OSError,
                 httpx.ConnectError,
                 httpx.ReadTimeout,
+                RetryableStatusError,
             ),
         )
 
@@ -63,6 +64,8 @@ class OpenAICompatProvider(AIProvider):
                     json=payload,
                     headers=headers,
                 )
+                if resp.status_code in (429, 503):
+                    raise RetryableStatusError(resp.status_code)
                 resp.raise_for_status()
                 return resp
 
@@ -91,4 +94,23 @@ class OpenAICompatProvider(AIProvider):
                 f"Unexpected response format from OpenAI-compatible API: {exc}"
             ) from exc
 
+        usage = data.get("usage")
+        if isinstance(usage, dict):
+            self._last_usage = TokenUsage(
+                input_tokens=usage.get("prompt_tokens"),
+                output_tokens=usage.get("completion_tokens"),
+            )
+
         return self._strip_fences(text)
+
+    async def health_check(self) -> bool:
+        """Check connectivity to the OpenAI-compatible server via GET /models."""
+        try:
+            async with httpx.AsyncClient(timeout=5.0) as client:
+                headers: dict[str, str] = {}
+                if self._api_key:
+                    headers["Authorization"] = f"Bearer {self._api_key}"
+                resp = await client.get(f"{self._base_url}/models", headers=headers)
+                return resp.status_code < 500
+        except httpx.HTTPError:
+            return False

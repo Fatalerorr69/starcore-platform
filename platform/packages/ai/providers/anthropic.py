@@ -9,7 +9,7 @@ from anthropic import AsyncAnthropic
 from anthropic.types import TextBlock
 from provider_sdk.retry import RetryableError, RetryConfig, attempt_with_retry
 
-from ai.base import AIProvider, BlueprintGenerationError
+from ai.base import AIProvider, BlueprintGenerationError, TokenUsage
 from ai.prompts import BLUEPRINT_SYSTEM_PROMPT
 
 
@@ -59,6 +59,13 @@ class AnthropicProvider(AIProvider):
 
         if not response.content:  # type: ignore[union-attr]
             raise BlueprintGenerationError("Anthropic API returned an empty response.")
+
+        usage = getattr(response, "usage", None)
+        if usage:
+            self._last_usage = TokenUsage(
+                input_tokens=getattr(usage, "input_tokens", None),
+                output_tokens=getattr(usage, "output_tokens", None),
+            )
 
         first_block = response.content[0]  # type: ignore[union-attr]
         if not isinstance(first_block, TextBlock):

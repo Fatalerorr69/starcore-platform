@@ -97,8 +97,16 @@ async def generate_blueprint_yaml(description: str) -> str:
         )
         raise
     duration = time.monotonic() - start
-    await event_bus.emit(
-        "ai.request.completed",
-        {"provider": provider_name, "status": "success", "duration_seconds": duration},
-    )
+    event_payload: dict[str, object] = {
+        "provider": provider_name,
+        "status": "success",
+        "duration_seconds": duration,
+    }
+    usage = provider._last_usage
+    if usage:
+        if usage.input_tokens is not None:
+            event_payload["input_tokens"] = usage.input_tokens
+        if usage.output_tokens is not None:
+            event_payload["output_tokens"] = usage.output_tokens
+    await event_bus.emit("ai.request.completed", event_payload)
     return result

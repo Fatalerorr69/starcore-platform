@@ -107,11 +107,19 @@ async def test_anthropic_provider_raises_on_non_text_block():
 # ---------------------------------------------------------------------------
 
 
-def _ok_response(content: str = "name: demo\nresources: []") -> MagicMock:
+def _ok_response(
+    content: str = "name: demo\nresources: []",
+    *,
+    usage: dict[str, int] | None = None,
+) -> MagicMock:
     """Build a fake successful httpx Response with OpenAI-compat JSON body."""
     resp = MagicMock(spec=httpx.Response)
+    resp.status_code = 200
     resp.raise_for_status = MagicMock()
-    resp.json = MagicMock(return_value={"choices": [{"message": {"content": content}}]})
+    body: dict[str, object] = {"choices": [{"message": {"content": content}}]}
+    if usage is not None:
+        body["usage"] = usage
+    resp.json = MagicMock(return_value=body)
     return resp
 
 
@@ -209,6 +217,7 @@ async def test_openai_compat_provider_raises_on_connection_error():
 
 async def test_openai_compat_provider_raises_on_unexpected_response_format():
     resp = MagicMock(spec=httpx.Response)
+    resp.status_code = 200
     resp.raise_for_status = MagicMock()
     resp.json = MagicMock(return_value={"no_choices_key": True})
     mock_post = AsyncMock(return_value=resp)
@@ -407,3 +416,242 @@ async def test_openai_compat_provider_raises_on_non_retryable_http_error():
         )
         with pytest.raises(BlueprintGenerationError, match="request failed"):
             await provider.generate_blueprint_yaml("a web app")
+
+
+# ---------------------------------------------------------------------------
+# Token usage tracking
+# ---------------------------------------------------------------------------
+
+
+async def test_anthropic_provider_captures_token_usage():
+    from ai.base import TokenUsage
+
+    fake_response = MagicMock()
+    fake_response.content = [MagicMock(spec=TextBlock, text="name: demo\nresources: []")]
+    fake_usage = MagicMock()
+    fake_usage.input_tokens = 150
+    fake_usage.output_tokens = 42
+    fake_response.usage = fake_usage
+    fake_client = MagicMock()
+    fake_client.messages.create = AsyncMock(return_value=fake_response)
+
+    with patch("ai.providers.anthropic.AsyncAnthropic", return_value=fake_client):
+        provider = AnthropicProvider(api_key="sk-test-key", model="claude-sonnet-5")
+        await provider.generate_blueprint_yaml("a web app")
+
+    assert provider._last_usage is not None
+    assert isinstance(provider._last_usage, TokenUsage)
+    assert provider._last_usage.input_tokens == 150
+    assert provider._last_usage.output_tokens == 42
+
+
+async def test_anthropic_provider_handles_missing_usage():
+    fake_response = MagicMock()
+    fake_response.content = [MagicMock(spec=TextBlock, text="name: demo\nresources: []")]
+    del fake_response.usage
+    fake_client = MagicMock()
+    fake_client.messages.create = AsyncMock(return_value=fake_response)
+
+    with patch("ai.providers.anthropic.AsyncAnthropic", return_value=fake_client):
+        provider = AnthropicProvider(api_key="sk-test-key", model="claude-sonnet-5")
+        await provider.generate_blueprint_yaml("a web app")
+
+    assert provider._last_usage is None
+
+
+async def test_openai_compat_provider_captures_token_usage():
+    from ai.base import TokenUsage
+
+    fake_resp = _ok_response(usage={"prompt_tokens": 200, "completion_tokens": 80})
+    mock_post = AsyncMock(return_value=fake_resp)
+
+    with patch("ai.providers.openai_compat.httpx.AsyncClient") as mock_cls:
+        mock_cls.return_value.__aenter__ = AsyncMock(return_value=MagicMock(post=mock_post))
+        mock_cls.return_value.__aexit__ = AsyncMock(return_value=False)
+
+        provider = OpenAICompatProvider(
+            base_url="http://localhost:11434/v1",
+            model="llama3.2",
+        )
+        await provider.generate_blueprint_yaml("a web app")
+
+    assert provider._last_usage is not None
+    assert isinstance(provider._last_usage, TokenUsage)
+    assert provider._last_usage.input_tokens == 200
+    assert provider._last_usage.output_tokens == 80
+
+
+async def test_openai_compat_provider_handles_no_usage_in_response():
+    fake_resp = _ok_response()
+    mock_post = AsyncMock(return_value=fake_resp)
+
+    with patch("ai.providers.openai_compat.httpx.AsyncClient") as mock_cls:
+        mock_cls.return_value.__aenter__ = AsyncMock(return_value=MagicMock(post=mock_post))
+        mock_cls.return_value.__aexit__ = AsyncMock(return_value=False)
+
+        provider = OpenAICompatProvider(
+            base_url="http://localhost:11434/v1",
+            model="llama3.2",
+        )
+        await provider.generate_blueprint_yaml("a web app")
+
+    assert provider._last_usage is None
+
+
+# ---------------------------------------------------------------------------
+# Rate-limit-aware retry (429 / 503)
+# ---------------------------------------------------------------------------
+
+
+async def test_openai_compat_provider_retries_on_429():
+    from ai.base import RetryableStatusError
+    from provider_sdk.retry import RetryConfig
+
+    rate_limited_resp = MagicMock(spec=httpx.Response)
+    rate_limited_resp.status_code = 429
+
+    ok_resp = _ok_response()
+    mock_post = AsyncMock(side_effect=[rate_limited_resp, ok_resp])
+
+    with patch("ai.providers.openai_compat.httpx.AsyncClient") as mock_cls:
+        mock_client = MagicMock(post=mock_post)
+        mock_cls.return_value.__aenter__ = AsyncMock(return_value=mock_client)
+        mock_cls.return_value.__aexit__ = AsyncMock(return_value=False)
+
+        retry = RetryConfig(
+            max_retries=2,
+            base_delay=0.0,
+            jitter=False,
+            retryable_exceptions=(RetryableStatusError,),
+        )
+        provider = OpenAICompatProvider(
+            base_url="http://localhost:11434/v1",
+            model="llama3.2",
+            retry_config=retry,
+        )
+        result = await provider.generate_blueprint_yaml("a web app")
+
+    assert result == "name: demo\nresources: []"
+    assert mock_post.call_count == 2
+
+
+async def test_openai_compat_provider_retries_on_503():
+    from ai.base import RetryableStatusError
+    from provider_sdk.retry import RetryConfig
+
+    unavailable_resp = MagicMock(spec=httpx.Response)
+    unavailable_resp.status_code = 503
+
+    ok_resp = _ok_response()
+    mock_post = AsyncMock(side_effect=[unavailable_resp, ok_resp])
+
+    with patch("ai.providers.openai_compat.httpx.AsyncClient") as mock_cls:
+        mock_client = MagicMock(post=mock_post)
+        mock_cls.return_value.__aenter__ = AsyncMock(return_value=mock_client)
+        mock_cls.return_value.__aexit__ = AsyncMock(return_value=False)
+
+        retry = RetryConfig(
+            max_retries=2,
+            base_delay=0.0,
+            jitter=False,
+            retryable_exceptions=(RetryableStatusError,),
+        )
+        provider = OpenAICompatProvider(
+            base_url="http://localhost:11434/v1",
+            model="llama3.2",
+            retry_config=retry,
+        )
+        result = await provider.generate_blueprint_yaml("a web app")
+
+    assert result == "name: demo\nresources: []"
+    assert mock_post.call_count == 2
+
+
+async def test_openai_compat_provider_includes_retryable_status_error_in_defaults():
+    from ai.base import RetryableStatusError
+
+    provider = OpenAICompatProvider(
+        base_url="http://localhost:11434/v1",
+        model="llama3.2",
+    )
+    assert RetryableStatusError in provider._retry_config.retryable_exceptions
+
+
+# ---------------------------------------------------------------------------
+# Health check
+# ---------------------------------------------------------------------------
+
+
+async def test_anthropic_provider_default_health_check_returns_true():
+    with patch("ai.providers.anthropic.AsyncAnthropic"):
+        provider = AnthropicProvider(api_key="sk-test-key", model="claude-sonnet-5")
+        assert await provider.health_check() is True
+
+
+async def test_openai_compat_health_check_returns_true_on_success():
+    mock_resp = MagicMock()
+    mock_resp.status_code = 200
+    mock_get = AsyncMock(return_value=mock_resp)
+
+    with patch("ai.providers.openai_compat.httpx.AsyncClient") as mock_cls:
+        mock_cls.return_value.__aenter__ = AsyncMock(return_value=MagicMock(get=mock_get))
+        mock_cls.return_value.__aexit__ = AsyncMock(return_value=False)
+
+        provider = OpenAICompatProvider(
+            base_url="http://localhost:11434/v1",
+            model="llama3.2",
+        )
+        assert await provider.health_check() is True
+
+    url_arg = mock_get.call_args[0][0]
+    assert url_arg == "http://localhost:11434/v1/models"
+
+
+async def test_openai_compat_health_check_returns_false_on_server_error():
+    mock_resp = MagicMock()
+    mock_resp.status_code = 500
+    mock_get = AsyncMock(return_value=mock_resp)
+
+    with patch("ai.providers.openai_compat.httpx.AsyncClient") as mock_cls:
+        mock_cls.return_value.__aenter__ = AsyncMock(return_value=MagicMock(get=mock_get))
+        mock_cls.return_value.__aexit__ = AsyncMock(return_value=False)
+
+        provider = OpenAICompatProvider(
+            base_url="http://localhost:11434/v1",
+            model="llama3.2",
+        )
+        assert await provider.health_check() is False
+
+
+async def test_openai_compat_health_check_returns_false_on_connection_error():
+    mock_get = AsyncMock(side_effect=httpx.ConnectError("refused"))
+
+    with patch("ai.providers.openai_compat.httpx.AsyncClient") as mock_cls:
+        mock_cls.return_value.__aenter__ = AsyncMock(return_value=MagicMock(get=mock_get))
+        mock_cls.return_value.__aexit__ = AsyncMock(return_value=False)
+
+        provider = OpenAICompatProvider(
+            base_url="http://localhost:11434/v1",
+            model="llama3.2",
+        )
+        assert await provider.health_check() is False
+
+
+async def test_openai_compat_health_check_sends_auth_header():
+    mock_resp = MagicMock()
+    mock_resp.status_code = 200
+    mock_get = AsyncMock(return_value=mock_resp)
+
+    with patch("ai.providers.openai_compat.httpx.AsyncClient") as mock_cls:
+        mock_cls.return_value.__aenter__ = AsyncMock(return_value=MagicMock(get=mock_get))
+        mock_cls.return_value.__aexit__ = AsyncMock(return_value=False)
+
+        provider = OpenAICompatProvider(
+            base_url="http://localhost:11434/v1",
+            model="llama3.2",
+            api_key="my-key",
+        )
+        await provider.health_check()
+
+    _, kwargs = mock_get.call_args
+    assert kwargs["headers"]["Authorization"] == "Bearer my-key"

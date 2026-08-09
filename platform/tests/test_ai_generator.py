@@ -247,6 +247,74 @@ async def test_generate_blueprint_yaml_emits_ai_metrics_event_on_error():
 
 
 # ---------------------------------------------------------------------------
+# Token usage forwarded to AI metrics event
+# ---------------------------------------------------------------------------
+
+
+async def test_generate_blueprint_yaml_includes_token_usage_in_event():
+    from core.events import event_bus
+
+    fake_response = MagicMock()
+    fake_response.content = [MagicMock(spec=TextBlock, text="name: demo\nresources: []")]
+    fake_usage = MagicMock()
+    fake_usage.input_tokens = 300
+    fake_usage.output_tokens = 120
+    fake_response.usage = fake_usage
+    fake_client = MagicMock()
+    fake_client.messages.create = AsyncMock(return_value=fake_response)
+
+    settings = _settings(anthropic_api_key="sk-test-key")
+    captured: list[dict] = []
+
+    def capture(payload: dict) -> None:
+        captured.append(payload)
+
+    event_bus.subscribe("ai.request.completed", capture)
+    try:
+        with (
+            patch("ai.generator.get_settings", return_value=settings),
+            patch("ai.providers.anthropic.AsyncAnthropic", return_value=fake_client),
+        ):
+            await generate_blueprint_yaml("a web app")
+    finally:
+        event_bus.unsubscribe("ai.request.completed", capture)
+
+    assert len(captured) == 1
+    assert captured[0]["input_tokens"] == 300
+    assert captured[0]["output_tokens"] == 120
+
+
+async def test_generate_blueprint_yaml_omits_tokens_when_not_available():
+    from core.events import event_bus
+
+    fake_response = MagicMock()
+    fake_response.content = [MagicMock(spec=TextBlock, text="name: demo\nresources: []")]
+    del fake_response.usage
+    fake_client = MagicMock()
+    fake_client.messages.create = AsyncMock(return_value=fake_response)
+
+    settings = _settings(anthropic_api_key="sk-test-key")
+    captured: list[dict] = []
+
+    def capture(payload: dict) -> None:
+        captured.append(payload)
+
+    event_bus.subscribe("ai.request.completed", capture)
+    try:
+        with (
+            patch("ai.generator.get_settings", return_value=settings),
+            patch("ai.providers.anthropic.AsyncAnthropic", return_value=fake_client),
+        ):
+            await generate_blueprint_yaml("a web app")
+    finally:
+        event_bus.unsubscribe("ai.request.completed", capture)
+
+    assert len(captured) == 1
+    assert "input_tokens" not in captured[0]
+    assert "output_tokens" not in captured[0]
+
+
+# ---------------------------------------------------------------------------
 # BlueprintLoader smoke test (unchanged from before)
 # ---------------------------------------------------------------------------
 
