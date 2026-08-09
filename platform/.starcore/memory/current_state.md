@@ -13,15 +13,15 @@
 
 ```yaml
 governance_layer: SES/SAKB/SPOS bootstrap (probíhá přes .claude/)
-active_document: SPOS-021 — AAOS Foundation Sprint (DOKONČENO)
-next_document: SPOS-022+ (ČEKÁ — next engine discovery)
+active_document: SPOS-022 — AAOS Observability & Resilience (DOKONČENO)
+next_document: SPOS-023+ (ČEKÁ — next engine discovery)
 branch: claude/starcore-ai-bootstrap-fkyb96
-last_governance_commit: "da522a2 feat(ai): SPOS-021 AAOS foundation"
-last_updated: "2026-08-08"
-spos_completed: [SPOS-001, SPOS-002, SPOS-003, SPOS-004, SPOS-005, SPOS-006, SPOS-007, SPOS-008, SPOS-009, SPOS-010/011, SPOS-012, SPOS-013, SPOS-014, SPOS-015, SPOS-016, SPOS-017, SPOS-018, SPOS-019, SPOS-020, SPOS-021]
+last_governance_commit: "c00640f feat(ai): SPOS-022 AAOS observability & resilience"
+last_updated: "2026-08-09"
+spos_completed: [SPOS-001, SPOS-002, SPOS-003, SPOS-004, SPOS-005, SPOS-006, SPOS-007, SPOS-008, SPOS-009, SPOS-010/011, SPOS-012, SPOS-013, SPOS-014, SPOS-015, SPOS-016, SPOS-017, SPOS-018, SPOS-019, SPOS-020, SPOS-021, SPOS-022]
 integration_health_score: "64% (ČÁSTEČNĚ_ZDRAVÝ)"
 automation_health_score: "61% (ČÁSTEČNĚ_ZDRAVÝ)"
-aaos_health_score: "42% (SLABÝ)"
+aaos_health_score: "46% (SLABÝ)"
 ecosystem_health_score: "58% (ČÁSTEČNĚ_ZDRAVÝ)"
 architecture_alignment: "93% (ALIGNED)"
 repository_hygiene: "90% (ZDRAVÝ)"

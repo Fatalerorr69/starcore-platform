@@ -333,6 +333,27 @@ spos_021_aaos_foundation:
     - "tests/test_property_based_metrics.py (+1 test)"
   no_new_dependencies: true
 
+spos_022_aaos_observability:
+  implementation_date: "2026-08-09"
+  approach: "AAOS Observability & Resilience — token tracking, rate-limit retry, health check"
+  commit: "c00640f"
+  milestones:
+    A_token_tracking: "TokenUsage dataclass in base.py; AnthropicProvider extracts usage.input_tokens/output_tokens; OpenAICompatProvider extracts usage.prompt_tokens/completion_tokens; generator.py forwards tokens to ai.request.completed event"
+    B_rate_limit_retry: "RetryableStatusError for HTTP 429/503; OpenAICompatProvider checks status before raise_for_status(); added to default retryable_exceptions"
+    C_health_check: "health_check() on AIProvider ABC (default True); OpenAICompatProvider overrides with GET /models connectivity check"
+  tests_before: 814
+  tests_after: 828
+  coverage: "100%"
+  aaos_health_improvement: "42% → 46%"
+  modified:
+    - "packages/ai/base.py (TokenUsage, RetryableStatusError, health_check)"
+    - "packages/ai/providers/anthropic.py (token usage extraction)"
+    - "packages/ai/providers/openai_compat.py (token usage, 429/503 retry, health_check)"
+    - "packages/ai/generator.py (token usage→event forwarding)"
+    - "tests/test_ai_providers.py (+14 tests)"
+    - "tests/test_ai_generator.py (+2 tests)"
+  no_new_dependencies: true
+
 prompt_status:
   total_prompts: 16
   active: 13
@@ -560,7 +581,7 @@ spos_013_automation_status:
 ```yaml
 spos_014_aaos_status:
   audit_date: "2026-08-08"
-  aaos_health_score: "42% (SLABÝ — improved by SPOS-021)"
+  aaos_health_score: "46% (SLABÝ — improved by SPOS-021/022)"
   aaos_maturity: "Level 2.5 / 5"
   score_breakdown:
     agent_coverage: "35% KRITICKÝ"
@@ -674,6 +695,7 @@ knowledge_base:
 
 | Datum | Změna | Autor |
 |---|---|---|
+| 2026-08-09 | SPOS-022 — AAOS Observability & Resilience: token usage tracking wired to AI_TOKEN_COUNT metric, RetryableStatusError for HTTP 429/503 in OpenAI-compat provider, health_check() on AIProvider ABC. Tests 814→828, coverage 100%, AAOS 42%→46% | Claude Code |
 | 2026-08-08 | SPOS-021 — AAOS Foundation Sprint: configurable AI params (max_tokens/timeout/max_retries), RetryConfig wired into both AI providers, 3 Prometheus AI metrics (requests/duration/tokens), regression sentinel workflow count fix. Tests 807→814, coverage 100%, AAOS 38%→42% | Claude Code |
 | 2026-08-08 | SPOS-020 — Code Quality Engine: _persist_run() deduplicated (blueprints.py + ws.py → repository.py), psutil removed from dependencies. Code duplicates 1→0, dependencies 21→20, tech debt 3→1, repo hygiene 88%→90%. TD-008/TD-009 resolved. CONSOLIDATION_ROADMAP 100% complete | Claude Code |
 | 2026-08-08 | SPOS-019 — Repository Restructure Engine: 25 dirs + 68 scripts moved to legacy/ via git mv. Root dirs 27→5, repo hygiene 72%→88%, arch alignment 87%→93%, tech debt 7→3. knowledge/ kept at root (active SAKB) | Claude Code |
