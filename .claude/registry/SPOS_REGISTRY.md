@@ -1,6 +1,6 @@
 # SPOS REGISTRY
 
-Aktualizováno: 2026-08-10 | Standard: SPOS-023
+Aktualizováno: 2026-08-10 | Standard: SPOS-024
 
 Registr operačních modulů Project Operating System. Fyzická implementace primárně v `platform/.starcore/` (viz SPOS-000 rozhodnutí — adoptováno, ne duplikováno).
 
@@ -31,6 +31,7 @@ Registr operačních modulů Project Operating System. Fyzická implementace pri
 | SPOS-021 | AAOS Foundation Sprint | `packages/ai/providers/anthropic.py` (retry+configurable params) + `packages/ai/providers/openai_compat.py` (retry+configurable params) + `packages/ai/generator.py` (retry config builder, AI metrics events) + `packages/core/config.py` (3 new AI settings) + `packages/core/metrics.py` (3 new Prometheus metrics) + `.starcore/scripts/regression_sentinel.py` (workflow count fix) | ✅ AKTIVNÍ — IMPLEMENTOVÁNO (AAOS 38%→42%, 814 tests, 100% coverage) |
 | SPOS-022 | AAOS Observability & Resilience | `packages/ai/base.py` (TokenUsage, RetryableStatusError, health_check) + providers (token extraction, 429/503 retry, health_check) + `packages/ai/generator.py` (token→event forwarding) | ✅ AKTIVNÍ — IMPLEMENTOVÁNO (AAOS 42%→46%, 828 tests) |
 | SPOS-023 | AAOS Provider Intelligence | `packages/ai/generator.py` (fallback + validation + `_build_provider_by_name()`) + `packages/ai/prompts.py` (`build_system_prompt()`) + `packages/core/config.py` (`ai_fallback_provider`) | ✅ AKTIVNÍ — IMPLEMENTOVÁNO (AAOS 46%→50%, 843 tests) |
+| SPOS-024 | AI Request Audit & Cost Tracking | `packages/core/ai_audit.py` (EventBus subscriber + query) + `packages/core/models_db.py` (`AIRequestLog`) + `packages/core/models_api.py` (response models) + `packages/core/routers/ai.py` (`GET /ai/usage`) + `migrations/versions/0003_ai_request_log.py` | ✅ AKTIVNÍ — IMPLEMENTOVÁNO (AAOS 50%→54%, 866 tests) |
 
 ---
 

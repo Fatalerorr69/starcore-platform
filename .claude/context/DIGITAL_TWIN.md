@@ -13,7 +13,7 @@ Musí být aktualizován po každé významné změně.
 repository: Fatalerorr69/starcore-platform
 branch_main: main
 branch_active: claude/starcore-ai-bootstrap-fkyb96
-last_commit: f389893 (SPOS-023 provider fallback, dynamic prompt, output validation)
+last_commit: 89b3c53 (SPOS-024 AI request audit & cost tracking)
 status: clean
 platform_version: 0.6.0
 ```
@@ -34,7 +34,7 @@ platform:
   ai_providers:
     - Anthropic Claude (volitelný)
     - OpenAI-compatible (Ollama, vLLM)
-  tests: 843 passing
+  tests: 866 passing
   coverage: 100% floor
   adr_count: 17
 ```
@@ -603,7 +603,7 @@ spos_013_automation_status:
 ```yaml
 spos_014_aaos_status:
   audit_date: "2026-08-08"
-  aaos_health_score: "50% (USPOKOJIVÝ — improved by SPOS-021/022/023)"
+  aaos_health_score: "54% (USPOKOJIVÝ — improved by SPOS-021/022/023/024)"
   aaos_maturity: "Level 2.5 / 5"
   score_breakdown:
     agent_coverage: "35% KRITICKÝ"
@@ -718,6 +718,7 @@ knowledge_base:
 | Datum | Změna | Autor |
 |---|---|---|
 | 2026-08-10 | SPOS-023 — AAOS Provider Intelligence: provider fallback (ai_fallback_provider), dynamic system prompt (build_system_prompt), AI output validation (_validate_blueprint_yaml). Tests 828→843, coverage 100%, AAOS 46%→50% | Claude Code |
+| 2026-08-10 | SPOS-024 — AI Request Audit & Cost Tracking: AIRequestLog model, Alembic 0003, EventBus subscriber, GET /ai/usage endpoint. Tests 843→866, coverage 100%, AAOS 50%→54% | Claude Code |
 | 2026-08-09 | SPOS-022 — AAOS Observability & Resilience: token usage tracking wired to AI_TOKEN_COUNT metric, RetryableStatusError for HTTP 429/503 in OpenAI-compat provider, health_check() on AIProvider ABC. Tests 814→828, coverage 100%, AAOS 42%→46% | Claude Code |
 | 2026-08-08 | SPOS-021 — AAOS Foundation Sprint: configurable AI params (max_tokens/timeout/max_retries), RetryConfig wired into both AI providers, 3 Prometheus AI metrics (requests/duration/tokens), regression sentinel workflow count fix. Tests 807→814, coverage 100%, AAOS 38%→42% | Claude Code |
 | 2026-08-08 | SPOS-020 — Code Quality Engine: _persist_run() deduplicated (blueprints.py + ws.py → repository.py), psutil removed from dependencies. Code duplicates 1→0, dependencies 21→20, tech debt 3→1, repo hygiene 88%→90%. TD-008/TD-009 resolved. CONSOLIDATION_ROADMAP 100% complete | Claude Code |
