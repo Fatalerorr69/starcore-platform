@@ -121,6 +121,7 @@ apps/cli (Typer)           packages/core/main.py (FastAPI)
 - `logger.py`: centralizes the process-wide loguru sink. Import it early (both `core/main.py` and `apps/cli/main.py` do this as a side effect). Every log record carries a `request_id` extra (default `"-"` for non-request contexts). Set `STARCORE_LOG_JSON=true` for JSON-structured log output suited to log aggregators (Loki, ELK, CloudWatch).
 - `correlation.py`: `ContextVar`-based request ID propagation (ADR-015). `resolve_request_id()` accepts a caller-supplied `X-Request-ID` header (validated against `[A-Za-z0-9_-]{1,128}`) or generates a UUID. `contextualize_request()` binds the ID to the asyncio context so it propagates automatically to all awaited coroutines.
 - `request_id_middleware.py`: `RequestIdMiddleware` class wrapping the correlation module. The inline `_request_id_middleware` in `main.py` also handles this for the FastAPI app directly, echoing `X-Request-ID` in every response.
+- `ai_audit.py`: EventBus subscriber that persists `ai.request.completed` events to the `ai_request_logs` table. Provides `list_ai_requests()` and `ai_usage_summary()` query functions for the `GET /ai/usage` endpoint. Imported as a side-effect in `main.py`.
 - `security.py`: `redact_database_url()` masks credentials in `STARCORE_DATABASE_URL` before `/health`/`/diagnostics` echo them; `scrub_configured_secrets()` strips any configured secret found verbatim in provider exception text.
 - `environment.py`: four independent environment checks — `detect_runtime_environment()` (`proxmox-host`/`container`/`local`), `detect_os_platform()` (OS family, WSL detection), `detect_cloud_provider()` (bounded-timeout AWS/GCP/Azure metadata probe, async only), `classify_client_platform()` (User-Agent-based client classification).
 - `plugin_manager.py`: `PluginManager` discovers and loads plugins from `plugins/`. **Plugins are not sandboxed** — `importlib.import_module()` runs top-level plugin code with full process privileges before `register()` is called; see `docs/plugins.md` and ADR-011.
@@ -158,6 +159,7 @@ All endpoints except `/`, `/health`, and `/ui/*` require `X-API-Key` header.
 | POST | `/resources/action` | Execute a single ad-hoc provider action |
 | GET | `/plugins` | List discovered and loaded plugins |
 | POST | `/ai/generate-blueprint` | Generate blueprint YAML from natural language |
+| GET | `/ai/usage` | AI request audit log and token usage summary |
 | POST | `/blueprints/plan` | Validate blueprint and return execution plan |
 | POST | `/blueprints/run` | Execute blueprint (`?parallel=true` for concurrent) |
 | POST | `/blueprints/run/stream` | Execute blueprint, stream events as Server-Sent Events |

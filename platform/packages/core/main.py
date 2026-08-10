@@ -20,6 +20,7 @@ from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
 from slowapi.util import get_remote_address
 
+import core.ai_audit  # noqa: F401 -- side effect: subscribes AI audit to EventBus
 import core.logger  # noqa: F401 -- side effect: configures the process-wide loguru sink
 from core.config import get_settings
 from core.database import create_initial_admin

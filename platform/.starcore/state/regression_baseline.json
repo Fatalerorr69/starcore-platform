@@ -41,8 +41,8 @@
     "action": "Nespouštět žádné destructive akce. Diagnostikovat příčinu. Nahlásit uživateli."
   },
   "sentinel": {
-    "test_count": 852,
-    "api_routes": 21,
+    "test_count": 875,
+    "api_routes": 22,
     "cli_commands": 4,
     "config_fields": 36,
     "adr_count": 17,

@@ -3,7 +3,7 @@
   "updated_at": "2026-08-10",
   "version": "0.6.0",
   "current_phase": "SES/SAKB/SPOS governance bootstrap",
-  "active_task": "SPOS-024+ — next engine discovery",
+  "active_task": "SPOS-025+ — next engine discovery",
   "completed_tasks": [
     "Bootstrap 00 — discovery reports + .claude/ structure",
     "SES-000 — Engineering Constitution",
@@ -31,7 +31,8 @@
     "SPOS-020 — Code Quality Engine (code duplicates: 1→0, dependencies: 21→20, tech debt: 3→1, repo hygiene: 88%→90%, CONSOLIDATION_ROADMAP 100% complete)",
     "SPOS-021 — AAOS Foundation Sprint (configurable AI params, retry wiring, 3 Prometheus AI metrics, sentinel fix, tests 807→814, AAOS 38%→42%)",
     "SPOS-022 — AAOS Observability & Resilience (token tracking, 429/503 retry, health check, tests 814→828, AAOS 42%→46%)",
-    "SPOS-023 — AAOS Provider Intelligence (provider fallback, dynamic prompt, output validation, tests 828→843, AAOS 46%→50%)"
+    "SPOS-023 — AAOS Provider Intelligence (provider fallback, dynamic prompt, output validation, tests 828→843, AAOS 46%→50%)",
+    "SPOS-024 — AI Request Audit & Cost Tracking (AIRequestLog model, Alembic 0003, EventBus subscriber, GET /ai/usage, tests 843→866, AAOS 50%→54%)"
   ],
   "blockers": [],
   "risks": [
@@ -40,11 +41,11 @@
     "All 3 infra providers offline (DockerProvider, ProxmoxProvider, KubernetesProvider)"
   ],
   "next_actions": [
-    "Next Engine Discovery — evaluate SPOS-024+ priorities across remaining health score gaps (AAOS 50%, ecosystem 58%, automation 61%)"
+    "Next Engine Discovery — evaluate SPOS-025+ priorities across remaining health score gaps (AAOS 54%, ecosystem 58%, automation 61%)"
   ],
   "integration_health_score": "64%",
   "automation_health_score": "61%",
-  "aaos_health_score": "50%",
+  "aaos_health_score": "54%",
   "ecosystem_health_score": "58%",
   "architecture_alignment": "93%",
   "repository_hygiene": "90%",

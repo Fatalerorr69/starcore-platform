@@ -21,7 +21,7 @@
 
 | Metrika | Hodnota |
 |---------|---------|
-| Testy | 843 passed, 0 failed (9 skipped — postgres) |
+| Testy | 866 passed, 0 failed (9 skipped — postgres) |
 | Coverage | 100.00% |
 | Ruff | 0 chyb |
 | Pyright | 0 chyb |
@@ -29,7 +29,7 @@
 | Bandit | čistý |
 | mkdocs | --strict PASS |
 | ADR záznamy | ADR-001 až ADR-017 |
-| Regression sentinel | PASS (baseline: 852 testy, 21 routes, 36 config fields, 17 ADRs) |
+| Regression sentinel | PASS (baseline: 875 testy, 22 routes, 36 config fields, 17 ADRs) |
 
 ## Health Scores (stav 2026-08-10)
 
@@ -37,7 +37,7 @@
 |---------|-------|------|
 | Integration | 64% | ČÁSTEČNĚ_ZDRAVÝ |
 | Automation | 61% | ČÁSTEČNĚ_ZDRAVÝ |
-| AAOS (AI) | 50% | USPOKOJIVÝ |
+| AAOS (AI) | 54% | USPOKOJIVÝ |
 | Architecture Alignment | 93% | ALIGNED |
 | Repository Hygiene | 90% | ZDRAVÝ |
 | Technical Debt | 1 item | NÍZKÝ |
@@ -45,7 +45,7 @@
 | Security | CI clean (bandit/pip-audit/gitleaks) | DOBRÝ |
 | Documentation | 126+ docs, mkdocs PASS | DOBRÝ |
 | Intelligence (QC) | 88.2% (4 engines) | DOBRÝ |
-| **Overall Project Maturity** | **~60%** | **ČÁSTEČNĚ_ZDRAVÝ** |
+| **Overall Project Maturity** | **~61%** | **ČÁSTEČNĚ_ZDRAVÝ** |
 
 ## SPOS Governance (stav 2026-08-10)
 
@@ -60,7 +60,8 @@
 | SPOS-021 (AAOS Foundation) | DOKONČENO |
 | SPOS-022 (AAOS Observability) | DOKONČENO |
 | SPOS-023 (AAOS Provider Intelligence) | DOKONČENO |
-| SPOS-024+ | ČEKÁ |
+| SPOS-024 (AI Request Audit & Cost Tracking) | DOKONČENO |
+| SPOS-025+ | ČEKÁ |
 
 ## Architektura (přehled)
 
