@@ -130,7 +130,7 @@ apps/cli (Typer)           packages/core/main.py (FastAPI)
 - `anthropic` (default): requires `STARCORE_ANTHROPIC_API_KEY`, model via `STARCORE_ANTHROPIC_MODEL` (default: `claude-sonnet-5`).
 - `openai-compatible`: any `/v1/chat/completions` server (Ollama, LM Studio, vLLM, LocalAI, OpenAI), configured via `STARCORE_AI_BASE_URL` / `STARCORE_AI_API_KEY` / `STARCORE_AI_MODEL` (required; no fallback to the Anthropic model name).
 
-`packages/ai/generator.py` builds the configured provider and exposes the public `generate_blueprint_yaml()` API.
+`packages/ai/generator.py` builds the configured provider and exposes the public `generate_blueprint_yaml()` API. When `STARCORE_AI_FALLBACK_PROVIDER` is set and the primary provider fails after retries, the generator automatically attempts the fallback provider before raising `BlueprintGenerationError`. AI-generated YAML is validated against the `Blueprint` Pydantic model before being returned; invalid output raises `BlueprintGenerationError` and emits an `ai.request.completed` event with `status: "validation_error"`. `packages/ai/prompts.py` provides `build_system_prompt(available_providers)` which appends available infrastructure providers to the base prompt when called with a provider list.
 
 **`packages/providers/docker`** and **`packages/providers/proxmox`** — Concrete `BaseProvider` implementations using `docker-py` and `proxmoxer` respectively. Both use blocking SDK calls wrapped in `asyncio.to_thread`.
 
@@ -202,6 +202,7 @@ Key variables:
 | `STARCORE_AI_MAX_TOKENS` | `2000` | Maximum tokens for AI generation |
 | `STARCORE_AI_TIMEOUT` | `120.0` | AI request timeout in seconds |
 | `STARCORE_AI_MAX_RETRIES` | `3` | Maximum retry attempts for AI requests |
+| `STARCORE_AI_FALLBACK_PROVIDER` | _(none)_ | Fallback AI provider if primary fails (e.g. `openai-compatible`) |
 | `STARCORE_PROXMOX_HOST` | _(none)_ | Proxmox API hostname |
 | `STARCORE_PROXMOX_USER` | _(none)_ | Proxmox API user |
 | `STARCORE_PROXMOX_TOKEN_NAME` | _(none)_ | Proxmox API token name |

@@ -52,6 +52,7 @@ class Settings(BaseSettings):
     ai_max_tokens: int = 2000
     ai_timeout: float = 120.0
     ai_max_retries: int = 3
+    ai_fallback_provider: str | None = None
 
     # Requests per minute allowed per client IP, applied globally to all
     # endpoints except /health (see core/main.py). 0 disables rate limiting

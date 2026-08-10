@@ -2,6 +2,8 @@
 Shared system prompt for all AI blueprint generators.
 """
 
+from __future__ import annotations
+
 BLUEPRINT_SYSTEM_PROMPT = """You generate STARCORE infrastructure blueprint YAML files.
 
 Output ONLY valid YAML, nothing else: no markdown code fences, no
@@ -43,3 +45,18 @@ Rules:
   values depend on the user's environment.
 - Keep resource names short, lowercase, hyphenated.
 """
+
+_PROVIDER_HINT = (
+    "\n\nAvailable infrastructure providers in this STARCORE instance: {providers}."
+    " Only use providers from this list."
+)
+
+
+def build_system_prompt(
+    available_providers: list[str] | None = None,
+) -> str:
+    """Build the system prompt, optionally scoping to available providers."""
+    if not available_providers:
+        return BLUEPRINT_SYSTEM_PROMPT
+    joined = ", ".join(sorted(available_providers))
+    return BLUEPRINT_SYSTEM_PROMPT + _PROVIDER_HINT.format(providers=joined)

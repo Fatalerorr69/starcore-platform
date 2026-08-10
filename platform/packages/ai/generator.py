@@ -7,6 +7,8 @@ The public API (generate_blueprint_yaml / BlueprintGenerationError) is unchanged
 
 from __future__ import annotations
 
+import logging
+
 from core.config import Settings, get_settings
 from provider_sdk.retry import RetryConfig
 
@@ -16,6 +18,8 @@ from ai.base import AIProvider, BlueprintGenerationError, _strip_code_fences  # 
 
 __all__ = ["BlueprintGenerationError", "_strip_code_fences", "generate_blueprint_yaml"]
 
+logger = logging.getLogger(__name__)
+
 
 def _build_retry_config(settings: Settings) -> RetryConfig:
     """Build a RetryConfig from the AI retry settings."""
@@ -24,7 +28,11 @@ def _build_retry_config(settings: Settings) -> RetryConfig:
 
 def _build_provider(settings: Settings) -> AIProvider:
     """Instantiate the AIProvider requested by *settings.ai_provider*."""
-    provider_name = settings.ai_provider
+    return _build_provider_by_name(settings.ai_provider, settings)
+
+
+def _build_provider_by_name(provider_name: str, settings: Settings) -> AIProvider:
+    """Instantiate an AIProvider by name."""
     retry = _build_retry_config(settings)
 
     if provider_name == "anthropic":
@@ -68,9 +76,23 @@ def _build_provider(settings: Settings) -> AIProvider:
         )
 
     raise BlueprintGenerationError(
-        f"Unknown AI provider: {settings.ai_provider!r}. "
+        f"Unknown AI provider: {provider_name!r}. "
         "Set STARCORE_AI_PROVIDER to 'anthropic' or 'openai-compatible'."
     )
+
+
+def _validate_blueprint_yaml(yaml_text: str) -> str | None:
+    """Validate AI-generated YAML against the Blueprint model.
+
+    Returns None on success, or an error message on failure.
+    """
+    try:
+        from blueprints.loader import BlueprintLoader
+
+        BlueprintLoader.load_from_string(yaml_text)
+        return None
+    except Exception as exc:
+        return str(exc)
 
 
 async def generate_blueprint_yaml(description: str) -> str:
@@ -89,24 +111,103 @@ async def generate_blueprint_yaml(description: str) -> str:
     start = time.monotonic()
     try:
         result = await provider.generate_blueprint_yaml(description)
-    except Exception:
+    except Exception as primary_exc:
         duration = time.monotonic() - start
         await event_bus.emit(
             "ai.request.completed",
             {"provider": provider_name, "status": "error", "duration_seconds": duration},
         )
-        raise
+        if settings.ai_fallback_provider:
+            result = await _attempt_fallback(settings, description, primary_exc, event_bus)
+        else:
+            raise
+    else:
+        duration = time.monotonic() - start
+        event_payload: dict[str, object] = {
+            "provider": provider_name,
+            "status": "success",
+            "duration_seconds": duration,
+        }
+        usage = provider._last_usage
+        if usage:
+            if usage.input_tokens is not None:
+                event_payload["input_tokens"] = usage.input_tokens
+            if usage.output_tokens is not None:
+                event_payload["output_tokens"] = usage.output_tokens
+        await event_bus.emit("ai.request.completed", event_payload)
+
+    validation_error = _validate_blueprint_yaml(result)
+    if validation_error:
+        await event_bus.emit(
+            "ai.request.completed",
+            {
+                "provider": provider_name,
+                "status": "validation_error",
+                "error": validation_error,
+            },
+        )
+        raise BlueprintGenerationError(f"AI-generated YAML failed validation: {validation_error}")
+
+    return result
+
+
+async def _attempt_fallback(
+    settings: Settings,
+    description: str,
+    primary_exc: Exception,
+    event_bus: object,
+) -> str:
+    """Try the fallback provider after the primary provider failed."""
+    import time
+
+    fallback_name = settings.ai_fallback_provider
+    assert fallback_name is not None
+
+    logger.warning(
+        "Primary AI provider %r failed (%s), trying fallback %r",
+        settings.ai_provider,
+        primary_exc,
+        fallback_name,
+    )
+
+    try:
+        fallback = _build_provider_by_name(fallback_name, settings)
+    except BlueprintGenerationError:
+        raise BlueprintGenerationError(
+            f"Primary provider {settings.ai_provider!r} failed: {primary_exc}. "
+            f"Fallback provider {fallback_name!r} is not configured."
+        ) from primary_exc
+
+    start = time.monotonic()
+    try:
+        result = await fallback.generate_blueprint_yaml(description)
+    except Exception as fallback_exc:
+        duration = time.monotonic() - start
+        await event_bus.emit(  # type: ignore[union-attr]
+            "ai.request.completed",
+            {
+                "provider": fallback_name,
+                "status": "error",
+                "duration_seconds": duration,
+            },
+        )
+        raise BlueprintGenerationError(
+            f"Primary provider {settings.ai_provider!r} failed: {primary_exc}. "
+            f"Fallback provider {fallback_name!r} also failed: {fallback_exc}"
+        ) from fallback_exc
+
     duration = time.monotonic() - start
     event_payload: dict[str, object] = {
-        "provider": provider_name,
+        "provider": fallback_name,
         "status": "success",
         "duration_seconds": duration,
+        "is_fallback": True,
     }
-    usage = provider._last_usage
+    usage = fallback._last_usage
     if usage:
         if usage.input_tokens is not None:
             event_payload["input_tokens"] = usage.input_tokens
         if usage.output_tokens is not None:
             event_payload["output_tokens"] = usage.output_tokens
-    await event_bus.emit("ai.request.completed", event_payload)
+    await event_bus.emit("ai.request.completed", event_payload)  # type: ignore[union-attr]
     return result

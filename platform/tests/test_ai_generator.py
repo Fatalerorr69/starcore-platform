@@ -11,7 +11,13 @@ from typing import Any
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-from ai.generator import BlueprintGenerationError, _build_provider, generate_blueprint_yaml
+from ai.generator import (
+    BlueprintGenerationError,
+    _build_provider,
+    _build_provider_by_name,
+    _validate_blueprint_yaml,
+    generate_blueprint_yaml,
+)
 from anthropic.types import TextBlock
 from blueprints.loader import BlueprintLoader
 from core.config import Settings
@@ -333,3 +339,222 @@ def test_blueprint_loader_load_from_string_parses_valid_yaml():
     blueprint = BlueprintLoader.load_from_string(yaml_text)
     assert blueprint.name == "demo"
     assert blueprint.resources[0].provider == "docker"
+
+
+# ---------------------------------------------------------------------------
+# _build_provider_by_name
+# ---------------------------------------------------------------------------
+
+
+def test_build_provider_by_name_returns_anthropic():
+    from ai.providers.anthropic import AnthropicProvider
+
+    s = _settings(anthropic_api_key="sk-test")
+    provider = _build_provider_by_name("anthropic", s)
+    assert isinstance(provider, AnthropicProvider)
+
+
+def test_build_provider_by_name_returns_openai_compat():
+    from ai.providers.openai_compat import OpenAICompatProvider
+
+    s = _settings(
+        ai_provider="openai-compatible",
+        ai_base_url="http://localhost:11434/v1",
+        ai_model="llama3",
+    )
+    provider = _build_provider_by_name("openai-compatible", s)
+    assert isinstance(provider, OpenAICompatProvider)
+
+
+def test_build_provider_by_name_raises_on_unknown():
+    with pytest.raises(BlueprintGenerationError, match="Unknown AI provider"):
+        _build_provider_by_name("nonexistent", _settings())
+
+
+# ---------------------------------------------------------------------------
+# _validate_blueprint_yaml
+# ---------------------------------------------------------------------------
+
+
+def test_validate_blueprint_yaml_returns_none_for_valid():
+    yaml_text = (
+        "name: demo\nversion: '1.0'\nresources:\n"
+        "  - name: web\n    provider: docker\n"
+        "    kind: container\n    config:\n      image: nginx\n"
+    )
+    assert _validate_blueprint_yaml(yaml_text) is None
+
+
+def test_validate_blueprint_yaml_returns_error_for_invalid():
+    result = _validate_blueprint_yaml("not valid yaml: [[[")
+    assert result is not None
+
+
+def test_validate_blueprint_yaml_returns_error_for_missing_name():
+    result = _validate_blueprint_yaml("version: '1.0'\n")
+    assert result is not None
+
+
+# ---------------------------------------------------------------------------
+# Fallback provider
+# ---------------------------------------------------------------------------
+
+
+async def test_generate_with_fallback_on_primary_failure():
+    from core.events import event_bus
+
+    fake_client_fallback = MagicMock()
+    fallback_resp = MagicMock()
+    fallback_resp.status_code = 200
+    fallback_resp.raise_for_status = MagicMock()
+    fallback_resp.json = MagicMock(
+        return_value={
+            "choices": [
+                {
+                    "message": {
+                        "content": (
+                            "name: demo\nversion: '1.0'\nresources:\n"
+                            "  - name: web\n    provider: docker\n"
+                            "    kind: container\n    config:\n      image: nginx\n"
+                        )
+                    }
+                }
+            ],
+            "usage": {"prompt_tokens": 50, "completion_tokens": 100},
+        }
+    )
+    fake_client_fallback.post = AsyncMock(return_value=fallback_resp)
+
+    fake_anthropic_client = MagicMock()
+    fake_anthropic_client.messages.create = AsyncMock(side_effect=RuntimeError("anthropic down"))
+
+    settings = _settings(
+        anthropic_api_key="sk-test",
+        ai_provider="anthropic",
+        ai_fallback_provider="openai-compatible",
+        ai_base_url="http://localhost:11434/v1",
+        ai_model="llama3",
+    )
+
+    captured: list[dict] = []
+    event_bus.subscribe("ai.request.completed", lambda p: captured.append(p))
+
+    try:
+        with (
+            patch("ai.generator.get_settings", return_value=settings),
+            patch("ai.providers.anthropic.AsyncAnthropic", return_value=fake_anthropic_client),
+            patch(
+                "httpx.AsyncClient.__aenter__",
+                return_value=MagicMock(post=AsyncMock(return_value=fallback_resp)),
+            ),
+            patch("httpx.AsyncClient.__aexit__", AsyncMock(return_value=False)),
+        ):
+            result = await generate_blueprint_yaml("a web app")
+    finally:
+        event_bus.unsubscribe("ai.request.completed", captured.append)
+
+    assert "name: demo" in result
+    assert any(e["status"] == "error" for e in captured)
+    fallback_events = [
+        e for e in captured if e.get("is_fallback") is True and e["status"] == "success"
+    ]
+    assert len(fallback_events) == 1
+    assert fallback_events[0]["input_tokens"] == 50
+    assert fallback_events[0]["output_tokens"] == 100
+
+
+async def test_generate_fallback_both_fail_raises():
+    fake_anthropic = MagicMock()
+    fake_anthropic.messages.create = AsyncMock(side_effect=RuntimeError("anthropic down"))
+
+    settings = _settings(
+        anthropic_api_key="sk-test",
+        ai_provider="anthropic",
+        ai_fallback_provider="openai-compatible",
+        ai_base_url="http://localhost:11434/v1",
+        ai_model="llama3",
+    )
+
+    fallback_resp = MagicMock()
+    fallback_resp.status_code = 500
+    fallback_resp.raise_for_status = MagicMock(side_effect=Exception("server error"))
+
+    with (
+        patch("ai.generator.get_settings", return_value=settings),
+        patch("ai.providers.anthropic.AsyncAnthropic", return_value=fake_anthropic),
+        patch(
+            "httpx.AsyncClient.__aenter__",
+            return_value=MagicMock(post=AsyncMock(return_value=fallback_resp)),
+        ),
+        patch("httpx.AsyncClient.__aexit__", AsyncMock(return_value=False)),
+    ):
+        with pytest.raises(BlueprintGenerationError, match="also failed"):
+            await generate_blueprint_yaml("a web app")
+
+
+async def test_generate_fallback_not_configured_raises_normally():
+    fake_anthropic = MagicMock()
+    fake_anthropic.messages.create = AsyncMock(side_effect=RuntimeError("anthropic down"))
+
+    settings = _settings(
+        anthropic_api_key="sk-test",
+        ai_provider="anthropic",
+        ai_fallback_provider=None,
+    )
+
+    with (
+        patch("ai.generator.get_settings", return_value=settings),
+        patch("ai.providers.anthropic.AsyncAnthropic", return_value=fake_anthropic),
+    ):
+        with pytest.raises(BlueprintGenerationError):
+            await generate_blueprint_yaml("a web app")
+
+
+async def test_generate_fallback_provider_misconfigured_raises():
+    fake_anthropic = MagicMock()
+    fake_anthropic.messages.create = AsyncMock(side_effect=RuntimeError("anthropic down"))
+
+    settings = _settings(
+        anthropic_api_key="sk-test",
+        ai_provider="anthropic",
+        ai_fallback_provider="openai-compatible",
+        ai_base_url=None,
+        ai_model=None,
+    )
+
+    with (
+        patch("ai.generator.get_settings", return_value=settings),
+        patch("ai.providers.anthropic.AsyncAnthropic", return_value=fake_anthropic),
+    ):
+        with pytest.raises(BlueprintGenerationError, match="not configured"):
+            await generate_blueprint_yaml("a web app")
+
+
+# ---------------------------------------------------------------------------
+# Output validation
+# ---------------------------------------------------------------------------
+
+
+async def test_generate_raises_on_invalid_yaml_output():
+    from core.events import event_bus
+
+    fake_response = MagicMock()
+    fake_response.content = [MagicMock(spec=TextBlock, text="this is not valid blueprint yaml")]
+    fake_client = MagicMock()
+    fake_client.messages.create = AsyncMock(return_value=fake_response)
+
+    settings = _settings(anthropic_api_key="sk-test-key")
+    captured: list[dict] = []
+
+    event_bus.subscribe("ai.request.completed", lambda p: captured.append(p))
+    try:
+        with (
+            patch("ai.generator.get_settings", return_value=settings),
+            patch("ai.providers.anthropic.AsyncAnthropic", return_value=fake_client),
+        ):
+            with pytest.raises(BlueprintGenerationError, match="validation"):
+                await generate_blueprint_yaml("a web app")
+    finally:
+        event_bus.unsubscribe("ai.request.completed", captured.append)
+
+    assert any(e.get("status") == "validation_error" for e in captured)

@@ -655,3 +655,35 @@ async def test_openai_compat_health_check_sends_auth_header():
 
     _, kwargs = mock_get.call_args
     assert kwargs["headers"]["Authorization"] == "Bearer my-key"
+
+
+# ---------------------------------------------------------------------------
+# Dynamic system prompt (build_system_prompt)
+# ---------------------------------------------------------------------------
+
+
+def test_build_system_prompt_returns_default_without_providers():
+    from ai.prompts import BLUEPRINT_SYSTEM_PROMPT, build_system_prompt
+
+    assert build_system_prompt() == BLUEPRINT_SYSTEM_PROMPT
+
+
+def test_build_system_prompt_returns_default_with_empty_list():
+    from ai.prompts import BLUEPRINT_SYSTEM_PROMPT, build_system_prompt
+
+    assert build_system_prompt([]) == BLUEPRINT_SYSTEM_PROMPT
+
+
+def test_build_system_prompt_appends_provider_list():
+    from ai.prompts import build_system_prompt
+
+    result = build_system_prompt(["docker", "proxmox"])
+    assert "docker, proxmox" in result
+    assert "Only use providers from this list" in result
+
+
+def test_build_system_prompt_sorts_providers():
+    from ai.prompts import build_system_prompt
+
+    result = build_system_prompt(["proxmox", "docker", "kubernetes"])
+    assert "docker, kubernetes, proxmox" in result
