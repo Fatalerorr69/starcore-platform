@@ -1,6 +1,6 @@
 # SPOS REGISTRY
 
-Aktualizováno: 2026-08-09 | Standard: SPOS-022
+Aktualizováno: 2026-08-10 | Standard: SPOS-023
 
 Registr operačních modulů Project Operating System. Fyzická implementace primárně v `platform/.starcore/` (viz SPOS-000 rozhodnutí — adoptováno, ne duplikováno).
 
@@ -30,6 +30,7 @@ Registr operačních modulů Project Operating System. Fyzická implementace pri
 | SPOS-020 | Code Quality Engine | `.claude/reports/SPOS-020-IMPLEMENTATION-REPORT.md` + `SPOS-020-HANDOVER-REPORT.md` | ✅ AKTIVNÍ — IMPLEMENTOVÁNO (M4 Code Quality, CONSOLIDATION_ROADMAP 100%) |
 | SPOS-021 | AAOS Foundation Sprint | `packages/ai/providers/anthropic.py` (retry+configurable params) + `packages/ai/providers/openai_compat.py` (retry+configurable params) + `packages/ai/generator.py` (retry config builder, AI metrics events) + `packages/core/config.py` (3 new AI settings) + `packages/core/metrics.py` (3 new Prometheus metrics) + `.starcore/scripts/regression_sentinel.py` (workflow count fix) | ✅ AKTIVNÍ — IMPLEMENTOVÁNO (AAOS 38%→42%, 814 tests, 100% coverage) |
 | SPOS-022 | AAOS Observability & Resilience | `packages/ai/base.py` (TokenUsage, RetryableStatusError, health_check) + providers (token extraction, 429/503 retry, health_check) + `packages/ai/generator.py` (token→event forwarding) | ✅ AKTIVNÍ — IMPLEMENTOVÁNO (AAOS 42%→46%, 828 tests) |
+| SPOS-023 | AAOS Provider Intelligence | `packages/ai/generator.py` (fallback + validation + `_build_provider_by_name()`) + `packages/ai/prompts.py` (`build_system_prompt()`) + `packages/core/config.py` (`ai_fallback_provider`) | ✅ AKTIVNÍ — IMPLEMENTOVÁNO (AAOS 46%→50%, 843 tests) |
 
 ---
 

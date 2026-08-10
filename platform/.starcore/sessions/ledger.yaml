@@ -752,3 +752,49 @@ sessions:
   - SPOS-022 COMMIT & PUSH explicitly approved by user
   blockers: []
   next_action: SPOS-022 DOKONCENO. Commit c00640f pushed. Next engine discovery.
+- session_id: spos-023-20260810
+  start_time: '2026-08-10T00:00:00Z'
+  end_time: '2026-08-10T01:00:00Z'
+  branch: claude/starcore-ai-bootstrap-fkyb96
+  head: f389893
+  user_requests:
+  - SPOS-023 AAOS Provider Intelligence — provider fallback, dynamic prompt, output validation
+  prompts_used: []
+  files_read:
+  - platform/packages/ai/generator.py
+  - platform/packages/ai/prompts.py
+  - platform/packages/ai/base.py
+  - platform/packages/core/config.py
+  - platform/tests/test_ai_generator.py
+  - platform/tests/test_ai_providers.py
+  files_created: []
+  files_modified:
+  - platform/packages/ai/generator.py (fallback + validation + _build_provider_by_name)
+  - platform/packages/ai/prompts.py (build_system_prompt)
+  - platform/packages/core/config.py (ai_fallback_provider)
+  - platform/tests/test_ai_generator.py (+12 tests)
+  - platform/tests/test_ai_providers.py (+4 tests)
+  - platform/CLAUDE.md (documented fallback + features)
+  - platform/.starcore/state/regression_baseline.json (852 tests, 36 config fields)
+  commands_executed:
+  - uv run pytest (843 passed, 9 skipped)
+  - uv run ruff check . (all passed)
+  - uv run ruff format . (clean)
+  - uv run pyright (0 errors)
+  - uv run bandit -r packages/ apps/ scripts/ -ll -q (clean)
+  - uv run pip-audit (clean)
+  - uv run mkdocs build --strict (OK)
+  tests_executed:
+  - pytest 843 passed, 9 skipped, 0 failed
+  decisions:
+  - Provider fallback via _attempt_fallback() with ai_fallback_provider setting
+  - _build_provider_by_name() extracted from _build_provider() for reuse
+  - AI output validation via BlueprintLoader.load_from_string() — no new validation logic
+  - Dynamic prompt build_system_prompt() appends provider hints when called with non-empty list
+  - Fallback emits is_fallback=True in event payload for observability
+  risks:
+  - No new risks introduced
+  approvals:
+  - SPOS-023 COMMIT & PUSH explicitly approved by user
+  blockers: []
+  next_action: SPOS-023 DOKONCENO. Commit f389893 pushed. Next engine discovery.

@@ -1,6 +1,6 @@
 # STARCORE DIGITAL TWIN
 
-Aktualizováno: 2026-08-08 | Standard: SES-001 §17
+Aktualizováno: 2026-08-10 | Standard: SES-001 §17
 
 Tento soubor je digitální obraz aktuálního stavu systému STARCORE.
 Musí být aktualizován po každé významné změně.
@@ -13,7 +13,7 @@ Musí být aktualizován po každé významné změně.
 repository: Fatalerorr69/starcore-platform
 branch_main: main
 branch_active: claude/starcore-ai-bootstrap-fkyb96
-last_commit: 87a0ede (SPOS-020 Code Quality Engine)
+last_commit: f389893 (SPOS-023 provider fallback, dynamic prompt, output validation)
 status: clean
 platform_version: 0.6.0
 ```
@@ -34,7 +34,7 @@ platform:
   ai_providers:
     - Anthropic Claude (volitelný)
     - OpenAI-compatible (Ollama, vLLM)
-  tests: 601 passing
+  tests: 843 passing
   coverage: 100% floor
   adr_count: 17
 ```
@@ -333,6 +333,28 @@ spos_021_aaos_foundation:
     - "tests/test_property_based_metrics.py (+1 test)"
   no_new_dependencies: true
 
+spos_023_aaos_provider_intelligence:
+  implementation_date: "2026-08-10"
+  approach: "AAOS Provider Intelligence — provider fallback, dynamic system prompt, AI output validation"
+  commit: "f389893"
+  milestones:
+    A_provider_fallback: "ai_fallback_provider setting; _build_provider_by_name() extracted; _attempt_fallback() with full observability (is_fallback flag, token usage tracking)"
+    B_dynamic_prompt: "build_system_prompt(available_providers) in prompts.py for provider-scoped system prompts"
+    C_output_validation: "_validate_blueprint_yaml() validates AI output against Blueprint Pydantic model via BlueprintLoader"
+  tests_before: 828
+  tests_after: 843
+  coverage: "100%"
+  aaos_health_improvement: "46% → 50%"
+  modified:
+    - "packages/ai/generator.py (fallback + validation + _build_provider_by_name)"
+    - "packages/ai/prompts.py (build_system_prompt)"
+    - "packages/core/config.py (ai_fallback_provider)"
+    - "tests/test_ai_generator.py (+12 tests)"
+    - "tests/test_ai_providers.py (+4 tests)"
+    - "CLAUDE.md (documented fallback + features)"
+    - ".starcore/state/regression_baseline.json (852 tests, 36 config fields)"
+  no_new_dependencies: true
+
 spos_022_aaos_observability:
   implementation_date: "2026-08-09"
   approach: "AAOS Observability & Resilience — token tracking, rate-limit retry, health check"
@@ -581,7 +603,7 @@ spos_013_automation_status:
 ```yaml
 spos_014_aaos_status:
   audit_date: "2026-08-08"
-  aaos_health_score: "46% (SLABÝ — improved by SPOS-021/022)"
+  aaos_health_score: "50% (USPOKOJIVÝ — improved by SPOS-021/022/023)"
   aaos_maturity: "Level 2.5 / 5"
   score_breakdown:
     agent_coverage: "35% KRITICKÝ"
@@ -695,6 +717,7 @@ knowledge_base:
 
 | Datum | Změna | Autor |
 |---|---|---|
+| 2026-08-10 | SPOS-023 — AAOS Provider Intelligence: provider fallback (ai_fallback_provider), dynamic system prompt (build_system_prompt), AI output validation (_validate_blueprint_yaml). Tests 828→843, coverage 100%, AAOS 46%→50% | Claude Code |
 | 2026-08-09 | SPOS-022 — AAOS Observability & Resilience: token usage tracking wired to AI_TOKEN_COUNT metric, RetryableStatusError for HTTP 429/503 in OpenAI-compat provider, health_check() on AIProvider ABC. Tests 814→828, coverage 100%, AAOS 42%→46% | Claude Code |
 | 2026-08-08 | SPOS-021 — AAOS Foundation Sprint: configurable AI params (max_tokens/timeout/max_retries), RetryConfig wired into both AI providers, 3 Prometheus AI metrics (requests/duration/tokens), regression sentinel workflow count fix. Tests 807→814, coverage 100%, AAOS 38%→42% | Claude Code |
 | 2026-08-08 | SPOS-020 — Code Quality Engine: _persist_run() deduplicated (blueprints.py + ws.py → repository.py), psutil removed from dependencies. Code duplicates 1→0, dependencies 21→20, tech debt 3→1, repo hygiene 88%→90%. TD-008/TD-009 resolved. CONSOLIDATION_ROADMAP 100% complete | Claude Code |

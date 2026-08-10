@@ -1,7 +1,7 @@
 # Project Snapshot — STARCORE Platform
 
 > Kanonická referenční karta pro cold-start. Aktualizovat při každé strukturální změně.
-> **Poslední aktualizace:** 2026-08-09 (sezení: spos-022-20260809)
+> **Poslední aktualizace:** 2026-08-10 (sezení: spos-023-20260810)
 
 ## Identita projektu
 
@@ -17,11 +17,11 @@
 | Výchozí větev | main |
 | Dev větev | claude/starcore-ai-bootstrap-fkyb96 |
 
-## Klíčové metriky (stav 2026-08-09)
+## Klíčové metriky (stav 2026-08-10)
 
 | Metrika | Hodnota |
 |---------|---------|
-| Testy | 828 passed, 0 failed (9 skipped — postgres) |
+| Testy | 843 passed, 0 failed (9 skipped — postgres) |
 | Coverage | 100.00% |
 | Ruff | 0 chyb |
 | Pyright | 0 chyb |
@@ -29,15 +29,15 @@
 | Bandit | čistý |
 | mkdocs | --strict PASS |
 | ADR záznamy | ADR-001 až ADR-017 |
-| Regression sentinel | PASS (baseline: 828 testy, 21 routes, 35 config fields, 17 ADRs) |
+| Regression sentinel | PASS (baseline: 852 testy, 21 routes, 36 config fields, 17 ADRs) |
 
-## Health Scores (stav 2026-08-09)
+## Health Scores (stav 2026-08-10)
 
 | Dimenze | Score | Stav |
 |---------|-------|------|
 | Integration | 64% | ČÁSTEČNĚ_ZDRAVÝ |
 | Automation | 61% | ČÁSTEČNĚ_ZDRAVÝ |
-| AAOS (AI) | 46% | SLABÝ |
+| AAOS (AI) | 50% | USPOKOJIVÝ |
 | Architecture Alignment | 93% | ALIGNED |
 | Repository Hygiene | 90% | ZDRAVÝ |
 | Technical Debt | 1 item | NÍZKÝ |
@@ -47,7 +47,7 @@
 | Intelligence (QC) | 88.2% (4 engines) | DOBRÝ |
 | **Overall Project Maturity** | **~60%** | **ČÁSTEČNĚ_ZDRAVÝ** |
 
-## SPOS Governance (stav 2026-08-09)
+## SPOS Governance (stav 2026-08-10)
 
 | Module | Status |
 |--------|--------|
@@ -59,7 +59,8 @@
 | SPOS-020 (Code Quality) | DOKONČENO |
 | SPOS-021 (AAOS Foundation) | DOKONČENO |
 | SPOS-022 (AAOS Observability) | DOKONČENO |
-| SPOS-023+ | ČEKÁ |
+| SPOS-023 (AAOS Provider Intelligence) | DOKONČENO |
+| SPOS-024+ | ČEKÁ |
 
 ## Architektura (přehled)
 
