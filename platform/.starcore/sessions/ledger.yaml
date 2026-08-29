@@ -2,7 +2,7 @@ schema_version: '1.0'
 sessions:
 - session_id: starcore-autonomous-engineering-4p3tlj
   start_time: '2026-07-26T00:00:00Z'
-  end_time: null
+  end_time: '2026-08-06T14:49:46Z'
   branch: claude/starcore-autonomous-engineering-4p3tlj
   head: a446965
   user_requests:
@@ -121,5 +121,93 @@ sessions:
     stop-hook)
   - commit .starcore/ memory layer schválen (implicitně přes stop-hook)
   blockers: []
-  next_action: v0.4.0 VYDÁN (2026-08-01T18:40:07Z) — timeout_strategy ADR-016 dokončena;
-    601 testů, 100% coverage; příští sezení zahájit výběrem nové funkce z P2 nebo Product Roadmap
+  next_action: Superseded by claude/session-76mlz8 (STARCORE Architecture Governance
+    iteration, 2026-08-06) — this session was never formally closed with 'ledger.py
+    end' at the time; end_time backfilled retroactively during ledger consistency
+    cleanup.
+- session_id: claude/session-76mlz8
+  start_time: '2026-08-06T14:50:38Z'
+  end_time: null
+  branch: claude/session-76mlz8
+  head: 5e00788
+  user_requests:
+  - STARCORE SAEF bootstrap prompt evaluation and rejection
+  - SAEF Integration Discovery Audit (platform/ vs root legacy layer)
+  - STARCORE Architecture Governance Report (GADR-001..007)
+  - Formalize GADR-001..007 as ADR-018..025
+  - Implement repository_map.py governance discovery tool + tests
+  - Register PROM-009..012 in prompts/registry.yaml
+  - Create ROADMAP.md and architecture/edge-node.md
+  - CI validation audit and regression_baseline.json synchronization
+  - Fix documentation drift (known_issues.md, README/ROADMAP test count)
+  - Document repository history (c5044ff rename to platform/, v0.4.0->v0.6.0)
+  - Ledger consistency cleanup (this task)
+  prompts_used:
+  - PROM-009
+  - PROM-010
+  - PROM-011
+  - PROM-012
+  files_read: []
+  files_created:
+  - .starcore/scripts/repository_map.py
+  - .starcore/scripts/tests/test_repository_map.py
+  - docs/ROADMAP.md
+  - docs/adr/ADR-018-repository-root-boundary.md
+  - docs/adr/ADR-019-platform-extension-policy.md
+  - docs/adr/ADR-020-legacy-root-freeze.md
+  - docs/adr/ADR-021-ai-layer-consolidation.md
+  - docs/adr/ADR-022-documentation-boundary.md
+  - docs/adr/ADR-023-saef-as-workflow-protocol.md
+  - docs/adr/ADR-024-android-termux-edge-node.md
+  - docs/adr/ADR-025-change-governance-lifecycle.md
+  - docs/architecture/edge-node.md
+  - docs/governance/repository-history.md
+  files_modified:
+  - .starcore/memory/completed_work.md
+  - .starcore/memory/known_issues.md
+  - .starcore/prompts/registry.yaml
+  - .starcore/state/regression_baseline.json
+  - CLAUDE.md
+  - README.md
+  - mkdocs.yml
+  commands_executed:
+  - uv run mkdocs build --strict
+  - uv run ruff check .
+  - uv run pyright
+  - uv run bandit -r packages/ apps/ scripts/ -ll -q
+  - uv run pytest -q --cov --cov-report=term-missing --cov-fail-under=100
+  - uv run pip-audit
+  - STARCORE_DATABASE_URL=sqlite:///./ci-check.db uv run alembic upgrade head && alembic
+    check
+  - uv run python .starcore/scripts/regression_sentinel.py check
+  - uv run python .starcore/scripts/regression_sentinel.py diff
+  - uv run python .starcore/scripts/tests/test_repository_map.py
+  - git fetch --unshallow origin
+  - git show --stat -M 0af3560
+  tests_executed:
+  - timestamp: '2026-08-06T14:51:33Z'
+    passed: 796
+    failed: 0
+    coverage: 100.0
+    command: 'uv run pytest -q --cov --cov-report=term-missing --cov-fail-under=100
+      (9 skipped: postgres, env-dependent)'
+  decisions:
+  - GADR-001..007 approved and formalized as ADR-018..025 (D-007..D-014 equivalent)
+  - Android/Termux treated as separate Edge Node architecture (ADR-024), not core
+    runtime
+  - ADR-025 establishes REQUEST->DISCOVERY->ADR->PLAN->IMPLEMENT->VALIDATE->RELEASE->KNOWLEDGE
+    UPDATE lifecycle with SAFE AUTOMATIC/REQUIRE REVIEW/REQUIRE USER APPROVAL classification
+  - regression_baseline.json update scoped strictly to sentinel.adr_count and sentinel.test_count;
+    no metadata/threshold changes
+  - Historical repository restructuring (0af3560 rename to platform/) documented as
+    docs/governance/repository-history.md, separate from ADR series
+  - 'Ledger consistency cleanup: close stale starcore-autonomous-engineering-4p3tlj
+    session, start claude/session-76mlz8, backfill retroactively'
+  risks: []
+  approvals:
+  - Local commits approved individually per file scope (1e2bc07, 3cf4b92, c8c963e,
+    e6a321e, b00465c, 0b46b5f, 009ca46, 98308cb, 1587e94, 34ffc53, 5e00788)
+  - Pushes to origin/claude/session-76mlz8 explicitly approved per batch, never inferred
+    from stop-hook notifications (ADR-025 Release Safety Gate)
+  blockers: []
+  next_action: ''

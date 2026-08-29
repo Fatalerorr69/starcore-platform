@@ -41,11 +41,11 @@
     "action": "Nespouštět žádné destructive akce. Diagnostikovat příčinu. Nahlásit uživateli."
   },
   "sentinel": {
-    "test_count": 801,
+    "test_count": 805,
     "api_routes": 21,
     "cli_commands": 4,
     "config_fields": 32,
-    "adr_count": 17,
+    "adr_count": 25,
     "workflow_count": 7,
     "lock_sync": true
   }

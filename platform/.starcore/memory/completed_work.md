@@ -5,6 +5,30 @@
 
 ---
 
+## Sezení: claude/session-76mlz8 (2026-08-06)
+
+### CHECKPOINT B — repository_map implementation
+
+**Datum:** 2026-08-06
+
+**Stav:** completed
+
+**Implementované soubory:**
+- `platform/.starcore/scripts/repository_map.py`
+- `platform/.starcore/scripts/tests/test_repository_map.py`
+
+**Validace:** 19/19 tests PASS
+
+**Release:**
+- Lokální commit: `e6a321e`
+- Push: neproveden
+
+**Poznámka:** Další governance kroky (push `e6a321e`, `prompts/registry.yaml`
+aktualizace, `ROADMAP.md`, `edge-node.md`, `regression_baseline.json`
+update) zůstávají otevřené a vyžadují samostatné schválení.
+
+---
+
 ## Sezení: starcore-autonomous-engineering-4p3tlj (pokračování, 2026-08-01, v0.4.0 release)
 
 ### Per-task timeout_strategy + Release v0.4.0

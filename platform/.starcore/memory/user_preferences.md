@@ -80,5 +80,5 @@ Sezení jsou organizována do fází (Phase 1, 2, ... 9). Každá fáze:
 
 ## Dev větev
 
-Veškerá práce jde na: `claude/starcore-autonomous-engineering-4p3tlj`
+Veškerá práce jde na: `claude/session-76mlz8`
 Nikdy push na `main` bez explicitního pokynu.
